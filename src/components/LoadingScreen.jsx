@@ -29,7 +29,7 @@ export const LoadingScreen = ({ onComplete }) => {
                 <div className="flex items-center space-x-3 mb-4">
                     {showLogo && (
                         <img 
-                            src="/logoTab.png"  
+                            src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/logoTab.png?raw=true"  
                             alt="PayPlus Logo"
                             className="w-17 h-17"
                         />

@@ -28,7 +28,7 @@ export const LandingPage = () => {
                         <div className="logo">
                             <img
                                 id="logo"
-                                src="/logo.png"
+                                src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/logo.png?raw=true"
                                 alt="PayPlus Logo"
                                 className="h-8"
                             />
@@ -123,7 +123,7 @@ export const LandingPage = () => {
                         {/* Right Column */}
                         <div className="md:w-1/2 relative">
                             <img
-                                src="/dasboard.png"
+                                src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/dasboard.png?raw=true"
                                 alt="Finance Dashboard"
                                 className="rounded-lg shadow-2xl animate-float"
                             />
