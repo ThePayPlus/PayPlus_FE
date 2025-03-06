@@ -19,10 +19,10 @@ export const LandingPage = () => {
     }, []);
 
     return (
-        <div className="bg-white text-gray-800">
+        <div className="bg-white text-gray-800 w-full">
             {/* Header */}
             <header className="fixed top-0 left-0 w-full bg-white bg-opacity-90 backdrop-filter backdrop-blur-sm z-50">
-                <nav className="w-full px-6 py-4">
+                <nav className="w-full px-6 py-0 ">
                     <div className="flex justify-between items-center">
                         {/* Logo */}
                         <div className="logo">
@@ -30,7 +30,6 @@ export const LandingPage = () => {
                                 id="logo"
                                 src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/logo.png?raw=true"
                                 alt="PayPlus Logo"
-                                className="h-8"
                             />
                         </div>
 
@@ -270,16 +269,7 @@ export const LandingPage = () => {
             </main>
 
             {/* Footer */}
-            <footer className="bg-gray-800 text-white py-8 w-full px-0">
-                <div className="container mx-auto px-6 flex flex-wrap justify-between items-center">
-                    <div className="w-full md:w-auto text-center md:text-left mb-4 md:mb-0">
-                        <span className="text-2xl font-semibold">PayPlus</span>
-                        <p className="mt-2 text-sm text-gray-400">
-                            &copy; 2024 PayPlus. All rights reserved.
-                        </p>
-                    </div>
-                </div>
-            </footer>
+            
         </div>
     );
 };
