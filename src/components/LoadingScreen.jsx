@@ -31,7 +31,7 @@ export const LoadingScreen = ({ onComplete }) => {
                         <img 
                             src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/logoTab.png?raw=true"  
                             alt="PayPlus Logo"
-                            className="w-17 h-17"
+                            className="w-17 h-auto"
                         />
                     )}
 

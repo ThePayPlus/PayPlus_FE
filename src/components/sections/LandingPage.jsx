@@ -27,7 +27,7 @@ export const LandingPage = () => {
           <div className="flex justify-between items-center">
             {/* Logo */}
             <div className="logo">
-              <img id="logo" src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/logo.png?raw=true" alt="PayPlus Logo" />
+              <img id="logo" className='w-50 h-auto' src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/logo.png?raw=true" alt="PayPlus Logo" />
             </div>
 
             {/* Desktop Menu */}
