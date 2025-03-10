@@ -1,6 +1,7 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-html,body {
+html,
+body {
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -10,10 +11,11 @@ html,body {
   color: #c517ce;
 }
 
-#root, #app {
+#root,
+#app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Ensures the page fills at least the viewport height */
+  min-height: auto; /* Ensures the page fills at least the viewport height */
 }
 
 main {
@@ -27,10 +29,8 @@ footer {
   background: #1f2937; /* Ensuring it's visible */
 }
 
-
 @layer utilities {
   @keyframes blink {
-
     0%,
     100% {
       opacity: 1;
@@ -44,7 +44,6 @@ footer {
   .animate-blink {
     animation: blink 0.8s step-end infinite;
   }
-
 
   @keyframes loading {
     0% {
@@ -61,7 +60,6 @@ footer {
   }
 
   @keyframes float {
-
     0%,
     100% {
       transform: translateY(0px);
@@ -75,7 +73,6 @@ footer {
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
-
 }
 
 .reveal {
@@ -88,4 +85,3 @@ footer {
   opacity: 1;
   transform: translateY(0);
 }
-
