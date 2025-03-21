@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Footer } from '../Footer';
+import { Link } from 'react-router-dom';
 
 export const LandingPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,9 +32,9 @@ export const LandingPage = () => {
 
             {/* Desktop Menu */}
             <div className="hidden md:block">
-              <a href="User?menu=login" className="bg-indigo-500 text-white px-6 py-2 rounded-full hover:bg-indigo-600 transition duration-300">
+              <Link to="/dashboard" className="bg-indigo-500 text-white px-6 py-2 rounded-full hover:bg-indigo-600 transition duration-300">
                 Log in
-              </a>
+              </Link>
             </div>
 
             {/* Mobile Menu Toggle */}
@@ -86,7 +86,7 @@ export const LandingPage = () => {
 
             {/* Right Column */}
             <div className="md:w-1/2 relative">
-              <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/dasboard.png?raw=true" alt="Finance Dashboard" className="rounded-lg shadow-2xl animate-float" />
+              <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/dasboard.png?raw=true" alt="Finance Dashboard" className="rounded-lg shadow-2xl animate-float ml-4" />
             </div>
           </div>
         </section>
@@ -97,7 +97,7 @@ export const LandingPage = () => {
             <h2 className="text-3xl font-bold text-center mb-12">Why Choose PayPlus?</h2>
             <div className="grid md:grid-cols-3 gap-12">
               {/* Feature 1 */}
-              <div className="text-center">
+              <div className="text-center bg-white p-8 rounded-lg shadow-sm transition-transform transform hover:scale-105 hover:shadow-lg">
                 <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-md">
                   <svg className="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -113,7 +113,7 @@ export const LandingPage = () => {
               </div>
 
               {/* Feature 2 */}
-              <div className="text-center">
+              <div className="text-center bg-white p-8 rounded-lg shadow-sm transition-transform transform hover:scale-105 hover:shadow-lg">
                 <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-md">
                   <svg className="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -129,7 +129,7 @@ export const LandingPage = () => {
               </div>
 
               {/* Feature 3 */}
-              <div className="text-center">
+              <div className="text-center bg-white p-8 rounded-lg shadow-sm transition-transform transform hover:scale-105 hover:shadow-lg">
                 <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-md">
                   <svg className="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -148,7 +148,7 @@ export const LandingPage = () => {
             <h2 className="text-3xl font-semibold text-center text-gray-800 mb-16">What Our Users Say</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               {/* Testimonial 1 */}
-              <div className="bg-white p-8 rounded-lg shadow-sm">
+              <div className="bg-white p-8 rounded-lg shadow-sm transition-transform transform hover:scale-105 hover:shadow-lg">
                 <p className="text-gray-600 mb-4">"PayPlus mengubah cara aku ngatur keuangan. Gampang banget dipakai, fiturnya keren, dan yang bikin seru, ngatur budget jadi lebih asyik."</p>
                 <div className="flex items-center">
                   <img src="https://i.pravatar.cc/60?img=8" alt="User" className="w-12 h-12 rounded-full mr-4" />
@@ -160,7 +160,7 @@ export const LandingPage = () => {
               </div>
 
               {/* Testimonial 2 */}
-              <div className="bg-white p-8 rounded-lg shadow-sm">
+              <div className="bg-white p-8 rounded-lg shadow-sm transition-transform transform hover:scale-105 hover:shadow-lg">
                 <p className="text-gray-600 mb-4">"Pakai PayPlus, ngatur uang jadi jauh lebih simpel. Fiturnya lengkap, gampang dipahami, dan bikin budgeting terasa ringan dan menyenangkan. Top deh pokoknya 😊"</p>
                 <div className="flex items-center">
                   <img src="https://i.pravatar.cc/60?img=1" alt="User" className="w-12 h-12 rounded-full mr-4" />
