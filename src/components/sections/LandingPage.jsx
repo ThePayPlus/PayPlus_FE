@@ -50,9 +50,9 @@ export const LandingPage = () => {
           {/* Mobile Menu */}
           {isMenuOpen && (
             <div className="md:hidden mt-4">
-              <a href="User?menu=login" className="block bg-indigo-500 text-white px-6 py-2 rounded-full hover:bg-indigo-600 transition duration-300 text-center">
+              <Link to="/login"  className="block bg-indigo-500 text-white px-6 py-2 rounded-full hover:bg-indigo-600 transition duration-300 text-center">
                 Log in
-              </a>
+              </Link>
             </div>
           )}
         </nav>
@@ -70,9 +70,9 @@ export const LandingPage = () => {
               </h1>
               <p className="text-xl mb-8 text-gray-600 leading-relaxed">PayPlus helps you manage money, track expenses, and achieve your financial goals with ease and precision.</p>
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                <a href="User?menu=signup" className="bg-indigo-500 text-white font-semibold px-8 py-3 rounded-full hover:bg-indigo-600 transition duration-300 text-center hover:scale-105">
+                <Link to="/signup" className="bg-indigo-500 text-white font-semibold px-8 py-3 rounded-full hover:bg-indigo-600 transition duration-300 text-center hover:scale-105">
                   Get Started
-                </a>
+                </Link>
               </div>
               <div className="mt-8 flex items-center space-x-4">
                 <div className="flex -space-x-2">

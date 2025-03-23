@@ -73,7 +73,7 @@ export const SignupPage = () => {
           <Link to="/dashboard"><button type="submit" className="w-full bg-indigo-500 text-white py-2 px-6 rounded-lg shadow hover:bg-indigo-600 transition duration-300">Register</button> </Link>
         </form>
 
-        <p className="mt-6 text-center text-gray-600 text-sm">Already have an account? <a href="User?menu=login" className="text-indigo-600 hover:underline">Login</a></p>
+        <p className="mt-6 text-center text-gray-600 text-sm">Already have an account? <Link to="/login" className="text-indigo-600 hover:underline">Login</Link></p>
       </div>
     </div>
   );
