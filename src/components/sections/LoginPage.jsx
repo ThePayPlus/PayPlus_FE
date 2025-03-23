@@ -4,13 +4,17 @@ import { Link } from 'react-router-dom';
 export const LoginPage = () => {
   return (
     <div className="bg-gray-50 font-sans min-h-screen flex items-center justify-center w-full px-4 sm:px-6 lg:px-8">
+      {/* Main Container */}
       <div className="bg-white shadow-lg rounded-lg p-8 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl w-100">
+        {/* Logo */}
         <Link to="/" >
           <img id="logo" className='mx-auto h-10 w-auto' src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" />
         </Link>
         <h3 className="text-2xl font-bold text-indigo-600 text-center mb-6">Welcome Back!</h3>
 
+        {/* Login Form */}
         <form className="space-y-4 w-full">
+          {/* Phone Number Input Field */}
           <div>
             <label htmlFor="phone" className="block text-sm text-left font-medium text-gray-700">Phone Number</label>
             <input
@@ -22,6 +26,8 @@ export const LoginPage = () => {
               required
             />
           </div>
+
+          {/* Password Input Field */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-left text-gray-700">Password</label>
             <div className="relative">
@@ -37,17 +43,27 @@ export const LoginPage = () => {
               </button>
             </div>
           </div>
+
+          {/* Remember Me Checkbox */}
           <div className="flex items-center justify-between">
             <label className="flex items-center">
               <input type="checkbox" className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
               <span className="ml-2 text-sm text-gray-600">Remember me</span>
             </label>
           </div>
-          <Link to="/dashboard"><button type="submit" className="w-full bg-indigo-500 text-white py-2 px-6 rounded-lg shadow hover:bg-indigo-600 transition duration-300">Login</button> </Link>
 
+          {/* Login Button */}
+          <Link to="/dashboard">
+            <button type="submit" className="w-full bg-indigo-500 text-white py-2 px-6 rounded-lg shadow hover:bg-indigo-600 transition duration-300">
+              Login
+            </button>
+          </Link>
         </form>
 
-        <p className="mt-6 text-center text-gray-600 text-sm">Don't have an account? <Link to="/signup" className="text-indigo-600 hover:underline">Sign Up</Link></p>
+        {/* Sign Up Link */}
+        <p className="mt-6 text-center text-gray-600 text-sm">
+          Don't have an account? <Link to="/signup" className="text-indigo-600 hover:underline">Sign Up</Link>
+        </p>
       </div>
     </div>
   );

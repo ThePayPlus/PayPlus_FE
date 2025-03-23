@@ -8,14 +8,6 @@ export const Footer = () => {
           <span className="text-2xl font-semibold">PayPlus</span>
           <p className="mt-1 text-sm text-gray-400">&copy; 2024 PayPlus. All rights reserved.</p>
         </div>
-        {/* Right-aligned section (optional) */}
-        {/* 
-          <div>
-            <a href="/somewhere" className="text-sm hover:underline">
-              Privacy Policy
-            </a>
-          </div>
-          */}
       </div>
     </footer>
   );
