@@ -6,7 +6,7 @@ export const LoginPage = () => {
     <div className="bg-gray-50 font-sans min-h-screen flex items-center justify-center w-full px-4 sm:px-6 lg:px-8">
       <div className="bg-white shadow-lg rounded-lg p-8 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl w-100">
         <Link to="/" >
-          <img id="logo" src="public/Logo.png" className="mx-auto h-10 w-auto" alt="Logo" />
+          <img id="logo" className='w-50 h-auto' src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" />
         </Link>
         <h3 className="text-2xl font-bold text-indigo-600 text-center mb-6">Welcome Back!</h3>
 
@@ -44,7 +44,7 @@ export const LoginPage = () => {
             </label>
           </div>
           <Link to="/dashboard"><button type="submit" className="w-full bg-indigo-500 text-white py-2 px-6 rounded-lg shadow hover:bg-indigo-600 transition duration-300">Login</button> </Link>
-          
+
         </form>
 
         <p className="mt-6 text-center text-gray-600 text-sm">Don't have an account? <Link to="/signup" className="text-indigo-600 hover:underline">Sign Up</Link></p>

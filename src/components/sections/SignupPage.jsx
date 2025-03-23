@@ -6,7 +6,7 @@ export const SignupPage = () => {
     <div className="bg-gray-50 font-sans min-h-screen flex items-center justify-center w-full px-4 sm:px-6 lg:px-8">
       <div className="bg-white shadow-lg rounded-lg p-8 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl w-100">
         <Link to="/">
-          <img id="logo" src="public/Logo.png" className="mx-auto h-10 w-auto" alt="Logo" />
+          <img id="logo" className='w-50 h-auto' src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" />
         </Link>
         <h3 className="text-2xl font-bold text-indigo-600 text-center mb-6">Create an Account</h3>
 
