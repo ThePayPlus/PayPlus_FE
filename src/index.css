@@ -8,7 +8,6 @@ body {
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
   background: #ffffff;
-  color: #c517ce;
 }
 
 #root,
@@ -27,6 +26,12 @@ footer {
   padding: 2rem;
   box-sizing: border-box;
   background: #1f2937; /* Ensuring it's visible */
+}
+
+/* Add global placeholder color */
+::placeholder {
+  color: gray; /* Set the placeholder text color to gray */
+  opacity: 1; /* Ensure the placeholder text is fully opaque */
 }
 
 @layer utilities {

@@ -32,7 +32,7 @@ export const LandingPage = () => {
 
             {/* Desktop Menu */}
             <div className="hidden md:block">
-              <Link to="/dashboard" className="bg-indigo-500 text-white px-6 py-2 rounded-full hover:bg-indigo-600 transition duration-300">
+              <Link to="/login" className="bg-indigo-500 text-white px-6 py-2 rounded-full hover:bg-indigo-600 transition duration-300">
                 Log in
               </Link>
             </div>

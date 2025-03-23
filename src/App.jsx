@@ -6,6 +6,8 @@ import { LoadingScreen } from './components/LoadingScreen';
 import { LandingPage } from './components/sections/landingPage';
 import { Footer } from './components/Footer';
 import { Dashboard } from './components/sections/Dashboard';
+import { LoginPage } from './components/sections/LoginPage';
+import { SignupPage } from './components/sections/SignupPage';
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -20,7 +22,9 @@ function App() {
       <div className={`min-h-screen flex flex-col transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'} bg-white text-purple-700`}>
         <Routes>
           <Route path="/" element={<LandingPage className={'flex-grow'} />} />
+          <Route path='/login' element={<LoginPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/signup" element={<SignupPage />} />
         </Routes>
         <FooterWrapper />
       </div>
