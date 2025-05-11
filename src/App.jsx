@@ -3,8 +3,7 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import { LoadingScreen } from './components/LoadingScreen';
-import { LandingPage } from './components/sections/landingPage';
-import { Footer } from './components/Footer';
+import { LandingPage } from './components/sections/LandingPage';
 import { Dashboard } from './components/sections/Dashboard';
 import { LoginPage } from './components/sections/LoginPage';
 import { SignupPage } from './components/sections/SignupPage';
@@ -26,15 +25,9 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/signup" element={<SignupPage />} />
         </Routes>
-        <FooterWrapper />
       </div>
     </Router>
   );
-}
-
-function FooterWrapper() {
-  const location = useLocation();
-  return location.pathname === '/' ? <Footer className={'w-full'} /> : null;
 }
 
 export default App;

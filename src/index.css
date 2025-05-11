@@ -20,17 +20,6 @@ body::-webkit-scrollbar {
   display: none;
 }
 
-#root,
-#app {
-  display: flex;
-  flex-direction: column;
-  min-height: auto; /* Ensures the page fills at least the viewport height */
-  
-  /* Hide scrollbar but keep functionality */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
-}
-
 /* Hide scrollbar for Chrome, Safari and Opera */
 #root::-webkit-scrollbar,
 #app::-webkit-scrollbar {
@@ -40,14 +29,6 @@ body::-webkit-scrollbar {
 main {
   flex: 1; /* Makes the main content take the remaining space */
 }
-
-footer {
-  width: 100%;
-  padding: 2rem;
-  box-sizing: border-box;
-  background: #1f2937; /* Ensuring it's visible */
-}
-
 /* Add global placeholder color */
 ::placeholder {
   color: gray; /* Set the placeholder text color to gray */
