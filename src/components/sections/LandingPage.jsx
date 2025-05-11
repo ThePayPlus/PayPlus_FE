@@ -106,9 +106,6 @@ export const LandingPage = () => {
           <div className="container mx-auto flex flex-col md:flex-row items-center">
             {/* Left Column */}
             <div className="md:w-1/2 mb-16 md:mb-0 text-left">
-              <div className="inline-block px-3 py-1 mb-6 rounded-full bg-indigo-100 text-indigo-600 font-medium text-sm">
-                Manage Your Finances
-              </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 text-left">
                 Simplify Your <span className="text-indigo-600">Financial Life</span>
               </h1>
