@@ -46,9 +46,6 @@ export const LandingPage = () => {
               <a href="#testimonials" className="text-gray-600 hover:text-indigo-600 font-medium transition duration-300">
                 Testimonials
               </a>
-              <a href="#faq" className="text-gray-600 hover:text-indigo-600 font-medium transition duration-300">
-                FAQ
-              </a>
               <Link to="/login" className="text-indigo-600 font-medium hover:text-indigo-700 transition duration-300">
                 Log in
               </Link>
