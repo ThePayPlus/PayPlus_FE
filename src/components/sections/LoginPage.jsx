@@ -1,7 +1,58 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ApiService } from '../../services';
 
 export const LoginPage = () => {
+  const [formData, setFormData] = useState({
+    phone: '',
+    password: '',
+    rememberMe: false
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const { phone, password } = formData;
+      const response = await ApiService.login(phone, password);
+
+      if (response.success) {
+        // Login successful, redirect to dashboard
+        navigate('/dashboard');
+      } else {
+        // Login failed, show error message
+        setError(response.message);
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+      console.error('Login error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    const passwordInput = document.getElementById('password');
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+    } else {
+      passwordInput.type = 'password';
+    }
+  };
+
   return (
     <div className="bg-gray-50 font-sans h-screen w-screen flex items-center justify-center overflow-hidden">
       {/* Main Container */}
@@ -12,8 +63,15 @@ export const LoginPage = () => {
         </Link>
         <h3 className="text-2xl font-bold text-indigo-600 text-center mb-6">Welcome Back!</h3>
 
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <span className="block sm:inline">{error}</span>
+          </div>
+        )}
+
         {/* Login Form */}
-        <form className="space-y-4 w-full">
+        <form className="space-y-4 w-full" onSubmit={handleSubmit}>
           {/* Phone Number Input Field */}
           <div>
             <label htmlFor="phone" className="block text-sm text-left font-medium text-gray-700">Phone Number</label>
@@ -21,6 +79,8 @@ export const LoginPage = () => {
               type="text"
               id="phone"
               name="phone"
+              value={formData.phone}
+              onChange={handleChange}
               placeholder="Enter your phone number"
               className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               required
@@ -35,11 +95,21 @@ export const LoginPage = () => {
                 type="password"
                 id="password"
                 name="password"
+                value={formData.password}
+                onChange={handleChange}
                 placeholder="Enter your password"
                 className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                 required
               />
-              <button type="button" id="toggle-password" className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600">
+              <button 
+                type="button" 
+                onClick={togglePasswordVisibility}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-600"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
               </button>
             </div>
           </div>
@@ -47,17 +117,25 @@ export const LoginPage = () => {
           {/* Remember Me Checkbox */}
           <div className="flex items-center justify-between">
             <label className="flex items-center">
-              <input type="checkbox" className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" />
+              <input 
+                type="checkbox" 
+                name="rememberMe"
+                checked={formData.rememberMe}
+                onChange={handleChange}
+                className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500" 
+              />
               <span className="ml-2 text-sm text-gray-600">Remember me</span>
             </label>
           </div>
 
           {/* Login Button */}
-          <Link to="/dashboard">
-            <button type="submit" className="w-full bg-indigo-500 text-white py-2 px-6 rounded-lg shadow hover:bg-indigo-600 transition duration-300">
-              Login
-            </button>
-          </Link>
+          <button 
+            type="submit" 
+            disabled={loading}
+            className={`w-full bg-indigo-500 text-white py-2 px-6 rounded-lg shadow hover:bg-indigo-600 transition duration-300 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+          >
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
         </form>
 
         {/* Sign Up Link */}
