@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 export const LoginPage = () => {
   return (
-    <div className="bg-gray-50 font-sans min-h-screen flex items-center justify-center w-full px-4 sm:px-6 lg:px-8">
+    <div className="bg-gray-50 font-sans h-screen w-screen flex items-center justify-center overflow-hidden">
       {/* Main Container */}
       <div className="bg-white shadow-lg rounded-lg p-8 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl w-100">
         {/* Logo */}

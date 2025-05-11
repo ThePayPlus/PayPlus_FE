@@ -64,11 +64,11 @@ export const LandingPage = () => {
         <section className="hero pt-32 pb-20 px-6">
           <div className="container mx-auto flex flex-col md:flex-row items-center">
             {/* Left Column */}
-            <div className="md:w-1/2 mb-16 md:mb-0">
-              <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
+            <div className="md:w-1/2 mb-16 md:mb-0 text-left">
+              <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6 text-left">
                 Simplify Your <span className="gradient-text">Financial Life</span>
               </h1>
-              <p className="text-xl mb-8 text-gray-600 leading-relaxed">PayPlus helps you manage money, track expenses, and achieve your financial goals with ease and precision.</p>
+              <p className="text-xl mb-8 text-gray-600 leading-relaxed text-left">PayPlus helps you manage money, track expenses, and achieve your financial goals with ease and precision.</p>
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
                 <Link to="/signup" className="bg-indigo-500 text-white font-semibold px-8 py-3 rounded-full hover:bg-indigo-600 transition duration-300 text-center hover:scale-105">
                   Get Started
