@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ApiService } from '../../services';
 
@@ -121,7 +121,7 @@ export const LoginPage = () => {
 
         {/* Sign Up Link */}
         <p className="mt-6 text-center text-gray-600 text-sm">
-          Don't have an account? <Link to="/signup" className="text-indigo-600 hover:underline">Sign Up</Link>
+          Dont have an account? <Link to="/signup" className="text-indigo-600 hover:underline">Sign Up</Link>
         </p>
       </div>
     </div>

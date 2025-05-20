@@ -283,7 +283,7 @@ export const LandingPage = () => {
                 <div className="flex mb-6">
                   <span className="text-amber-400">★★★★★</span>
                 </div>
-                <p className="text-gray-600 mb-8 text-lg italic">"PayPlus mengubah cara aku ngatur keuangan. Gampang banget dipakai, fiturnya keren, dan yang bikin seru, ngatur budget jadi lebih asyik."</p>
+                <p className="text-gray-600 mb-8 text-lg italic">PayPlus mengubah cara aku ngatur keuangan. Gampang banget dipakai, fiturnya keren, dan yang bikin seru, ngatur budget jadi lebih asyik.</p>
                 <div className="flex items-center pt-7.5">
                   <img src="https://i.pravatar.cc/60?img=8" alt="User" className="w-14 h-14 rounded-full border-4 border-white shadow-md mr-4" />
                   <div>
@@ -297,7 +297,7 @@ export const LandingPage = () => {
                 <div className="flex mb-6">
                   <span className="text-amber-400">★★★★★</span>
                 </div>
-                <p className="text-gray-600 mb-8 text-lg italic">"Pakai PayPlus, ngatur uang jadi jauh lebih simpel. Fiturnya lengkap, gampang dipahami, dan bikin budgeting terasa ringan dan menyenangkan. Top deh pokoknya 😊"</p>
+                <p className="text-gray-600 mb-8 text-lg italic">Pakai PayPlus, ngatur uang jadi jauh lebih simpel. Fiturnya lengkap, gampang dipahami, dan bikin budgeting terasa ringan dan menyenangkan. Top deh pokoknya 😊</p>
                 <div className="flex items-center">
                   <img src="https://i.pravatar.cc/60?img=1" alt="User" className="w-14 h-14 rounded-full border-4 border-white shadow-md mr-4" />
                   <div>

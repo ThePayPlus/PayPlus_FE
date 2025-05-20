@@ -1,12 +1,14 @@
 import './index.css';
 import { useState, useEffect } from 'react';
 import './App.css';
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import { LoadingScreen } from './components/LoadingScreen';
 import { LandingPage } from './components/sections/LandingPage';
 import { Dashboard } from './components/sections/Dashboard';
 import { LoginPage } from './components/sections/LoginPage';
 import { SignupPage } from './components/sections/SignupPage';
+import Settings from './components/sections/Settings';
+import Income from './components/sections/IncomeRecord';
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -24,6 +26,8 @@ function App() {
           <Route path='/login' element={<LoginPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/income" element={<Income />} />
         </Routes>
       </div>
     </Router>
