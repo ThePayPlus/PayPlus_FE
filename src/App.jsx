@@ -6,6 +6,7 @@ import { LoadingScreen } from './components/LoadingScreen';
 import { LandingPage } from './components/sections/LandingPage';
 import { Dashboard } from './components/sections/Dashboard';
 import { LoginPage } from './components/sections/LoginPage';
+import { BillPage } from './components/sections/BillPage';
 import { SignupPage } from './components/sections/SignupPage';
 import Settings from './components/sections/Settings';
 import Income from './components/sections/IncomeRecord';
@@ -28,6 +29,7 @@ function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/income" element={<Income />} />
+          <Route path="/bills" element={<BillPage />} />
         </Routes>
       </div>
     </Router>

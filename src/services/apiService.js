@@ -411,6 +411,67 @@ class ApiService {
     }
   }
 
+  // Add new bill
+  static async addBill(name, amount, dueDate, category) {
+    try {
+      const response = await ApiService.api.post('/bills', {
+        name,
+        amount,
+        dueDate,
+        category
+      });
+      
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to add bill',
+      };
+    }
+  }
+  
+  // Update bill
+  static async updateBill(billId, name, amount, dueDate, category) {
+    try {
+      const response = await ApiService.api.put(`/bills/${billId}`, {
+        name,
+        amount,
+        dueDate,
+        category
+      });
+      
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to update bill',
+      };
+    }
+  }
+  
+  // Delete bill
+  static async deleteBill(billId) {
+    try {
+      const response = await ApiService.api.delete(`/bills/${billId}`);
+      
+      return {
+        success: true,
+        message: response.data.message || 'Bill deleted successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to delete bill',
+      };
+    }
+  }
+
   // Send message to chatbot
   static async sendChatbotMessage(message) {
     try {

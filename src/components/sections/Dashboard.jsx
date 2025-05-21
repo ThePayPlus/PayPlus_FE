@@ -283,7 +283,7 @@ export const Dashboard = () => {
             {/* Bills and Savings */}
             <div className="grid gap-6 mb-8 md:grid-cols-2">
               {/* Upcoming Bills */}
-              <a href="/bills" className="block">
+              <Link to="/bills" className="block">
                 <div className="bg-white rounded-lg shadow-xs p-6 hover:shadow-md transition-shadow duration-300">
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-xl font-semibold text-gray-700">Upcoming Bills</h2>
@@ -310,7 +310,7 @@ export const Dashboard = () => {
                     )}
                   </div>
                 </div>
-              </a>
+              </Link>
 
               {/* Savings Goals */}
               <a href="/savings" className="block">
