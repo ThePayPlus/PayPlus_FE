@@ -8,6 +8,8 @@ import { Dashboard } from './components/sections/Dashboard';
 import { LoginPage } from './components/sections/LoginPage';
 import { BillPage } from './components/sections/BillPage';
 import { SignupPage } from './components/sections/SignupPage';
+import { SavingsPage } from './components/sections/SavingsPage';
+import { AddSavings } from './components/sections/AddSavings';
 import Settings from './components/sections/Settings';
 import Income from './components/sections/IncomeRecord';
 
@@ -30,6 +32,8 @@ function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/income" element={<Income />} />
           <Route path="/bills" element={<BillPage />} />
+          <Route path="/savings" element={<SavingsPage />} />
+          <Route path="/addsavings" element={<AddSavings />} />
         </Routes>
       </div>
     </Router>
