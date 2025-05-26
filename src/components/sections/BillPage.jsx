@@ -13,14 +13,11 @@ import {
   AlertTriangle,
   X,
   Pencil,
-  Trash2,
   Plus,
   Calendar,
   DollarSign,
-  Tag,
   ChevronDown,
   ChevronUp,
-  Check,
   CheckCircle
 } from "lucide-react"
 import { Link } from "react-router-dom"
@@ -373,18 +370,18 @@ export const BillPage = () => {
                 <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" className="h-10" />
               </Link>
             </div>
-            <nav className="hidden md:flex space-x-6">
-              <Link to="/dashboard" className="text-gray-600 hover:text-indigo-600 transition-colors duration-200">
-                Dashboard
+            <nav className="hidden sm:flex space-x-4">
+              <Link to="/transfer" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Transfer
               </Link>
-              <Link to="/income" className="text-gray-600 hover:text-indigo-600 transition-colors duration-200">
-                Pemasukan
+              <Link to="/savings" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Savings
               </Link>
-              <Link to="/bills" className="text-indigo-600 font-medium transition-colors duration-200 border-b-2 border-indigo-600 pb-1">
-                Tagihan
+              <Link to="/income" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Income
               </Link>
-              <Link to="/settings" className="text-gray-600 hover:text-indigo-600 transition-colors duration-200">
-                Pengaturan
+              <Link to="/expense" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Expenses
               </Link>
             </nav>
             <div className="md:hidden">
@@ -401,16 +398,10 @@ export const BillPage = () => {
           {showMobileMenu && (
             <div className="md:hidden py-2 pb-4 animate-fadeIn">
               <Link
-                to="/dashboard"
-                className="block px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors duration-200"
-              >
-                Dashboard
-              </Link>
-              <Link
                 to="/income"
                 className="block px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors duration-200"
               >
-                Pemasukan
+                Income
               </Link>
               <Link
                 to="/bills"
@@ -419,10 +410,10 @@ export const BillPage = () => {
                 Tagihan
               </Link>
               <Link
-                to="/settings"
+                to="/Savings"
                 className="block px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors duration-200"
               >
-                Pengaturan
+                Savings
               </Link>
             </div>
           )}
@@ -480,21 +471,31 @@ export const BillPage = () => {
             {notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`flex items-start p-4 rounded-lg shadow-sm border-l-4 ${
+                className={`flex items-start p-4 rounded-lg shadow-md border-l-4 transition-all duration-300 hover:shadow-lg ${
                   notification.type === 'overdue' ? 'border-red-500 bg-red-50' : 'border-yellow-500 bg-yellow-50'
                 }`}
               >
                 <div className="flex-shrink-0 mr-3">
-                  <AlertTriangle className={`w-5 h-5 ${
-                    notification.type === 'overdue' ? 'text-red-500' : 'text-yellow-500'
-                  }`} />
+                  <div className={`p-2 rounded-full ${notification.type === 'overdue' ? 'bg-red-100' : 'bg-yellow-100'}`}>
+                    <AlertTriangle className={`w-5 h-5 ${
+                      notification.type === 'overdue' ? 'text-red-500' : 'text-yellow-500'
+                    }`} />
+                  </div>
                 </div>
                 <div className="flex-grow">
-                  <p className="text-sm font-medium">{notification.message}</p>
+                  <p className={`text-sm font-semibold mb-1 ${notification.type === 'overdue' ? 'text-red-700' : 'text-yellow-700'}`}>
+                    {notification.type === 'overdue' ? 'Tagihan Terlambat' : 'Segera Jatuh Tempo'}
+                  </p>
+                  <p className="text-sm">{notification.message}</p>
                 </div>
                 <button
-                  onClick={() => dismissNotification(notification.id)}
-                  className="flex-shrink-0 ml-3 text-gray-400 hover:text-gray-600"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    dismissNotification(notification.id);
+                  }}
+                  className={`flex-shrink-0 ml-3 p-1.5 rounded-full hover:bg-opacity-80 ${
+                    notification.type === 'overdue' ? 'text-red-400 hover:bg-red-100' : 'text-yellow-400 hover:bg-yellow-100'
+                  }`}
                 >
                   <X className="w-5 h-5" />
                 </button>
