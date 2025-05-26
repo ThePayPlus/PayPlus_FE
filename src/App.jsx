@@ -13,6 +13,7 @@ import { AddSavings } from './components/sections/AddSavings';
 import { AddToSavings } from './components/sections/AddtoSavings';
 import Settings from './components/sections/Settings';
 import Income from './components/sections/IncomeRecord';
+import Expense from './components/sections/ExpenseRecord';
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -32,6 +33,7 @@ function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/income" element={<Income />} />
+          <Route path="/expense" element={<Expense />} />
           <Route path="/bills" element={<BillPage />} />
           <Route path="/savings" element={<SavingsPage />} />
           <Route path="/addsavings" element={<AddSavings />} />

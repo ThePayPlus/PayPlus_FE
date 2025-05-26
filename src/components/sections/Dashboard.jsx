@@ -268,8 +268,8 @@ export const Dashboard = () => {
                 </div>
                 <p className="text-gray-600">View detailed income history and analytics</p>
               </Link>
-              <a
-                href="/expense"
+              <Link
+                to="/expense"
                 className="block p-6 bg-white rounded-lg shadow-xs hover:shadow-md transition-shadow duration-300"
               >
                 <div className="flex items-center justify-between mb-4">
@@ -277,7 +277,7 @@ export const Dashboard = () => {
                   <ChevronRight className="text-gray-500" />
                 </div>
                 <p className="text-gray-600">Track your spending patterns and categories</p>
-              </a>
+              </Link>
             </div>
 
             {/* Bills and Savings */}

@@ -9,52 +9,50 @@ import { ApiService } from "../../services"
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend)
 
-export default function Income() {
-  const [incomeData, setIncomeData] = useState({
-    totalIncome: 0,
+export default function Expense() {
+  const [expenseData, setExpenseData] = useState({
+    totalExpense: 0,
     totalTransactions: 0,
-    normalIncome: 0,
-    giftIncome: 0,
-    topupIncome: 0,
-    incomeRecords: [],
+    normalExpense: 0,
+    giftExpense: 0,
+    expenseRecords: [],
   })
 
   const [activeFilter, setActiveFilter] = useState("all")
   const [filteredRecords, setFilteredRecords] = useState([])
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const calculateTotalIncome = (records) => {
+  const calculateTotalExpense = (records) => {
     return records.reduce((acc, record) => acc + Number(record.amount), 0);
   };
 
   useEffect(() => {
-    const fetchIncomeRecords = async () => {
-      const response = await ApiService.getIncomeRecords()
+    const fetchExpenseRecords = async () => {
+      const response = await ApiService.getExpenseRecords()
       if (response.success) {
-        const totalIncome = calculateTotalIncome(response.records);
-        setIncomeData({
-          totalIncome,
+        const totalExpense = calculateTotalExpense(response.records);
+        setExpenseData({
+          totalExpense,
           totalTransactions: response.records.length,
-          normalIncome: response.records.filter(record => record.type === "normal").reduce((acc, record) => acc + Number(record.amount), 0),
-          giftIncome: response.records.filter(record => record.type === "gift").reduce((acc, record) => acc + Number(record.amount), 0),
-          topupIncome: response.records.filter(record => record.type === "topup").reduce((acc, record) => acc + Number(record.amount), 0),
-          incomeRecords: response.records,
+          normalExpense: response.records.filter(record => record.type === "normal").reduce((acc, record) => acc + Number(record.amount), 0),
+          giftExpense: response.records.filter(record => record.type === "gift").reduce((acc, record) => acc + Number(record.amount), 0),
+          expenseRecords: response.records,
         });
       } else {
         console.error(response.message);
       }
     };
 
-    fetchIncomeRecords();
+    fetchExpenseRecords();
   }, []);
 
   useEffect(() => {
     if (activeFilter === "all") {
-      setFilteredRecords(incomeData.incomeRecords)
+      setFilteredRecords(expenseData.expenseRecords)
     } else {
-      setFilteredRecords(incomeData.incomeRecords.filter((record) => record.type === activeFilter))
+      setFilteredRecords(expenseData.expenseRecords.filter((record) => record.type === activeFilter))
     }
-  }, [activeFilter, incomeData.incomeRecords])
+  }, [activeFilter, expenseData.expenseRecords])
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("id-ID", {
@@ -64,11 +62,11 @@ export default function Income() {
   }
 
   const chartData = {
-    labels: ["Normal Income", "Gift Income", "TopUp Income"],
+    labels: ["Normal Expense", "Gift Expense"],
     datasets: [
       {
-        data: [incomeData.normalIncome, incomeData.giftIncome, incomeData.topupIncome],
-        backgroundColor: ["#3B82F6", "#8B5CF6", "#F1C40F"],
+        data: [expenseData.normalExpense, expenseData.giftExpense],
+        backgroundColor: ["#3B82F6", "#8B5CF6"],
         hoverOffset: 4,
       },
     ],
@@ -109,8 +107,8 @@ export default function Income() {
               <Link to="/bills" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Bills
               </Link>
-              <Link to="/expense" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
-                Expenses
+              <Link to="/income" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Incomes
               </Link>
             </nav>
             <div className="sm:hidden">
@@ -126,6 +124,12 @@ export default function Income() {
           </div>
           {mobileMenuOpen && (
             <div className="sm:hidden py-2 pb-4">
+              <Link
+                to="/dashboard"
+                className="block px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
+              >
+                Dashboard
+              </Link>
               <Link
                 to="/transfer"
                 className="block px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
@@ -145,10 +149,10 @@ export default function Income() {
                 Bills
               </Link>
               <Link
-                to="/expense"
+                to="/income"
                 className="block px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
               >
-                Expenses
+                Incomes
               </Link>
             </div>
           )}
@@ -157,11 +161,12 @@ export default function Income() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold mb-8 text-gray-800">Income Overview</h1>
+        <h1 className="text-3xl font-bold mb-8 text-gray-800">Expense Overview</h1>
 
-        {/* Total Income Card */}
-        <div className="grid gap-6 mb-8 md:grid-cols-1 xl:grid-cols-1">
-          <div className="flex items-center justify-center p-4 bg-white rounded-lg shadow-xs">
+        {/* Expense Stats Cards */}
+        <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
+          {/* Total Expense Card */}
+          <div className="flex items-center p-4 bg-white rounded-lg shadow-xs">
             <div className="p-3 mr-4 text-green-500 bg-green-100 rounded-full">
               <svg className="w-5 h-5" fill="currentColor" viewBox="1 1 22 22">
                 <path
@@ -178,16 +183,12 @@ export default function Income() {
               </svg>
             </div>
             <div>
-              <p className="mb-2 text-sm font-medium text-gray-600">Total Income</p>
-              <p id="totalIncome" className="text-lg font-semibold text-gray-700">
-                Rp. {formatCurrency(incomeData.totalIncome)}
+              <p className="mb-2 text-sm font-medium text-gray-600">Total Expense</p>
+              <p id="totalExpense" className="text-lg font-semibold text-gray-700">
+                Rp. {formatCurrency(expenseData.totalExpense)}
               </p>
             </div>
           </div>
-        </div>
-
-        {/* Income Stats Cards */}
-        <div className="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
           {/* Total Transactions */}
           <div className="flex items-center p-4 bg-white rounded-lg shadow-xs">
             <div className="p-3 mr-4 text-orange-500 bg-orange-100 rounded-full">
@@ -198,12 +199,12 @@ export default function Income() {
             <div>
               <p className="mb-2 text-sm font-medium text-gray-600">Total Transactions</p>
               <p id="totalTransactions" className="text-lg font-semibold text-gray-700">
-                {incomeData.totalTransactions}
+                {expenseData.totalTransactions}
               </p>
             </div>
           </div>
 
-          {/* Normal Income */}
+          {/* Normal Expense */}
           <div className="flex items-center p-4 bg-white rounded-lg shadow-xs">
             <div className="p-3 mr-4 text-blue-500 bg-blue-100 rounded-full">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -212,14 +213,14 @@ export default function Income() {
               </svg>
             </div>
             <div>
-              <p className="mb-2 text-sm font-medium text-gray-600">Normal Income</p>
-              <p id="normalIncome" className="text-lg font-semibold text-gray-700">
-                Rp. {formatCurrency(incomeData.normalIncome)}
+              <p className="mb-2 text-sm font-medium text-gray-600">Normal Expense</p>
+              <p id="normalExpense" className="text-lg font-semibold text-gray-700">
+                Rp. {formatCurrency(expenseData.normalExpense)}
               </p>
             </div>
           </div>
 
-          {/* Gift Income */}
+          {/* Gift Expense */}
           <div className="flex items-center p-4 bg-white rounded-lg shadow-xs">
             <div className="p-3 mr-4 text-purple-500 bg-purple-100 rounded-full">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -232,41 +233,17 @@ export default function Income() {
               </svg>
             </div>
             <div>
-              <p className="mb-2 text-sm font-medium text-gray-600">Gift Income</p>
-              <p id="giftIncome" className="text-lg font-semibold text-gray-700">
-                Rp. {formatCurrency(incomeData.giftIncome)}
-              </p>
-            </div>
-          </div>
-
-          {/* TopUp Income */}
-          <div className="flex items-center p-4 bg-white rounded-lg shadow-xs">
-            <div className="p-3 mr-4 text-yellow-500 bg-yellow-100 rounded-full">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M12 14a3 3 0 0 1 3-3h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4a3 3 0 0 1-3-3Zm3-1a1 1 0 1 0 0 2h4v-2h-4Z"
-                  clipRule="evenodd"
-                />
-                <path
-                  fillRule="evenodd"
-                  d="M12.293 3.293a1 1 0 0 1 1.414 0L16.414 6h-2.828l-1.293-1.293a1 1 0 0 1 0-1.414ZM12.414 6 9.707 3.293a1 1 0 0 0-1.414 0L5.586 6h6.828ZM4.586 7l-.056.055A2 2 0 0 0 3 9v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2h-4a5 5 0 0 1 0-10h4a2 2 0 0 0-1.53-1.945L17.414 7H4.586Z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div>
-              <p className="mb-2 text-sm font-medium text-gray-600">TopUp Income</p>
-              <p id="totalIncome" className="text-lg font-semibold text-gray-700">
-                Rp. {formatCurrency(incomeData.topupIncome)}
+              <p className="mb-2 text-sm font-medium text-gray-600">Gift Expense</p>
+              <p id="giftExpense" className="text-lg font-semibold text-gray-700">
+                Rp. {formatCurrency(expenseData.giftExpense)}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Income Distribution Chart */}
+        {/* Expense Distribution Chart */}
         <div className="mb-8 bg-white rounded-lg shadow-xs p-4 flex flex-col items-center">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">Income Distribution</h2>
+          <h2 className="text-xl font-semibold text-gray-700 mb-4">Expense Distribution</h2>
           <div style={{ width: "300px", height: "150px" }}>
             <Doughnut data={chartData} options={chartOptions} />
           </div>
@@ -300,54 +277,44 @@ export default function Income() {
             >
               Gift
             </button>
-            <button
-              onClick={() => setActiveFilter("topup")}
-              className={`filter-btn px-4 py-2 rounded-md transition-all duration-300 hover:bg-blue-500 hover:text-white ${
-                activeFilter === "topup" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
-              }`}
-            >
-              TopUp
-            </button>
           </div>
         </div>
 
-        {/* Income Cards */}
-        <div id="incomeCards" className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Expense Cards */}
+        <div id="expenseCards" className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredRecords.length > 0 ? (
-            filteredRecords.map((income, index) => (
+            filteredRecords.map((expense, index) => (
               <div
-                key={income.id}
-                className="bg-white shadow rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg income-card"
+                key={expense.id}
+                className="bg-white shadow rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg expense-card"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="p-6">
                   <div className="flex justify-between items-center mb-4">
-                    <span className="text-2xl font-bold text-gray-800">Rp. {formatCurrency(income.amount)}</span>
-                    <span className="text-sm font-medium text-gray-500">{income.date}</span>
+                    <span className="text-2xl font-bold text-gray-800">Rp. {formatCurrency(expense.amount)}</span>
+                    <span className="text-sm font-medium text-gray-500">{expense.date}</span>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Sender:</span>
-                      <span className="font-medium text-gray-800">{income.senderName}</span>
+                      <span className="font-medium text-gray-800">{expense.senderName}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Type:</span>
                       <span
                         className={`font-medium ${
-                          income.type === "gift"
+                          expense.type === "gift"
                             ? "text-purple-600"
-                            : income.type === "topup"
-                              ? "text-green-600"
-                              : "text-blue-600"
+                            : "text-blue-600"
                         }`}
                       >
-                        {income.type.charAt(0).toUpperCase() + income.type.slice(1)}
+                        {expense.type.charAt(0).toUpperCase() + expense.type.slice(1)}
                       </span>
                     </div>
-                    {income.type === "gift" && income.message && (
+                    {expense.type === "gift" && expense.message && (
                       <div className="mt-4">
                         <span className="text-sm text-gray-600">Message:</span>
-                        <p className="mt-1 text-sm text-gray-800">{income.message}</p>
+                        <p className="mt-1 text-sm text-gray-800">{expense.message}</p>
                       </div>
                     )}
                   </div>
@@ -355,13 +322,13 @@ export default function Income() {
               </div>
             ))
           ) : (
-            <p className="col-span-3 text-center text-gray-600">No income records found.</p>
+            <p className="col-span-3 text-center text-gray-600">No expense records found.</p>
           )}
         </div>
       </main>
 
       <style>{`
-        .income-card {
+        .expense-card {
           opacity: 0;
           transform: translateY(20px);
           animation: fadeInUp 0.3s ease forwards;
