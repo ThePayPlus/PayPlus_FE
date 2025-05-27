@@ -104,7 +104,7 @@ export const BillPage = () => {
         newNotifications.push({
           id: `overdue-${bill.name}-${bill.dueDate}`,
           type: 'overdue',
-          message: `Tagihan ${bill.name} sebesar Rp ${formatCurrency(bill.amount)} sudah jatuh tempo pada ${formatDate(bill.dueDate)}`,
+          message: `Bill ${bill.name} of Rp ${formatCurrency(bill.amount)} is overdue since ${formatDate(bill.dueDate)}`,
           bill
         })
       } 
@@ -113,7 +113,7 @@ export const BillPage = () => {
         newNotifications.push({
           id: `due-tomorrow-${bill.name}-${bill.dueDate}`,
           type: 'due-tomorrow',
-          message: `Tagihan ${bill.name} sebesar Rp ${formatCurrency(bill.amount)} akan jatuh tempo besok`,
+          message: `Bill ${bill.name} of Rp ${formatCurrency(bill.amount)} is due tomorrow`,
           bill
         })
       }
@@ -231,7 +231,7 @@ export const BillPage = () => {
       
       // Validasi input
       if (!newBill.name || !newBill.amount || !newBill.dueDate || !newBill.category) {
-        setError("Semua field harus diisi")
+        setError("All fields must be filled in")
         return
       }
       
@@ -243,7 +243,7 @@ export const BillPage = () => {
       )
       
       if (response.success) {
-        setSuccessMessage("Tagihan berhasil ditambahkan")
+        setSuccessMessage("Bill added successfully")
         
         // Reset form
         setNewBill({
@@ -261,10 +261,10 @@ export const BillPage = () => {
           setSuccessMessage("")
         }, 3000)
       } else {
-        setError(response.message || "Gagal menambahkan tagihan")
+        setError(response.message || "Failed to add bill")
       }
     } catch (err) {
-      setError("Terjadi kesalahan saat menambahkan tagihan")
+      setError("An error occurred while adding a bill")
       console.error("Error adding bill:", err)
     } finally {
       setLoading(false)
@@ -285,7 +285,7 @@ export const BillPage = () => {
       
       // Validasi input
       if (!editingBill.name || !editingBill.amount || !editingBill.dueDate || !editingBill.category) {
-        setError("Semua field harus diisi")
+        setError("All fields must be filled in")
         return
       }
       
@@ -298,7 +298,7 @@ export const BillPage = () => {
       )
       
       if (response.success) {
-        setSuccessMessage("Tagihan berhasil diperbarui")
+        setSuccessMessage("Bill updated successfully")
         setEditingBill(null)
         setShowAddBillForm(false)
         fetchBills() // Refresh daftar tagihan
@@ -308,10 +308,10 @@ export const BillPage = () => {
           setSuccessMessage("")
         }, 3000)
       } else {
-        setError(response.message || "Gagal memperbarui tagihan")
+        setError(response.message || "Failed to update bill")
       }
     } catch (err) {
-      setError("Terjadi kesalahan saat memperbarui tagihan")
+      setError("An error occurred while updating the bill")
       console.error("Error updating bill:", err)
     } finally {
       setLoading(false)
@@ -320,7 +320,7 @@ export const BillPage = () => {
 
   // Fungsi untuk menghapus tagihan
   const handleDeleteBill = async (billId) => {
-    if (!window.confirm("Apakah Anda yakin ingin menandai tagihan ini sebagai sudah dibayar?")) {
+    if (!window.confirm("Are you sure you want to mark this bill as paid?")) {
       return
     }
     
@@ -330,7 +330,7 @@ export const BillPage = () => {
       const response = await ApiService.deleteBill(billId)
       
       if (response.success) {
-        setSuccessMessage("Tagihan telah terbayar")
+        setSuccessMessage("The bill has been paid")
         
         if (editingBill && editingBill.id === billId) {
           setEditingBill(null)
@@ -344,10 +344,10 @@ export const BillPage = () => {
           setSuccessMessage("")
         }, 3000)
       } else {
-        setError(response.message || "Gagal menandai tagihan sebagai sudah dibayar")
+        setError(response.message || "Failed to mark bill as paid")
       }
     } catch (err) {
-      setError("Terjadi kesalahan saat menandai tagihan sebagai sudah dibayar")
+      setError("An error occurred while marking the bill as paid.")
       console.error("Error marking bill as paid:", err)
     } finally {
       setLoading(false)
@@ -424,8 +424,7 @@ export const BillPage = () => {
       <main className="flex-grow container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Manajemen Tagihan</h1>
-            <p className="text-gray-600 mt-1">Kelola semua tagihan Anda dalam satu tempat</p>
+            <h1 className="text-3xl font-bold text-gray-800">Bill Management</h1>
           </div>
           <button
             onClick={() => {
@@ -441,7 +440,7 @@ export const BillPage = () => {
             className="mt-4 md:mt-0 flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors duration-300 shadow-md"
           >
             <Plus className="w-5 h-5 mr-2" />
-            Tambah Tagihan
+            Add Bill
           </button>
         </div>
 
@@ -484,7 +483,7 @@ export const BillPage = () => {
                 </div>
                 <div className="flex-grow">
                   <p className={`text-sm font-semibold mb-1 ${notification.type === 'overdue' ? 'text-red-700' : 'text-yellow-700'}`}>
-                    {notification.type === 'overdue' ? 'Tagihan Terlambat' : 'Segera Jatuh Tempo'}
+                    {notification.type === 'overdue' ? 'Bill Overdue' : 'Bill Due Soon'}
                   </p>
                   <p className="text-sm">{notification.message}</p>
                 </div>
@@ -513,7 +512,7 @@ export const BillPage = () => {
                 <DollarSign className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm text-gray-500 font-medium">Total Tagihan</p>
+                <p className="text-sm text-gray-500 font-medium">Total Bills</p>
                 <p className="text-2xl font-bold text-gray-800">Rp {formatCurrency(totalBillAmount)}</p>
               </div>
             </div>
@@ -526,7 +525,7 @@ export const BillPage = () => {
                 <Calendar className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm text-gray-500 font-medium">Tagihan Mendatang</p>
+                <p className="text-sm text-gray-500 font-medium">Upcoming Bills</p>
                 <p className="text-2xl font-bold text-gray-800">{bills.filter(bill => !isOverdue(bill.dueDate)).length}</p>
               </div>
             </div>
@@ -539,7 +538,7 @@ export const BillPage = () => {
                 <AlertTriangle className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm text-gray-500 font-medium">Tagihan Terlambat</p>
+                <p className="text-sm text-gray-500 font-medium">Overdue Bills</p>
                 <p className="text-2xl font-bold text-gray-800">{bills.filter(bill => isOverdue(bill.dueDate)).length}</p>
               </div>
             </div>
@@ -550,14 +549,14 @@ export const BillPage = () => {
         {showAddBillForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6 animate-fadeIn">
-              <h2 className="text-xl font-bold mb-4">{editingBill ? 'Edit Tagihan' : 'Tambah Tagihan Baru'}</h2>
+              <h2 className="text-xl font-bold mb-4">{editingBill ? 'Edit Bill' : 'Add New Bill'}</h2>
               
               <form onSubmit={editingBill ? handleUpdateBill : handleAddBill}>
                 <div className="space-y-4">
                   {/* Nama Tagihan */}
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                      Nama Tagihan
+                      Bill Name
                     </label>
                     <input
                       type="text"
@@ -574,7 +573,7 @@ export const BillPage = () => {
                   {/* Jumlah Tagihan */}
                   <div>
                     <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
-                      Jumlah (Rp)
+                      Amount (Rp)
                     </label>
                     <input
                       type="number"
@@ -591,7 +590,7 @@ export const BillPage = () => {
                   {/* Tanggal Jatuh Tempo */}
                   <div>
                     <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-1">
-                      Tanggal Jatuh Tempo
+                      Due Date
                     </label>
                     <input
                       type="date"
@@ -607,7 +606,7 @@ export const BillPage = () => {
                   {/* Kategori */}
                   <div>
                     <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-                      Kategori
+                      Category
                     </label>
                     <select
                       id="category"
@@ -617,13 +616,13 @@ export const BillPage = () => {
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       required
                     >
-                      <option value="Rent">Sewa</option>
-                      <option value="Electricity">Listrik</option>
+                      <option value="Rent">Rent</option>
+                      <option value="Electricity">Electricity</option>
                       <option value="Internet">Internet</option>
-                      <option value="Water">Air</option>
-                      <option value="Vehicle">Kendaraan</option>
+                      <option value="Water">Water</option>
+                      <option value="Vehicle">Vehicle</option>
                       <option value="Heart">Health</option>
-                      <option value="Other">Lainnya</option>
+                      <option value="Other">Other</option>
                     </select>
                   </div>
                 </div>
@@ -634,7 +633,7 @@ export const BillPage = () => {
                     onClick={editingBill ? handleCancelEdit : () => setShowAddBillForm(false)}
                     className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-300"
                   >
-                    Batal
+                    Cancel
                   </button>
                   
                   {editingBill && (
@@ -643,7 +642,7 @@ export const BillPage = () => {
                       onClick={() => handleDeleteBill(editingBill.id)}
                       className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300"
                     >
-                      Hapus
+                      Delete
                     </button>
                   )}
                   
@@ -652,7 +651,7 @@ export const BillPage = () => {
                     className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-300"
                     disabled={loading}
                   >
-                    {loading ? "Menyimpan..." : (editingBill ? "Perbarui" : "Simpan")}
+                    {loading ? "Menyimpan..." : (editingBill ? "Update" : "Save")}
                   </button>
                 </div>
               </form>
@@ -707,16 +706,16 @@ export const BillPage = () => {
                     {getCategoryIcon(category)}
                   </div>
                   <h3 className="text-lg font-semibold">
-                    {category === 'Rent' ? 'Sewa' : 
-                     category === 'Electricity' ? 'Listrik' :
+                    {category === 'Rent' ? 'Rent' : 
+                     category === 'Electricity' ? 'Electricity' :
                      category === 'Internet' ? 'Internet' :
-                     category === 'Water' ? 'Air' :
-                     category === 'Vehicle' ? 'Kendaraan' :
+                     category === 'Water' ? 'Water' :
+                     category === 'Vehicle' ? 'Vehicle' :
                      category === 'Heart' ? 'Health' : 'Lainnya'}
                   </h3>
                   <div className="ml-auto flex items-center space-x-2">
                     <span className="text-sm font-medium">
-                      {categoryBills.length} tagihan
+                      {categoryBills.length} Bills
                     </span>
                     {expandedCategories[category] ? (
                       <ChevronUp className="w-5 h-5 text-gray-500" />
