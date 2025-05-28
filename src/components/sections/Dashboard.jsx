@@ -174,6 +174,9 @@ export const Dashboard = () => {
                     <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       Account Settings
                     </Link>
+                    <Link to="/friends" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                      Friends
+                    </Link>
                     <a href="#" onClick={handleLogout} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       Logout
                     </a>
