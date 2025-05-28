@@ -11,6 +11,7 @@ import { SignupPage } from './components/sections/SignupPage';
 import { SavingsPage } from './components/sections/SavingsPage';
 import { AddSavings } from './components/sections/AddSavings';
 import { AddToSavings } from './components/sections/AddtoSavings';
+import { TransferPage } from './components/sections/TransferPage';
 import Settings from './components/sections/Settings';
 import Income from './components/sections/IncomeRecord';
 import Expense from './components/sections/ExpenseRecord';
@@ -35,6 +36,7 @@ function App() {
           <Route path="/income" element={<Income />} />
           <Route path="/expense" element={<Expense />} />
           <Route path="/bills" element={<BillPage />} />
+          <Route path="/transfer" element={<TransferPage />} />
           <Route path="/savings" element={<SavingsPage />} />
           <Route path="/addsavings" element={<AddSavings />} />
           <Route path="/addtosavings" element={<AddToSavings />} />
