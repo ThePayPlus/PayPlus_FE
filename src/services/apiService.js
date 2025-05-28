@@ -307,8 +307,8 @@ class ApiService {
     try {
       const response = await ApiService.api.patch(`/savings/${savingsId}/add`, {
         amount: parseInt(amount),
+        deductFromBalance: true,
       });
-
       return {
         success: true,
         data: response.data,

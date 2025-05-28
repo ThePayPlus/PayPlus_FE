@@ -15,6 +15,7 @@ import { TransferPage } from './components/sections/TransferPage';
 import Settings from './components/sections/Settings';
 import Income from './components/sections/IncomeRecord';
 import Expense from './components/sections/ExpenseRecord';
+import { TopUpPage } from './components/sections/TopUpPage';
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -40,6 +41,7 @@ function App() {
           <Route path="/savings" element={<SavingsPage />} />
           <Route path="/addsavings" element={<AddSavings />} />
           <Route path="/addtosavings/:id" element={<AddToSavings />} />
+          <Route path="/topup" element={<TopUpPage />} />
         </Routes>
       </div>
     </Router>

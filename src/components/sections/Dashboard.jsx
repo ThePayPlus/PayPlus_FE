@@ -205,9 +205,9 @@ export const Dashboard = () => {
                   <p className="text-sm opacity-90">Saldo Tersedia</p>
                   <h2 className="text-3xl font-bold mt-1">Rp. {formatCurrency(financialData.balance || 0)}</h2>
                 </div>
-                <button className="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-colors">
+                <Link to="/topup" className="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-colors">
                   Top Up
-                </button>
+                </Link>
               </div>
               <div className="flex items-center space-x-4">
                 <div className="flex items-center">
