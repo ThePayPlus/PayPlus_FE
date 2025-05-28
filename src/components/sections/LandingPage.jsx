@@ -23,13 +23,12 @@ export const LandingPage = () => {
     <div className="bg-white text-gray-800 w-full font-sans">
       {/* Header */}
       <header 
-        className={`fixed top-0 left-0 w-full bg-white z-50 transition-all duration-300 
-        ${isScrolled ? 'py-2 shadow-lg bg-opacity-95 backdrop-blur-md' : 'py-4 bg-opacity-90 backdrop-blur-sm'}`}
+        className={`bg-white sticky top-0 z-10 transition-all duration-300 
+        ${isScrolled ? 'shadow-lg bg-opacity-95 backdrop-blur-md' : 'shadow-sm bg-opacity-90 backdrop-blur-sm'}`}
       >
-        <div className="container mx-auto">
-          <nav className="flex justify-between items-center px-6">
-            {/* Logo */}
-            <div className="logo flex items-center">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center">
               <img 
                 id="logo" 
                 className="h-10 w-auto transition-all duration-300" 
@@ -37,7 +36,7 @@ export const LandingPage = () => {
                 alt="PayPlus Logo" 
               />
             </div>
-
+            
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-8">
               <a href="#features" className="text-gray-600 hover:text-indigo-600 font-medium transition duration-300">
@@ -72,8 +71,8 @@ export const LandingPage = () => {
                 )}
               </button>
             </div>
-          </nav>
-
+          </div>
+          
           {/* Mobile Menu */}
           {isMenuOpen && (
             <div className="md:hidden py-4 px-6 bg-white shadow-inner rounded-b-lg animate-fadeIn">
@@ -143,17 +142,19 @@ export const LandingPage = () => {
               <div className="absolute -top-10 -left-10 w-40 h-40 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-70"></div>
               <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70"></div>
               <div className="relative">
-                <img 
-                  src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/dasboard.png?raw=true" 
-                  alt="Finance Dashboard" 
-                  className="rounded-2xl shadow-2xl transition-all duration-500 transform hover:-rotate-1 hover:scale-105 z-10"
-                />
-                <div className="absolute -bottom-4 -right-4 bg-white rounded-lg shadow-lg p-4 transform rotate-3 z-20">
-                  <div className="flex items-center space-x-2">
-                    <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    <span className="font-medium">Budgeting simplified</span>
+                <div className="relative">
+                  <img 
+                    src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/dasboard.png?raw=true" 
+                    alt="Finance Dashboard" 
+                    className="rounded-2xl shadow-2xl transition-all duration-500 transform hover:-rotate-1 hover:scale-105 z-10"
+                  />
+                  <div className="absolute -bottom-4 -right-4 bg-white rounded-lg shadow-lg p-4 transform rotate-3 z-1">
+                    <div className="flex items-center space-x-2">
+                      <svg className="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                      </svg>
+                      <span className="font-medium">Budgeting simplified</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -327,4 +328,4 @@ export const LandingPage = () => {
       </footer>
     </div>
   );
-}; 
+};
