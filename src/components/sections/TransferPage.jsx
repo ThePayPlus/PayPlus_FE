@@ -14,12 +14,11 @@ export const TransferPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [friends, setFriends] = useState([]);
-  const [loadingFriends, setLoadingFriends] = useState(true);
+  // Menghapus state friends dan loadingFriends
   const [userData, setUserData] = useState(null);
   const [transferType, setTransferType] = useState('normal'); // 'normal' or 'gift'
 
-  // Fetch user profile and friends list on component mount
+  // Fetch user profile only (removed friends fetching)
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -27,15 +26,9 @@ export const TransferPage = () => {
         if (profileResponse.success) {
           setUserData(profileResponse.data);
         }
-
-        const friendsResponse = await ApiService.getFriends();
-        if (friendsResponse.success && friendsResponse.data) {
-          setFriends(friendsResponse.data.friends || []);
-        }
+        // Menghapus pemanggilan API getFriends
       } catch (error) {
         console.error('Error fetching data:', error);
-      } finally {
-        setLoadingFriends(false);
       }
     };
 
@@ -51,13 +44,19 @@ export const TransferPage = () => {
     try {
       const response = await ApiService.searchUser(searchQuery);
       if (response.success && response.data) {
-        setSearchResults([response.data]);
+        // Validasi untuk mencegah transfer ke diri sendiri
+        if (userData && response.data.phone === userData.phone) {
+          setSearchResults([]);
+          setError('You cannot transfer money to your own account');
+        } else {
+          setSearchResults([response.data]);
+        }
       } else {
         setSearchResults([]);
-        setError('Pengguna tidak ditemukan');
+        setError('User not found');
       }
     } catch (err) {
-      setError('Terjadi kesalahan saat mencari pengguna');
+      setError('An error occurred while searching for user');
       console.error('Search error:', err);
     } finally {
       setLoading(false);
@@ -65,6 +64,7 @@ export const TransferPage = () => {
   };
 
   const selectUser = (user) => {
+    
     setSelectedUser(user);
     setStep(2);
   };
@@ -79,7 +79,7 @@ export const TransferPage = () => {
 
   const goToConfirmation = () => {
     if (!amount || parseInt(amount) <= 0) {
-      setError('Silakan masukkan jumlah yang valid');
+      setError('Please enter a valid amount');
       return;
     }
     setError('');
@@ -102,10 +102,10 @@ export const TransferPage = () => {
         setSuccess(true);
         setStep(4);
       } else {
-        setError(response.message || 'Transfer gagal');
+        setError(response.message || 'Transfer failed');
       }
     } catch (err) {
-      setError('Terjadi kesalahan saat melakukan transfer');
+      setError('An error occurred while processing the transfer');
       console.error('Transfer error:', err);
     } finally {
       setLoading(false);
@@ -197,18 +197,18 @@ export const TransferPage = () => {
             {/* Balance Card */}
             {userData && (
               <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-xl p-6 mb-8 shadow-md">
-                <p className="text-sm font-medium text-indigo-200 mb-1">Saldo Anda</p>
+                <p className="text-sm font-medium text-indigo-200 mb-1">Your Balance</p>
                 <p className="text-2xl font-bold">Rp {formatCurrency(userData.balance || 0)}</p>
               </div>
             )}
 
             {/* Search Form */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">Cari Penerima</h2>
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-semibold mb-4 text-gray-800">Find Recipient</h2>
               <div className="flex mb-4">
                 <input
                   type="text"
-                  placeholder="Nomor telepon"
+                  placeholder="Phone number"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="flex-grow p-2 border rounded-l-lg focus:ring-indigo-500 focus:border-indigo-500"
@@ -231,7 +231,7 @@ export const TransferPage = () => {
               {/* Search Results */}
               {searchResults.length > 0 && (
                 <div className="mt-4">
-                  <h3 className="text-md font-medium mb-2 text-gray-700">Hasil Pencarian</h3>
+                  <h3 className="text-md font-medium mb-2 text-gray-700">Search Results</h3>
                   <div className="space-y-2">
                     {searchResults.map((user) => (
                       <div
@@ -253,38 +253,11 @@ export const TransferPage = () => {
               )}
             </div>
 
-            {/* Friends List */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">Daftar Teman</h2>
-              {loadingFriends ? (
-                <div className="flex justify-center">
-                  <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              ) : friends.length > 0 ? (
-                <div className="space-y-2">
-                  {friends.map((friend) => (
-                    <div
-                      key={friend.phone}
-                      onClick={() => selectUser(friend)}
-                      className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors duration-200"
-                    >
-                      <div className="bg-indigo-100 p-2 rounded-full mr-3">
-                        <User className="w-5 h-5 text-indigo-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-800">{friend.name}</p>
-                        <p className="text-sm text-gray-500">{friend.phone}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 text-center">Anda belum memiliki teman</p>
-              )}
-            </div>
+            {/* Menghapus seluruh bagian Friends List */}
           </div>
         )}
 
+        {/* Langkah-langkah berikutnya tetap sama */}
         {step === 2 && selectedUser && (
           <div className="max-w-md mx-auto">
             <button
@@ -292,10 +265,10 @@ export const TransferPage = () => {
               className="flex items-center text-indigo-600 mb-6 hover:text-indigo-800 transition-colors duration-200"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
-              Kembali
+              Back
             </button>
 
-            <h1 className="text-3xl font-bold mb-8 text-gray-800">Jumlah Transfer</h1>
+            <h1 className="text-3xl font-bold mb-8 text-gray-800">Transfer Amount</h1>
 
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
               <div className="flex items-center mb-6">
@@ -311,7 +284,7 @@ export const TransferPage = () => {
               {/* Transfer Type Selection */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Jenis Transfer
+                  Transfer Type
                 </label>
                 <div className="grid grid-cols-2 gap-4">
                   <div
@@ -326,18 +299,18 @@ export const TransferPage = () => {
                     className={`flex flex-col items-center justify-center p-4 border rounded-lg cursor-pointer transition-all duration-200 ${transferType === 'gift' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'}`}
                   >
                     <Gift className={`w-6 h-6 mb-2 ${transferType === 'gift' ? 'text-indigo-600' : 'text-gray-500'}`} />
-                    <span className={`text-sm font-medium ${transferType === 'gift' ? 'text-indigo-600' : 'text-gray-700'}`}>Hadiah</span>
+                    <span className={`text-sm font-medium ${transferType === 'gift' ? 'text-indigo-600' : 'text-gray-700'}`}>Gift</span>
                   </div>
                 </div>
               </div>
 
               <div className="mb-6">
                 <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
-                  Jumlah (Rp)
+                  Amount (Rp)
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSign className="h-5 w-5 text-gray-400" />
+                    <span className="text-gray-400 font-medium">Rp</span>
                   </div>
                   <input
                     type="text"
@@ -357,7 +330,7 @@ export const TransferPage = () => {
 
               <div className="mb-6">
                 <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                  Pesan {transferType === 'gift' ? '' : '(Opsional)'}
+                  Message {transferType === 'gift' ? '' : '(Optional)'}
                 </label>
                 <textarea
                   id="message"
@@ -365,7 +338,7 @@ export const TransferPage = () => {
                   onChange={(e) => setMessage(e.target.value)}
                   className="p-3 w-full border rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                   rows="3"
-                  placeholder={transferType === 'gift' ? "Tulis ucapan untuk hadiah Anda" : "Tulis pesan untuk penerima"}
+                  placeholder={transferType === 'gift' ? "Write a message for your gift" : "Write a message for the recipient"}
                   required={transferType === 'gift'}
                 ></textarea>
               </div>
@@ -376,7 +349,7 @@ export const TransferPage = () => {
                 onClick={goToConfirmation}
                 className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg shadow hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center"
               >
-                Lanjutkan
+                Continue
               </button>
             </div>
           </div>
@@ -389,14 +362,14 @@ export const TransferPage = () => {
               className="flex items-center text-indigo-600 mb-6 hover:text-indigo-800 transition-colors duration-200"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
-              Kembali
+              Back
             </button>
 
-            <h1 className="text-3xl font-bold mb-8 text-gray-800">Konfirmasi Transfer</h1>
+            <h1 className="text-3xl font-bold mb-8 text-gray-800">Confirm Transfer</h1>
 
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
               <div className="border-b pb-4 mb-4">
-                <p className="text-sm text-gray-500 mb-1">Penerima</p>
+                <p className="text-sm text-gray-500 mb-1">Recipient</p>
                 <div className="flex items-center">
                   <div className="bg-indigo-100 p-2 rounded-full mr-3">
                     <User className="w-5 h-5 text-indigo-600" />
@@ -409,7 +382,7 @@ export const TransferPage = () => {
               </div>
 
               <div className="border-b pb-4 mb-4">
-                <p className="text-sm text-gray-500 mb-1">Jenis Transfer</p>
+                <p className="text-sm text-gray-500 mb-1">Transfer Type</p>
                 <div className="flex items-center">
                   {transferType === 'normal' ? (
                     <>
@@ -419,20 +392,20 @@ export const TransferPage = () => {
                   ) : (
                     <>
                       <Gift className="w-5 h-5 text-indigo-600 mr-2" />
-                      <p className="font-medium text-gray-800">Hadiah</p>
+                      <p className="font-medium text-gray-800">Gift</p>
                     </>
                   )}
                 </div>
               </div>
 
               <div className="border-b pb-4 mb-4">
-                <p className="text-sm text-gray-500 mb-1">Jumlah</p>
+                <p className="text-sm text-gray-500 mb-1">Amount</p>
                 <p className="text-xl font-semibold text-gray-800">Rp {formatCurrency(amount)}</p>
               </div>
 
               {message && (
                 <div className="border-b pb-4 mb-4">
-                  <p className="text-sm text-gray-500 mb-1">Pesan</p>
+                  <p className="text-sm text-gray-500 mb-1">Message</p>
                   <p className="text-gray-800">{message}</p>
                 </div>
               )}
@@ -449,7 +422,7 @@ export const TransferPage = () => {
                 ) : (
                   <Send className="w-5 h-5 mr-2" />
                 )}
-                Kirim Transfer
+                Send Transfer
               </button>
             </div>
           </div>
@@ -463,10 +436,10 @@ export const TransferPage = () => {
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <CheckCircle className="w-8 h-8 text-green-500" />
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-800 mb-2">Transfer Berhasil!</h2>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2">Transfer Successful!</h2>
                   <p className="text-gray-600 mb-6">
-                    Anda telah berhasil mentransfer Rp {formatCurrency(amount)} ke {selectedUser.name}
-                    {transferType === 'gift' && " sebagai hadiah"}
+                    You have successfully transferred Rp {formatCurrency(amount)} to {selectedUser.name}
+                    {transferType === 'gift' && " as a gift"}
                   </p>
                 </>
               ) : (
@@ -474,8 +447,8 @@ export const TransferPage = () => {
                   <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                     <AlertCircle className="w-8 h-8 text-red-500" />
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-800 mb-2">Transfer Gagal</h2>
-                  <p className="text-gray-600 mb-6">{error || 'Terjadi kesalahan saat melakukan transfer'}</p>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2">Transfer Failed</h2>
+                  <p className="text-gray-600 mb-6">{error || 'An error occurred while processing the transfer'}</p>
                 </>
               )}
 
@@ -484,13 +457,13 @@ export const TransferPage = () => {
                   onClick={resetForm}
                   className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg shadow hover:bg-indigo-700 transition-colors duration-200"
                 >
-                  Transfer Baru
+                  New Transfer
                 </button>
                 <Link
                   to="/dashboard"
                   className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg shadow hover:bg-gray-300 transition-colors duration-200"
                 >
-                  Ke Dashboard
+                  To Dashboard
                 </Link>
               </div>
             </div>
