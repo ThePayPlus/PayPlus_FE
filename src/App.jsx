@@ -39,7 +39,7 @@ function App() {
           <Route path="/transfer" element={<TransferPage />} />
           <Route path="/savings" element={<SavingsPage />} />
           <Route path="/addsavings" element={<AddSavings />} />
-          <Route path="/addtosavings" element={<AddToSavings />} />
+          <Route path="/addtosavings/:id" element={<AddToSavings />} />
         </Routes>
       </div>
     </Router>

@@ -1,44 +1,86 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { ApiService } from '../../services';
 
 export const AddToSavings = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [savingsList, setSavingsList] = useState([]); // Could be fetched from an API or context
   const [savingToEdit, setSavingToEdit] = useState(null);
   const [amount, setAmount] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // Simulate fetching savings list and finding the item by ID
-    const list = JSON.parse(localStorage.getItem('savingsList') || '[]');
-    setSavingsList(list);
-
-    const saving = list.find((item) => item.id === parseInt(id));
-    if (saving) {
-      setSavingToEdit(saving);
-    }
+    // Ambil data savings dari backend
+    const fetchSaving = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const response = await ApiService.getSavings();
+        if (response.success) {
+          let data = [];
+          if (Array.isArray(response.data)) {
+            data = response.data;
+          } else if (response.data.savings && Array.isArray(response.data.savings)) {
+            data = response.data.savings;
+          } else if (response.data.records && Array.isArray(response.data.records)) {
+            data = response.data.records;
+          } else if (typeof response.data === 'object') {
+            const possibleKeys = ['savings', 'records', 'data'];
+            for (const key of possibleKeys) {
+              if (response.data[key] && Array.isArray(response.data[key])) {
+                data = response.data[key];
+                break;
+              }
+            }
+          }
+          const saving = data.find((item) => String(item.id) === String(id));
+          setSavingToEdit(saving || null);
+        } else {
+          setError(response.message || 'Gagal memuat data savings');
+        }
+      } catch (err) {
+        setError('Terjadi kesalahan saat memuat data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSaving();
   }, [id]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!savingToEdit) return;
-
-    const updatedList = savingsList.map((s) =>
-      s.id === savingToEdit.id
-        ? { ...s, terkumpul: parseFloat(s.terkumpul) + parseFloat(amount) }
-        : s
-    );
-
-    localStorage.setItem('savingsList', JSON.stringify(updatedList));
-    navigate('/savings'); // Or wherever you want to redirect after
+    setLoading(true);
+    setError('');
+    try {
+      const response = await ApiService.addToSavings(savingToEdit.id, amount);
+      if (response.success) {
+        navigate('/savings');
+      } else {
+        setError(response.message || 'Gagal menambah dana ke savings');
+      }
+    } catch (err) {
+      setError('Terjadi kesalahan saat menambah dana');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (!savingToEdit) {
-    return <p className="text-center text-red-500">Saving not found.</p>;
+  if (loading) {
+    return <p className="text-center text-gray-500">Memuat data...</p>;
   }
 
+  if (error) {
+    return <p className="text-center text-red-500">{error}</p>;
+  }
+
+  if (!savingToEdit) {
+    return <p className="text-center text-red-500">Saving tidak ditemukan.</p>;
+  }
+
+  console.log('savingToEdit', savingToEdit);
   return (
     <div className="bg-gray-50 min-h-screen">
       <header className="bg-white shadow-sm sticky top-0 z-10">
@@ -46,7 +88,7 @@ export const AddToSavings = () => {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
               <a href="/Dashboard">
-              <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" className="h-10" />
+                <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" className="h-10" />
               </a>
             </div>
             <nav className="hidden sm:flex space-x-4">
@@ -62,11 +104,15 @@ export const AddToSavings = () => {
 
       <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold mb-8 text-gray-800">Add to Savings</h1>
-
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <span className="block sm:inline">{error}</span>
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md max-w-lg mx-auto">
           <div className="mb-4">
             <p className="text-sm font-medium text-gray-700">Name</p>
-            <p className="text-lg font-semibold text-gray-800">{savingToEdit.nama}</p>
+            <p className="text-lg font-semibold text-gray-800">{savingToEdit.namaSavings}</p>
           </div>
           <div className="mb-4">
             <p className="text-sm font-medium text-gray-700">Description</p>
@@ -91,10 +137,11 @@ export const AddToSavings = () => {
               onChange={(e) => setAmount(e.target.value)}
               className="mt-1 p-2 w-full border rounded-lg focus:ring-blue-500 focus:border-blue-500"
               required
+              min="1"
             />
           </div>
-          <button type="submit" className="w-full bg-green-500 text-white py-2 px-4 rounded shadow hover:bg-green-600">
-            Add Amount
+          <button type="submit" className="w-full bg-green-500 text-white py-2 px-4 rounded shadow hover:bg-green-600" disabled={loading}>
+            {loading ? 'Menambah...' : 'Add Amount'}
           </button>
         </form>
       </main>
