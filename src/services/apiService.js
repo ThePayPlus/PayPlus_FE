@@ -264,6 +264,80 @@ class ApiService {
     }
   }
 
+  // Get savings list
+  static async getSavings() {
+    try {
+      const response = await ApiService.api.get('/savings');
+      return {
+        success: true,
+        data: response.data,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to load savings',
+      };
+    }
+  }
+
+  // Add new savings
+  static async addSavings(nama, deskripsi, target) {
+    try {
+      const response = await ApiService.api.post('/savings', {
+        nama,
+        deskripsi,
+        target: parseInt(target),
+      });
+
+      return {
+        success: true,
+        data: response.data,
+        message: response.data.message || 'Savings added successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to add savings',
+      };
+    }
+  }
+
+  // Add amount to existing savings
+  static async addToSavings(savingsId, amount) {
+    try {
+      const response = await ApiService.api.patch(`/savings/${savingsId}/add`, {
+        amount: parseInt(amount),
+      });
+
+      return {
+        success: true,
+        data: response.data,
+        message: response.data.message || 'Amount added to savings successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to add amount to savings',
+      };
+    }
+  }
+
+  // Delete savings
+  static async deleteSavings(savingsId) {
+    try {
+      const response = await ApiService.api.delete(`/savings/${savingsId}`);
+      return {
+        success: true,
+        message: response.data.message || 'Savings deleted successfully',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to delete savings',
+      };
+    }
+  }
+
   // Transfer money
   static async transferMoney(receiverPhone, amount, type, message = null) {
     try {
