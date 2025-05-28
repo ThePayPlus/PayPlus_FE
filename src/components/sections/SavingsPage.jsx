@@ -5,6 +5,7 @@ import { ApiService } from '../../services';
 export const SavingsPage = () => {
   const [savingsList, setSavingsList] = useState([]);
   const [alert, setAlert] = useState('');
+  const [alertType, setAlertType] = useState(''); // 'success', 'error', 'transfer', etc.
   const [totalTarget, setTotalTarget] = useState(0);
   const [totalCollected, setTotalCollected] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -94,6 +95,27 @@ export const SavingsPage = () => {
     }
   };
 
+  const transferToBalance = async (savingsId) => {
+    if (window.confirm('Are you sure you want to transfer these savings to your balance?')) {
+      try {
+        const response = await ApiService.deleteSavings(savingsId);
+        if (response.success) {
+          setAlert('Savings successfully transferred');
+          setAlertType('transfer'); // Set a custom type for transfer
+          fetchSavingsData();
+          setTimeout(() => { setAlert(''); setAlertType(''); }, 3000);
+        } else {
+          setAlert(response.message || 'Failed to transfer savings');
+          setAlertType('error');
+        }
+      } catch (err) {
+        setAlert('An error occurred during the savings transfer.');
+        setAlertType('error');
+        console.error('Delete savings error:', err);
+      }
+    }
+  };
+
   return (
     <div className="bg-gray-50">
       <header className="bg-white shadow-sm sticky top-0 z-10">
@@ -119,7 +141,10 @@ export const SavingsPage = () => {
         {/* Alert Messages */}
         {alert && (
           <div className={`font-bold mb-8 p-4 rounded ${
-            alert.includes('berhasil') ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'
+            alertType === 'transfer' ? 'text-blue-800 bg-blue-100' :
+            alertType === 'success' ? 'text-green-800 bg-green-100' :
+            alertType === 'error' ? 'text-red-800 bg-red-100' :
+            'text-gray-800 bg-gray-100'
           }`}>
             {alert}
           </div>
@@ -206,7 +231,7 @@ export const SavingsPage = () => {
                       <>
                         <p className="text-lg font-semibold text-green-600">Target achieved!</p>
                         <button 
-                          onClick={() => handleDeleteSavings(s.id)}
+                          onClick={() => transferToBalance(s.id)}
                           className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-800"
                         >
                           Transfer to balance
