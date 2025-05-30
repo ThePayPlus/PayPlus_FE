@@ -4,7 +4,7 @@ import { io } from 'socket.io-client';
 class ApiService {
   // Base URL for the backend API
   static baseUrl = 'https://78nvh33s-3000.asse.devtunnels.ms/api';
-  static wsUrl = 'wss://78nvh33s-3000.asse.devtunnels.ms'; // Ubah dari https:// ke wss://
+  static wsUrl = 'wss://78nvh33s-3000.asse.devtunnels.ms';
 
   // Token storage key
   static tokenKey = 'auth_token';
@@ -22,11 +22,11 @@ class ApiService {
     const token = ApiService.getAuthToken();
     const socket = io(ApiService.wsUrl, {
       query: { token },
-      transports: ['websocket', 'polling'], // Tambahkan polling sebagai fallback
+      transports: ['websocket', 'polling'],
       autoConnect: true,
-      reconnection: true, // Aktifkan reconnection
-      reconnectionAttempts: 5, // Coba reconnect 5 kali
-      reconnectionDelay: 1000, // Tunggu 1 detik sebelum mencoba lagi
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
     });
 
     socket.on('connect', () => {

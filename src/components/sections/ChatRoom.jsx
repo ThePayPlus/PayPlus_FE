@@ -20,7 +20,14 @@ const ChatRoom = ({ friend, onBack, ws }) => {
     const handleMessage = (data) => {
       console.log('Message received:', data);
       if (friend && (data.sender === friend.phone || data.receiver === friend.phone)) {
-        setMessages((prev) => [...prev, data]);
+        // Cek apakah pesan ini adalah pesan yang dikirim oleh pengguna saat ini
+        // Jika ya, jangan tambahkan lagi ke state
+        const myPhone = localStorage.getItem('user_phone');
+        const isMyMessage = data.sender === myPhone;
+
+        if (!isMyMessage) {
+          setMessages((prev) => [...prev, data]);
+        }
       }
     };
 
@@ -94,17 +101,22 @@ const ChatRoom = ({ friend, onBack, ws }) => {
       // Send via Socket.IO
       ws.current.emit('message', messageData, (acknowledgement) => {
         console.log('Message acknowledgement:', acknowledgement);
-      });
 
-      // Add message to local state immediately for better UX
-      const myPhone = localStorage.getItem('user_phone'); // Simpan phone number user saat login
-      const newMsg = {
-        sender: myPhone,
-        receiver: friend.phone,
-        message: newMessage,
-        sent_at: new Date().toISOString()
-      };
-      setMessages((prev) => [...prev, newMsg]);
+        // Hanya tambahkan pesan ke state jika tidak ada acknowledgement error
+        if (!acknowledgement || !acknowledgement.error) {
+          // Add message to local state immediately for better UX
+          const myPhone = localStorage.getItem('user_phone');
+          const newMsg = {
+            sender: myPhone,
+            receiver: friend.phone,
+            message: newMessage,
+            sent_at: new Date().toISOString(),
+            // Tambahkan flag untuk menandai pesan yang dikirim oleh pengguna saat ini
+            isLocalMessage: true,
+          };
+          setMessages((prev) => [...prev, newMsg]);
+        }
+      });
 
       // Clear input field
       setNewMessage('');
@@ -140,11 +152,14 @@ const ChatRoom = ({ friend, onBack, ws }) => {
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)]">
       {/* Header */}
-      <div className="bg-white p-4 rounded-lg shadow mb-4 flex items-center">
-        <button onClick={onBack} className="mr-3 p-2 rounded-full hover:bg-gray-100">
-          <ArrowLeft className="w-5 h-5 text-gray-600" />
-        </button>
+      <div className="bg-white p-4 rounded-lg shadow mb-4">
         <div className="flex items-center">
+          <button onClick={onBack} className="mr-3 p-2 rounded-full hover:bg-gray-100">
+            <ArrowLeft className="w-5 h-5 text-gray-600" />
+          </button>
+          <h1 className="text-xl font-semibold text-gray-800">Chat</h1>
+        </div>
+        <div className="flex items-center mt-2">
           <div className="relative">
             <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
               <User className="w-5 h-5 text-indigo-600" />
@@ -179,7 +194,9 @@ const ChatRoom = ({ friend, onBack, ws }) => {
                 <div key={index} className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[70%] px-4 py-2 rounded-lg ${isSentByMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none'}`}>
                     <p>{msg.message}</p>
-                    <p className={`text-xs mt-1 ${isSentByMe ? 'text-indigo-200' : 'text-gray-500'}`}>{formatTime(msg.sent_at)}</p>
+                  </div>
+                  <div className={`flex items-end ${isSentByMe ? 'ml-2' : 'mr-2'}`}>
+                    <p className={`text-xs ${isSentByMe ? 'text-gray-500' : 'text-gray-500'}`}>{formatTime(msg.sent_at)}</p>
                   </div>
                 </div>
               );
@@ -190,7 +207,7 @@ const ChatRoom = ({ friend, onBack, ws }) => {
       </div>
 
       {/* Message Input */}
-      <div className="bg-white p-3 rounded-lg shadow flex flex-col">
+      <div className="bg-white p-3 rounded-lg shadow">
         {isTyping && (
           <div className="text-xs text-gray-500 mb-1 ml-2 flex items-center">
             <div className="mr-2">{friend.name} sedang mengetik</div>
@@ -210,10 +227,10 @@ const ChatRoom = ({ friend, onBack, ws }) => {
               handleTypingIndicator();
             }}
             placeholder="Type a message..."
-            className="flex-grow px-4 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="flex-grow px-4 py-3 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
           />
-          <button onClick={handleSendMessage} className="px-4 py-2 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700 transition-colors">
+          <button onClick={handleSendMessage} className="h-[46px] px-4 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700 transition-colors flex items-center justify-center">
             <Send className="w-5 h-5" />
           </button>
         </div>
