@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { ApiService } from '../../services/apiService.js';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { 
   Home, 
   Zap, 
@@ -19,346 +19,134 @@ import {
   ChevronDown,
   ChevronUp,
   CheckCircle
-} from "lucide-react"
-import { Link } from "react-router-dom"
+} from "lucide-react";
+
+import BillController from "../../controllers/BillController";
+import BillModel from "../../models/BillModel";
 
 export const BillPage = () => {
-  const [bills, setBills] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [notifications, setNotifications] = useState([])
-  const [showAddBillForm, setShowAddBillForm] = useState(false)
-  const [editingBill, setEditingBill] = useState(null)
-  const [showMobileMenu, setShowMobileMenu] = useState(false)
+  // State
+  const [bills, setBills] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [showAddBillForm, setShowAddBillForm] = useState(false);
+  const [editingBill, setEditingBill] = useState(null);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [newBill, setNewBill] = useState({
     name: '',
     amount: '',
     dueDate: '',
     category: 'Rent'
-  })
-  const [totalBillAmount, setTotalBillAmount] = useState(0)
-  const [billsByCategory, setBillsByCategory] = useState({})
-  const [expandedCategories, setExpandedCategories] = useState({})
-  const [successMessage, setSuccessMessage] = useState("")
+  });
+  const [totalBillAmount, setTotalBillAmount] = useState(0);
+  const [billsByCategory, setBillsByCategory] = useState({});
+  const [expandedCategories, setExpandedCategories] = useState({});
+  const [successMessage, setSuccessMessage] = useState("");
 
+  // Fetch bills on component mount
   useEffect(() => {
-    fetchBills()
-  }, [])
+    fetchBills();
+  }, []);
 
-  useEffect(() => {
-    if (bills.length > 0) {
-      // Hitung total tagihan
-      const total = bills.reduce((sum, bill) => sum + parseFloat(bill.amount || 0), 0)
-      setTotalBillAmount(total)
-      
-      // Kelompokkan tagihan berdasarkan kategori
-      const byCategory = bills.reduce((acc, bill) => {
-        const category = bill.category || 'Other'
-        if (!acc[category]) {
-          acc[category] = []
-        }
-        acc[category].push(bill)
-        return acc
-      }, {})
-      
-      setBillsByCategory(byCategory)
-    }
-  }, [bills])
-
+  // Fetch bills function
   const fetchBills = async () => {
-    try {
-      setLoading(true)
-      const response = await ApiService.getBills()
-      if (response.success && response.data && response.data.bills) {
-        const sortedBills = response.data.bills.sort((a, b) => {
-          return new Date(a.dueDate) - new Date(b.dueDate)
-        })
-        setBills(sortedBills)
-        checkBillsStatus(sortedBills)
-      } else {
-        setError(response.message || "Gagal memuat data tagihan")
-      }
-    } catch (err) {
-      setError("Terjadi kesalahan yang tidak terduga")
-      console.error("Error fetching bills:", err)
-    } finally {
-      setLoading(false)
-    }
-  }
+    await BillController.fetchBills(
+      setLoading,
+      setBills,
+      setError,
+      setNotifications,
+      setTotalBillAmount,
+      setBillsByCategory
+    );
+  };
 
-  const checkBillsStatus = (billsList) => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    
-    const newNotifications = []
-    
-    billsList.forEach(bill => {
-      const dueDate = new Date(bill.dueDate)
-      dueDate.setHours(0, 0, 0, 0)
-      
-      // Cek tagihan yang sudah jatuh tempo (overdue)
-      if (dueDate < today) {
-        newNotifications.push({
-          id: `overdue-${bill.name}-${bill.dueDate}`,
-          type: 'overdue',
-          message: `Bill ${bill.name} of Rp ${formatCurrency(bill.amount)} is overdue since ${formatDate(bill.dueDate)}`,
-          bill
-        })
-      } 
-      // Cek tagihan yang akan jatuh tempo besok (H-1)
-      else if (dueDate.getTime() === tomorrow.getTime()) {
-        newNotifications.push({
-          id: `due-tomorrow-${bill.name}-${bill.dueDate}`,
-          type: 'due-tomorrow',
-          message: `Bill ${bill.name} of Rp ${formatCurrency(bill.amount)} is due tomorrow`,
-          bill
-        })
-      }
-    })
-    
-    setNotifications(newNotifications)
-  }
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "decimal",
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('id-ID', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    })
-  }
-
-  const isOverdue = (dueDate) => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const billDueDate = new Date(dueDate)
-    billDueDate.setHours(0, 0, 0, 0)
-    return billDueDate < today
-  }
-
-  const isDueTomorrow = (dueDate) => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    
-    const billDueDate = new Date(dueDate)
-    billDueDate.setHours(0, 0, 0, 0)
-    
-    return billDueDate.getTime() === tomorrow.getTime()
-  }
-
+  // Fungsi untuk mendapatkan ikon kategori
   const getCategoryIcon = (category) => {
     switch (category) {
       case "Rent":
-        return <Home className="w-5 h-5" />
+        return <Home className="w-5 h-5" />;
       case "Electricity":
-        return <Zap className="w-5 h-5" />
+        return <Zap className="w-5 h-5" />;
       case "Internet":
-        return <Wifi className="w-5 h-5" />
+        return <Wifi className="w-5 h-5" />;
       case "Water":
-        return <Droplet className="w-5 h-5" />
+        return <Droplet className="w-5 h-5" />;
       case "Vehicle":
-        return <Truck className="w-5 h-5" />
+        return <Truck className="w-5 h-5" />;
       case "Heart":
-        return <Heart className="w-5 h-5" />
+        return <Heart className="w-5 h-5" />;
       default:
-        return <File className="w-5 h-5" />
+        return <File className="w-5 h-5" />;
     }
-  }
+  };
 
-  const getCategoryColor = (category) => {
-    switch (category) {
-      case "Rent":
-        return "bg-indigo-200 text-indigo-800"
-      case "Electricity":
-        return "bg-indigo-200 text-indigo-800"
-      case "Internet":
-        return "bg-indigo-200 text-indigo-800"
-      case "Water":
-        return "bg-indigo-200 text-indigo-800"
-      case "Vehicle":
-        return "bg-indigo-200 text-indigo-800"
-      case "Heart":
-        return "bg-indigo-200 text-indigo-800"
-      default:
-        return "bg-indigo-200 text-indigo-800"
-    }
-  }
-  
-  const toggleCategoryExpand = (category) => {
-    setExpandedCategories(prev => ({
-      ...prev,
-      [category]: !prev[category]
-    }))
-  }
-
-  const dismissNotification = (notificationId) => {
-    setNotifications(notifications.filter(notification => notification.id !== notificationId))
-  }
-
+  // Event handlers
   const handleInputChange = (e) => {
-    const { name, value } = e.target
-    if (editingBill) {
-      setEditingBill({
-        ...editingBill,
-        [name]: value
-      })
-    } else {
-      setNewBill({
-        ...newBill,
-        [name]: value
-      })
-    }
-  }
+    BillController.handleInputChange(e, editingBill, setEditingBill, newBill, setNewBill);
+  };
 
-  // Fungsi untuk menambahkan tagihan baru
   const handleAddBill = async (e) => {
-    e.preventDefault()
-    
-    try {
-      setLoading(true)
-      
-      // Validasi input
-      if (!newBill.name || !newBill.amount || !newBill.dueDate || !newBill.category) {
-        setError("All fields must be filled in")
-        return
-      }
-      
-      const response = await ApiService.addBill(
-        newBill.name,
-        parseFloat(newBill.amount),
-        newBill.dueDate,
-        newBill.category
-      )
-      
-      if (response.success) {
-        setSuccessMessage("Bill added successfully")
-        
-        // Reset form
-        setNewBill({
-          name: '',
-          amount: '',
-          dueDate: '',
-          category: 'Rent'
-        })
-        
-        setShowAddBillForm(false)
-        fetchBills() // Refresh daftar tagihan
-        
-        // Hilangkan pesan sukses setelah 3 detik
-        setTimeout(() => {
-          setSuccessMessage("")
-        }, 3000)
-      } else {
-        setError(response.message || "Failed to add bill")
-      }
-    } catch (err) {
-      setError("An error occurred while adding a bill")
-      console.error("Error adding bill:", err)
-    } finally {
-      setLoading(false)
-    }
-  }
+    e.preventDefault();
+    await BillController.addBill(
+      newBill,
+      setLoading,
+      setError,
+      setSuccessMessage,
+      () => setNewBill({
+        name: '',
+        amount: '',
+        dueDate: '',
+        category: 'Rent'
+      }),
+      () => setShowAddBillForm(false),
+      fetchBills
+    );
+  };
 
   const handleEditBill = (bill) => {
-    setEditingBill(bill)
-    setShowAddBillForm(true)
-  }
+    BillController.handleEditBill(bill, setEditingBill, setShowAddBillForm);
+  };
 
-  // Fungsi untuk memperbarui tagihan
   const handleUpdateBill = async (e) => {
-    e.preventDefault()
-    
-    try {
-      setLoading(true)
-      
-      // Validasi input
-      if (!editingBill.name || !editingBill.amount || !editingBill.dueDate || !editingBill.category) {
-        setError("All fields must be filled in")
-        return
-      }
-      
-      const response = await ApiService.updateBill(
-        editingBill.id,
-        editingBill.name,
-        parseFloat(editingBill.amount),
-        editingBill.dueDate,
-        editingBill.category
-      )
-      
-      if (response.success) {
-        setSuccessMessage("Bill updated successfully")
-        setEditingBill(null)
-        setShowAddBillForm(false)
-        fetchBills() // Refresh daftar tagihan
-        
-        // Hilangkan pesan sukses setelah 3 detik
-        setTimeout(() => {
-          setSuccessMessage("")
-        }, 3000)
-      } else {
-        setError(response.message || "Failed to update bill")
-      }
-    } catch (err) {
-      setError("An error occurred while updating the bill")
-      console.error("Error updating bill:", err)
-    } finally {
-      setLoading(false)
-    }
-  }
+    e.preventDefault();
+    await BillController.updateBill(
+      editingBill,
+      setLoading,
+      setError,
+      setSuccessMessage,
+      () => setEditingBill(null),
+      () => setShowAddBillForm(false),
+      fetchBills
+    );
+  };
 
-  // Fungsi untuk menghapus tagihan
   const handleDeleteBill = async (billId) => {
-    if (!window.confirm("Are you sure you want to mark this bill as paid?")) {
-      return
-    }
-    
-    try {
-      setLoading(true)
-      
-      const response = await ApiService.deleteBill(billId)
-      
-      if (response.success) {
-        setSuccessMessage("The bill has been paid")
-        
-        if (editingBill && editingBill.id === billId) {
-          setEditingBill(null)
-          setShowAddBillForm(false)
-        }
-        
-        fetchBills() // Refresh daftar tagihan
-        
-        // Hilangkan pesan sukses setelah 3 detik
-        setTimeout(() => {
-          setSuccessMessage("")
-        }, 3000)
-      } else {
-        setError(response.message || "Failed to mark bill as paid")
-      }
-    } catch (err) {
-      setError("An error occurred while marking the bill as paid.")
-      console.error("Error marking bill as paid:", err)
-    } finally {
-      setLoading(false)
-    }
-  }
+    await BillController.deleteBill(
+      billId,
+      editingBill,
+      setLoading,
+      setError,
+      setSuccessMessage,
+      () => setEditingBill(null),
+      () => setShowAddBillForm(false),
+      fetchBills
+    );
+  };
 
   const handleCancelEdit = () => {
-    setEditingBill(null)
-    setShowAddBillForm(false)
-  }
+    BillController.handleCancelEdit(setEditingBill, setShowAddBillForm);
+  };
 
+  const dismissNotification = (notificationId) => {
+    BillController.dismissNotification(notificationId, notifications, setNotifications);
+  };
+
+  const toggleCategoryExpand = (category) => {
+    BillController.toggleCategoryExpand(category, setExpandedCategories);
+  };
+
+  // Render UI
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
@@ -428,14 +216,14 @@ export const BillPage = () => {
           </div>
           <button
             onClick={() => {
-              setEditingBill(null)
+              setEditingBill(null);
               setNewBill({
                 name: '',
                 amount: '',
                 dueDate: '',
                 category: 'Rent'
-              })
-              setShowAddBillForm(true)
+              });
+              setShowAddBillForm(true);
             }}
             className="mt-4 md:mt-0 flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors duration-300 shadow-md"
           >
@@ -448,8 +236,7 @@ export const BillPage = () => {
         {successMessage && (
           <div className="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
             <span className="block sm:inline">{successMessage}</span>
-            <span className="absolute top-0 bottom-0 right-0 px-4 py-3" onClick={() => setSuccessMessage("")}>
-              <X className="h-5 w-5" />
+            <span className="absolute top-0 bottom-0 right-0 px-4 py-3" onClick={() => setSuccessMessage("")}>              <X className="h-5 w-5" />
             </span>
           </div>
         )}
@@ -513,7 +300,7 @@ export const BillPage = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-500 font-medium">Total Bills</p>
-                <p className="text-2xl font-bold text-gray-800">Rp {formatCurrency(totalBillAmount)}</p>
+                <p className="text-2xl font-bold text-gray-800">Rp {BillModel.formatCurrency(totalBillAmount)}</p>
               </div>
             </div>
           </div>
@@ -526,7 +313,7 @@ export const BillPage = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-500 font-medium">Upcoming Bills</p>
-                <p className="text-2xl font-bold text-gray-800">{bills.filter(bill => !isOverdue(bill.dueDate)).length}</p>
+                <p className="text-2xl font-bold text-gray-800">{bills.filter(bill => !BillModel.isOverdue(bill.dueDate)).length}</p>
               </div>
             </div>
           </div>
@@ -539,7 +326,7 @@ export const BillPage = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-500 font-medium">Overdue Bills</p>
-                <p className="text-2xl font-bold text-gray-800">{bills.filter(bill => isOverdue(bill.dueDate)).length}</p>
+                <p className="text-2xl font-bold text-gray-800">{bills.filter(bill => BillModel.isOverdue(bill.dueDate)).length}</p>
               </div>
             </div>
           </div>
@@ -684,8 +471,8 @@ export const BillPage = () => {
             <p className="text-gray-500 mb-6">Anda belum memiliki tagihan yang perlu dibayar.</p>
             <button
               onClick={() => {
-                setEditingBill(null)
-                setShowAddBillForm(true)
+                setEditingBill(null);
+                setShowAddBillForm(true);
               }}
               className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
@@ -699,7 +486,7 @@ export const BillPage = () => {
             {Object.entries(billsByCategory).map(([category, categoryBills]) => (
               <div key={category} className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
                 <div 
-                  className={`px-6 py-4 flex items-center ${getCategoryColor(category)} cursor-pointer`}
+                  className={`px-6 py-4 flex items-center ${BillModel.getCategoryColor(category)} cursor-pointer`}
                   onClick={() => toggleCategoryExpand(category)}
                 >
                   <div className="mr-3">
@@ -734,16 +521,16 @@ export const BillPage = () => {
                             <h4 className="text-lg font-medium text-gray-900">{bill.name}</h4>
                             <div className="flex items-center mt-1">
                               <span className={`text-sm ${
-                                isOverdue(bill.dueDate) ? 'text-red-600 font-medium' : 
-                                isDueTomorrow(bill.dueDate) ? 'text-yellow-600 font-medium' : 
+                                BillModel.isOverdue(bill.dueDate) ? 'text-red-600 font-medium' : 
+                                BillModel.isDueTomorrow(bill.dueDate) ? 'text-yellow-600 font-medium' : 
                                 'text-gray-500'
                               }`}>
-                                Due on {formatDate(bill.dueDate)}
+                                Due on {BillModel.formatDate(bill.dueDate)}
                               </span>
                             </div>
                           </div>
                           <div className="flex flex-col items-end">
-                            <span className="text-xl font-bold text-gray-900">Rp {formatCurrency(bill.amount)}</span>
+                            <span className="text-xl font-bold text-gray-900">Rp {BillModel.formatCurrency(bill.amount)}</span>
                             <div className="flex mt-2 space-x-2">
                               <button
                                 onClick={(e) => {
@@ -777,5 +564,7 @@ export const BillPage = () => {
         )}
       </main>
     </div>
-  )
-}
+  );
+};
+
+export default BillPage;
