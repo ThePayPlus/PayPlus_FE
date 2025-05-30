@@ -1,9 +1,10 @@
 import axios from 'axios';
+import { io } from 'socket.io-client';
 
 class ApiService {
   // Base URL for the backend API
   static baseUrl = 'https://78nvh33s-3000.asse.devtunnels.ms/api';
-  static wsUrl = 'wss://78nvh33s-3000.asse.devtunnels.ms';
+  static wsUrl = 'wss://78nvh33s-3000.asse.devtunnels.ms'; // Ubah dari https:// ke wss://
 
   // Token storage key
   static tokenKey = 'auth_token';
@@ -16,20 +17,31 @@ class ApiService {
     },
   });
 
-  // WebSocket helper methods
+  // Socket.IO helper methods
   static createWebSocketConnection() {
     const token = ApiService.getAuthToken();
-    const ws = new WebSocket(`${ApiService.wsUrl}?token=${token}`); // Mengirim token untuk autentikasi
+    const socket = io(ApiService.wsUrl, {
+      query: { token },
+      transports: ['websocket', 'polling'], // Tambahkan polling sebagai fallback
+      autoConnect: true,
+      reconnection: true, // Aktifkan reconnection
+      reconnectionAttempts: 5, // Coba reconnect 5 kali
+      reconnectionDelay: 1000, // Tunggu 1 detik sebelum mencoba lagi
+    });
 
-    ws.onopen = () => {
-      console.log('WebSocket connection established');
-    };
+    socket.on('connect', () => {
+      console.log('Socket.IO connection established with ID:', socket.id);
+    });
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
+    socket.on('connect_error', (error) => {
+      console.error('Socket.IO connection error:', error);
+    });
 
-    return ws;
+    socket.on('disconnect', (reason) => {
+      console.log('Socket.IO disconnected:', reason);
+    });
+
+    return socket;
   }
 
   // Method to set auth token in headers
@@ -73,6 +85,8 @@ class ApiService {
 
       if (response.data.token) {
         await ApiService.setAuthToken(response.data.token);
+        // Simpan nomor telepon pengguna untuk identifikasi di chat
+        localStorage.setItem('user_phone', phone);
       }
 
       return {
@@ -398,9 +412,10 @@ class ApiService {
     }
   }
 
-  // Send message
+  // Send message (update untuk menggunakan Socket.IO)
   static async sendMessage(receiverPhone, message) {
     try {
+      // Pesan tetap disimpan melalui API untuk persistensi
       const response = await ApiService.api.post('/messages', {
         receiverPhone,
         message,
@@ -587,3 +602,4 @@ class ApiService {
 ApiService.initializeAuth();
 
 export default ApiService;
+export { ApiService };

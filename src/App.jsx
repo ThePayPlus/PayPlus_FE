@@ -43,11 +43,9 @@ function App() {
           <Route path="/addsavings" element={<AddSavings />} />
           <Route path="/addtosavings/:id" element={<AddToSavings />} />
           <Route path="/topup" element={<TopUpPage />} />
+          <Route path="/friends" element={<Friends />} />
         </Routes>
       </div>
-      <Routes>
-        <Route path="/friends" element={<Friends />} />
-      </Routes>
     </Router>
   );
 }

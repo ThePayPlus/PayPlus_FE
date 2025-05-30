@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiService } from '../../services';
-import { User, Search, Plus, Send, ArrowLeft, Phone, X, Bell, Check, UserX } from 'lucide-react';
+import { User, Search, Plus, Bell, X, Phone, Check, UserX, ArrowLeftIcon } from 'lucide-react';
+import ChatRoom from './ChatRoom';
 
 export const Friends = () => {
   const [friends, setFriends] = useState([]);
@@ -12,10 +13,6 @@ export const Friends = () => {
   const [addFriendError, setAddFriendError] = useState('');
   const [addFriendSuccess, setAddFriendSuccess] = useState('');
   const [selectedFriend, setSelectedFriend] = useState(null);
-  const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [loadingMessages, setLoadingMessages] = useState(false);
-  const messagesEndRef = useRef(null);
   const ws = useRef(null);
   // Tambahkan state untuk permintaan pertemanan
   const [friendRequests, setFriendRequests] = useState([]);
@@ -30,30 +27,24 @@ export const Friends = () => {
     fetchFriends();
     fetchFriendRequests(); // Tambahkan fetch friend requests
 
-    // Initialize WebSocket connection
+    // Initialize Socket.IO connection
     ws.current = ApiService.createWebSocketConnection();
 
-    ws.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+    // Handle friend requests
+    ws.current.on('friend_request', (data) => {
+      fetchFriendRequests();
+      showNotification('New Friend Request', `${data.name} sent you a friend request`);
+    });
 
-      // Handle different message types
-      if (data.type === 'message' && selectedFriend && (data.sender === selectedFriend.phone || data.receiver === selectedFriend.phone)) {
-        setMessages((prev) => [...prev, data]);
-      } else if (data.type === 'friend_request') {
-        // Refresh friend requests when new request comes in
-        fetchFriendRequests();
-        // Show notification
-        showNotification('New Friend Request', `${data.name} sent you a friend request`);
-      } else if (data.type === 'friend_request_accepted') {
-        // Refresh friends list when request is accepted
-        fetchFriends();
-        showNotification('Friend Request Accepted', `${data.name} accepted your friend request`);
-      }
-    };
+    // Handle accepted friend requests
+    ws.current.on('friend_request_accepted', (data) => {
+      fetchFriends();
+      showNotification('Friend Request Accepted', `${data.name} accepted your friend request`);
+    });
 
     return () => {
       if (ws.current) {
-        ws.current.close();
+        ws.current.disconnect();
       }
     };
   }, []);
@@ -73,18 +64,6 @@ export const Friends = () => {
     }
   };
 
-  // Scroll to bottom of messages when messages change
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  // Fetch messages when selected friend changes
-  useEffect(() => {
-    if (selectedFriend) {
-      fetchMessages(selectedFriend.phone);
-    }
-  }, [selectedFriend]);
-
   const fetchFriends = async () => {
     try {
       setLoading(true);
@@ -99,22 +78,6 @@ export const Friends = () => {
       console.error('Friends fetch error:', err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchMessages = async (friendPhone) => {
-    try {
-      setLoadingMessages(true);
-      const response = await ApiService.getMessages(friendPhone);
-      if (response.success) {
-        setMessages(response.messages || []);
-      } else {
-        console.error('Failed to load messages:', response.message);
-      }
-    } catch (err) {
-      console.error('Messages fetch error:', err);
-    } finally {
-      setLoadingMessages(false);
     }
   };
 
@@ -154,51 +117,6 @@ export const Friends = () => {
       setAddFriendError('An unexpected error occurred');
       console.error('Add friend error:', err);
     }
-  };
-
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedFriend) return;
-
-    try {
-      const messageData = {
-        type: 'message',
-        sender: null, // Will be set by the server based on the auth token
-        receiver: selectedFriend.phone,
-        message: newMessage,
-        sent_at: new Date().toISOString(),
-      };
-
-      // Send via WebSocket
-      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-        ws.current.send(JSON.stringify(messageData));
-      }
-
-      // Also send via API for persistence
-      const response = await ApiService.sendMessage(selectedFriend.phone, newMessage);
-
-      if (response.success) {
-        // Add message to local state
-        const userProfile = await ApiService.getProfile();
-        const newMsg = {
-          sender: userProfile.data.phone,
-          receiver: selectedFriend.phone,
-          message: newMessage,
-          sent_at: new Date().toISOString(),
-        };
-
-        setMessages((prev) => [...prev, newMsg]);
-        setNewMessage('');
-      } else {
-        console.error('Failed to send message:', response.message);
-      }
-    } catch (err) {
-      console.error('Send message error:', err);
-    }
-  };
-
-  const formatTime = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   const fetchFriendRequests = async () => {
@@ -262,15 +180,17 @@ export const Friends = () => {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
               {selectedFriend ? (
-                <button onClick={() => setSelectedFriend(null)} className="mr-2 p-2 rounded-full hover:bg-gray-100">
-                  <ArrowLeft className="w-5 h-5 text-gray-600" />
-                </button>
+                <>
+                  <h1 className="text-xl font-semibold text-gray-800">Chat</h1>
+                </>
               ) : (
-                <Link to="/dashboard" className="mr-2 p-2 rounded-full hover:bg-gray-100">
-                  <ArrowLeft className="w-5 h-5 text-gray-600" />
-                </Link>
+                <>
+                  <Link to="/dashboard" className="mr-2 p-2 rounded-full hover:bg-gray-100">
+                    <ArrowLeftIcon className="w-5 h-5 text-gray-600" />
+                  </Link>
+                  <h1 className="text-xl font-semibold text-gray-800">Friends</h1>
+                </>
               )}
-              <h1 className="text-xl font-semibold text-gray-800">{selectedFriend ? selectedFriend.name : 'Friends'}</h1>
             </div>
             {!selectedFriend && (
               <div className="flex items-center space-x-2">
@@ -324,11 +244,13 @@ export const Friends = () => {
                           <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-indigo-500"></div>
                         ) : (
                           <>
-                            <button onClick={() => handleFriendRequestAction(request.id, 'accept')} className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors" title="Accept">
-                              <Check className="w-4 h-4" />
+                            <button onClick={() => handleFriendRequestAction(request.id, 'accept')} className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors flex items-center">
+                              <Check className="w-4 h-4 mr-1" />
+                              Accept
                             </button>
-                            <button onClick={() => handleFriendRequestAction(request.id, 'reject')} className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors" title="Reject">
-                              <UserX className="w-4 h-4" />
+                            <button onClick={() => handleFriendRequestAction(request.id, 'reject')} className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors flex items-center">
+                              <X className="w-4 h-4 mr-1" />
+                              Reject
                             </button>
                           </>
                         )}
@@ -356,55 +278,8 @@ export const Friends = () => {
             </button>
           </div>
         ) : selectedFriend ? (
-          // Chat Room
-          <div className="flex flex-col h-[calc(100vh-12rem)]">
-            {/* Messages */}
-            <div className="flex-grow overflow-y-auto mb-4 p-4 bg-white rounded-lg shadow">
-              {loadingMessages ? (
-                <div className="flex justify-center items-center h-full">
-                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
-                </div>
-              ) : messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-gray-500">
-                  <User className="w-16 h-16 mb-4 text-gray-300" />
-                  <p>No messages yet</p>
-                  <p className="text-sm">Send a message to start the conversation</p>
-                </div>
-              ) : (
-                // Perbaikan tampilan chat - pesan pengirim di kiri, penerima di kanan
-                <div className="space-y-3">
-                  {messages.map((msg, index) => {
-                    // Periksa apakah pesan dikirim oleh pengguna saat ini atau oleh teman
-                    const isSentByMe = msg.sender !== selectedFriend.phone;
-                    return (
-                      <div key={index} className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[70%] px-4 py-2 rounded-lg ${isSentByMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none'}`}>
-                          <p>{msg.message}</p>
-                          <p className={`text-xs mt-1 ${isSentByMe ? 'text-indigo-200' : 'text-gray-500'}`}>{formatTime(msg.sent_at)}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  <div ref={messagesEndRef} />
-                </div>
-              )}
-            </div>
-
-            {/* Message Input */}
-            <div className="bg-white p-3 rounded-lg shadow flex items-center">
-              <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type a message..."
-                className="flex-grow px-4 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              />
-              <button onClick={handleSendMessage} className="px-4 py-2 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700 transition-colors">
-                <Send className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
+          // Render ChatRoom component
+          <ChatRoom friend={selectedFriend} onBack={() => setSelectedFriend(null)} ws={ws} />
         ) : friends.length === 0 ? (
           // Empty State
           <div className="flex flex-col items-center justify-center py-16 text-center">
