@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Doughnut } from "react-chartjs-2"
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js"
 import { Link } from "react-router-dom"
-import { ApiService } from "../../services"
+import { ApiService } from "../../services/apiService.js"
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend)

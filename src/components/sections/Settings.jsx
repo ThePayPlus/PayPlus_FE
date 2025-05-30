@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { CheckCircle, Eye, EyeOff, Mail, Shield, User, X } from "lucide-react"
-import ApiService from "../../services/apiService"
+import { ApiService } from '../../services/apiService.js';
 
 export default function Settings() {
   // Form references

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Doughnut } from "react-chartjs-2"
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js"
 import { Link } from "react-router-dom"
-import { ApiService } from "../../services"
+import IncomeController from "../../controllers/income_controller"
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend)
@@ -23,23 +23,11 @@ export default function Income() {
   const [filteredRecords, setFilteredRecords] = useState([])
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const calculateTotalIncome = (records) => {
-    return records.reduce((acc, record) => acc + Number(record.amount), 0);
-  };
-
   useEffect(() => {
     const fetchIncomeRecords = async () => {
-      const response = await ApiService.getIncomeRecords()
+      const response = await IncomeController.fetchIncomeData();
       if (response.success) {
-        const totalIncome = calculateTotalIncome(response.records);
-        setIncomeData({
-          totalIncome,
-          totalTransactions: response.records.length,
-          normalIncome: response.records.filter(record => record.type === "normal").reduce((acc, record) => acc + Number(record.amount), 0),
-          giftIncome: response.records.filter(record => record.type === "gift").reduce((acc, record) => acc + Number(record.amount), 0),
-          topupIncome: response.records.filter(record => record.type === "topup").reduce((acc, record) => acc + Number(record.amount), 0),
-          incomeRecords: response.records,
-        });
+        setIncomeData(response.data);
       } else {
         console.error(response.message);
       }
@@ -49,44 +37,18 @@ export default function Income() {
   }, []);
 
   useEffect(() => {
-    if (activeFilter === "all") {
-      setFilteredRecords(incomeData.incomeRecords)
-    } else {
-      setFilteredRecords(incomeData.incomeRecords.filter((record) => record.type === activeFilter))
-    }
+    setFilteredRecords(IncomeController.filterRecordsByType(incomeData.incomeRecords, activeFilter))
   }, [activeFilter, incomeData.incomeRecords])
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "decimal",
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
-
-  const chartData = {
-    labels: ["Normal Income", "Gift Income", "TopUp Income"],
-    datasets: [
-      {
-        data: [incomeData.normalIncome, incomeData.giftIncome, incomeData.topupIncome],
-        backgroundColor: ["#3B82F6", "#8B5CF6", "#F1C40F"],
-        hoverOffset: 4,
-      },
-    ],
-  }
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: "bottom",
-        labels: {
-          boxWidth: 12,
-          padding: 10,
-        },
-      },
-    },
-  }
+  // Mendapatkan data chart dari controller
+  const chartData = IncomeController.prepareChartData(
+    incomeData.normalIncome, 
+    incomeData.giftIncome, 
+    incomeData.topupIncome
+  );
+  
+  // Mendapatkan opsi chart dari controller
+  const chartOptions = IncomeController.getChartOptions();
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -180,7 +142,7 @@ export default function Income() {
             <div>
               <p className="mb-2 text-sm font-medium text-gray-600">Total Income</p>
               <p id="totalIncome" className="text-lg font-semibold text-gray-700">
-                Rp. {formatCurrency(incomeData.totalIncome)}
+                Rp. {IncomeController.formatCurrency(incomeData.totalIncome)}
               </p>
             </div>
           </div>
@@ -214,7 +176,7 @@ export default function Income() {
             <div>
               <p className="mb-2 text-sm font-medium text-gray-600">Normal Income</p>
               <p id="normalIncome" className="text-lg font-semibold text-gray-700">
-                Rp. {formatCurrency(incomeData.normalIncome)}
+                Rp. {IncomeController.formatCurrency(incomeData.normalIncome)}
               </p>
             </div>
           </div>
@@ -234,7 +196,7 @@ export default function Income() {
             <div>
               <p className="mb-2 text-sm font-medium text-gray-600">Gift Income</p>
               <p id="giftIncome" className="text-lg font-semibold text-gray-700">
-                Rp. {formatCurrency(incomeData.giftIncome)}
+                Rp. {IncomeController.formatCurrency(incomeData.giftIncome)}
               </p>
             </div>
           </div>
@@ -258,7 +220,7 @@ export default function Income() {
             <div>
               <p className="mb-2 text-sm font-medium text-gray-600">TopUp Income</p>
               <p id="totalIncome" className="text-lg font-semibold text-gray-700">
-                Rp. {formatCurrency(incomeData.topupIncome)}
+                Rp. {IncomeController.formatCurrency(incomeData.topupIncome)}
               </p>
             </div>
           </div>
@@ -322,7 +284,9 @@ export default function Income() {
               >
                 <div className="p-6">
                   <div className="flex justify-between items-center mb-4">
-                    <span className="text-2xl font-bold text-gray-800">Rp. {formatCurrency(income.amount)}</span>
+                    <span className="text-2xl font-bold text-gray-800">
+                      Rp. {IncomeController.formatCurrency(income.amount)}
+                    </span>
                     <span className="text-sm font-medium text-gray-500">{income.date}</span>
                   </div>
                   <div className="space-y-2">
@@ -332,16 +296,8 @@ export default function Income() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Type:</span>
-                      <span
-                        className={`font-medium ${
-                          income.type === "gift"
-                            ? "text-purple-600"
-                            : income.type === "topup"
-                              ? "text-green-600"
-                              : "text-blue-600"
-                        }`}
-                      >
-                        {income.type.charAt(0).toUpperCase() + income.type.slice(1)}
+                      <span className={`font-medium ${IncomeController.getIncomeTypeClass(income.type)}`}>
+                        {IncomeController.capitalizeIncomeType(income.type)}
                       </span>
                     </div>
                     {income.type === "gift" && income.message && (
