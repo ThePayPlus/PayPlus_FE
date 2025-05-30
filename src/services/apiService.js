@@ -2,8 +2,9 @@ import axios from 'axios';
 
 class ApiService {
   // Base URL for the backend API
-  static baseUrl = 'http://localhost:3000/api';
-  
+  static baseUrl = 'https://78nvh33s-3000.asse.devtunnels.ms/api';
+  static wsUrl = 'wss://78nvh33s-3000.asse.devtunnels.ms';
+
   // Token storage key
   static tokenKey = 'auth_token';
 
@@ -14,6 +15,22 @@ class ApiService {
       'Content-Type': 'application/json',
     },
   });
+
+  // WebSocket helper methods
+  static createWebSocketConnection() {
+    const token = ApiService.getAuthToken();
+    const ws = new WebSocket(`${ApiService.wsUrl}?token=${token}`); // Mengirim token untuk autentikasi
+
+    ws.onopen = () => {
+      console.log('WebSocket connection established');
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    return ws;
+  }
 
   // Method to set auth token in headers
   static async setAuthToken(token) {
@@ -57,7 +74,7 @@ class ApiService {
       if (response.data.token) {
         await ApiService.setAuthToken(response.data.token);
       }
-      
+
       return {
         success: true,
         data: response.data,
@@ -492,9 +509,9 @@ class ApiService {
         name,
         amount,
         dueDate,
-        category
+        category,
       });
-      
+
       return {
         success: true,
         data: response.data,
@@ -506,7 +523,7 @@ class ApiService {
       };
     }
   }
-  
+
   // Update bill
   static async updateBill(billId, name, amount, dueDate, category) {
     try {
@@ -514,9 +531,9 @@ class ApiService {
         name,
         amount,
         dueDate,
-        category
+        category,
       });
-      
+
       return {
         success: true,
         data: response.data,
@@ -528,12 +545,12 @@ class ApiService {
       };
     }
   }
-  
+
   // Delete bill
   static async deleteBill(billId) {
     try {
       const response = await ApiService.api.delete(`/bills/${billId}`);
-      
+
       return {
         success: true,
         message: response.data.message || 'Bill deleted successfully',
