@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { CheckCircle, Eye, EyeOff, Mail, Shield, User, X } from "lucide-react"
-import { ApiService } from '../../services/apiService.js';
+import SettingController from "../../controllers/setting_controller.js"
 
 export default function Settings() {
   // Form references
@@ -17,24 +17,18 @@ export default function Settings() {
   // Fetch user profile data on component mount
   useEffect(() => {
     const fetchProfileData = async () => {
-      try {
-        const response = await ApiService.getProfile()
-        if (response.success && response.data) {
-          setFullName(response.data.name || "")
-          setEmail(response.data.email || "")
-          setPhoneNumber(response.data.phone || "")
-        } else {
-          setErrorMessage("Gagal memuat data profil")
-          setIsError(true)
-        }
-      } catch (error) {
-        console.error("Error fetching profile:", error)
-        setErrorMessage("Terjadi kesalahan saat memuat profil")
-        setIsError(true)
+      const response = await SettingController.getProfile();
+      if (response.success && response.data) {
+        setFullName(response.data.name);
+        setEmail(response.data.email);
+        setPhoneNumber(response.data.phone);
+      } else {
+        setErrorMessage(response.message);
+        setIsError(true);
       }
     }
 
-    fetchProfileData()
+    fetchProfileData();
   }, [])
 
   // State for password fields
@@ -60,91 +54,58 @@ export default function Settings() {
     }
   }
 
-  // Function to validate email
-  const isValidEmail = (email) => {
-    return /\S+@\S+\.\S+/.test(email)
-  }
-
-  // Function to validate form
-  const validateForm = () => {
-    if (!fullName.trim()) {
-      setErrorMessage("Silakan masukkan nama Anda")
-      setIsError(true)
-      return false
-    }
-
-    if (!email.trim()) {
-      setErrorMessage("Silakan masukkan email Anda")
-      setIsError(true)
-      return false
-    }
-
-    if (!isValidEmail(email)) {
-      setErrorMessage("Silakan masukkan email yang valid")
-      setIsError(true)
-      return false
-    }
-
-    if (newPassword && !currentPassword) {
-      setErrorMessage("Silakan masukkan password saat ini")
-      setIsError(true)
-      return false
-    }
-
-    if (newPassword && newPassword.length < 6) {
-      setErrorMessage("Password harus minimal 6 karakter")
-      setIsError(true)
-      return false
-    }
-
-    if (newPassword && newPassword !== confirmPassword) {
-      setErrorMessage("Password tidak cocok")
-      setIsError(true)
-      return false
-    }
-
-    return true
-  }
-
   // Function to save changes
   const saveChanges = async () => {
-    if (!validateForm()) return
+    // Validasi form menggunakan controller
+    const validation = SettingController.validateForm(
+      fullName, 
+      email, 
+      currentPassword, 
+      newPassword, 
+      confirmPassword
+    );
+    
+    if (!validation.isValid) {
+      setErrorMessage(validation.message);
+      setIsError(true);
+      return;
+    }
 
-    setIsLoading(true)
+    setIsLoading(true);
     
     try {
       // Handle password change if new password is provided
       if (newPassword) {
-        const passwordResponse = await ApiService.changePassword(currentPassword, newPassword)
+        const passwordResponse = await SettingController.changePassword(currentPassword, newPassword);
         if (!passwordResponse.success) {
-          setIsLoading(false)
-          setErrorMessage(passwordResponse.message || "Gagal mengubah password")
-          setIsError(true)
-          return
+          setIsLoading(false);
+          setErrorMessage(passwordResponse.message);
+          setIsError(true);
+          return;
         }
       }
       
       // Update profile information
-      const profileResponse = await ApiService.updateProfile(fullName, email)
+      const profileResponse = await SettingController.updateProfile(fullName, email);
       
-      setIsLoading(false)
+      setIsLoading(false);
       
       if (profileResponse.success) {
-        setErrorMessage("Pengaturan berhasil diperbarui!")
-        setIsError(false)
+        setErrorMessage("Pengaturan berhasil diperbarui!");
+        setIsError(false);
         // Reset password fields after successful update
-        setCurrentPassword("")
-        setNewPassword("")
-        setConfirmPassword("")
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
       } else {
-        setErrorMessage(profileResponse.message || "Gagal memperbarui profil")
-        setIsError(true)
+        setErrorMessage(profileResponse.message);
+        setIsError(true);
       }
     } catch (error) {
-      console.error("Error updating profile:", error)
-      setIsLoading(false)
-      setErrorMessage("Terjadi kesalahan saat memperbarui profil")
-      setIsError(true)
+      console.error("Error updating profile:", error);
+      setIsLoading(false);
+      setErrorMessage("Terjadi kesalahan saat memperbarui profil");
+      setIsError(true);
     }
   }
 
