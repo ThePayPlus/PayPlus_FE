@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, ArrowLeft, User } from 'lucide-react';
-import { ApiService } from '../../services';
+import { ApiService } from '../../services/apiService.js';
 
 const ChatRoom = ({ friend, onBack, ws }) => {
   const [messages, setMessages] = useState([]);

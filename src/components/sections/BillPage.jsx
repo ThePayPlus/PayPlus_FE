@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ApiService } from "../../services"
+import { ApiService } from '../../services/apiService.js';
 import { 
   Home, 
   Zap, 

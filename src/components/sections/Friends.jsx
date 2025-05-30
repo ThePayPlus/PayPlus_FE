@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ApiService } from '../../services';
-import { User, Search, Plus, Bell, X, Phone, Check, ArrowLeftIcon } from 'lucide-react';
+import { ApiService } from '../../services/apiService.js';
+import { User, Search, Plus, Bell, X, Phone, Check, UserX, ArrowLeftIcon } from 'lucide-react';
 import ChatRoom from './ChatRoom';
 
 export const Friends = () => {

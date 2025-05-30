@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ApiService } from '../../services';
+import { ApiService } from '../../services/apiService.js';
 import { Search, User, Phone, DollarSign, Send, ArrowLeft, CheckCircle, AlertCircle, Gift } from 'lucide-react';
 
 export const TransferPage = () => {
