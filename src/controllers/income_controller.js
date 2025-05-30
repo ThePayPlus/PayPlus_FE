@@ -1,9 +1,29 @@
-import IncomeModel from "../models/income_model";
+import Income from "../models/income_model";
+import { ApiService } from "../services/apiService.js";
 
 class IncomeController {
+  // Mengambil data income dari API dan mengkonversi ke model Income
+  static async getIncomeRecords() {
+    const response = await ApiService.getIncomeRecords();
+    
+    if (response.success) {
+      // Convert raw data to Income model instances
+      const incomeRecords = response.records.map(record => Income.fromJson(record));
+      return {
+        success: true,
+        records: incomeRecords
+      };
+    } else {
+      return {
+        success: false,
+        message: response.message
+      };
+    }
+  }
+  
   // Mengambil data income dan menyiapkan data untuk view
   static async fetchIncomeData() {
-    const response = await IncomeModel.getIncomeRecords();
+    const response = await this.getIncomeRecords();
     
     if (response.success) {
       const totalIncome = this.calculateTotalIncome(response.records);
