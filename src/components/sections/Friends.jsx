@@ -30,26 +30,59 @@ export const Friends = () => {
     fetchFriends();
     fetchFriendRequests(); // Tambahkan fetch friend requests
 
-    // Initialize WebSocket connection
-    ws.current = ApiService.createWebSocketConnection();
-
-    ws.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-
-      // Handle different message types
-      if (data.type === 'message' && selectedFriend && (data.sender === selectedFriend.phone || data.receiver === selectedFriend.phone)) {
-        setMessages((prev) => [...prev, data]);
-      } else if (data.type === 'friend_request') {
-        // Refresh friend requests when new request comes in
-        fetchFriendRequests();
-        // Show notification
-        showNotification('New Friend Request', `${data.name} sent you a friend request`);
-      } else if (data.type === 'friend_request_accepted') {
-        // Refresh friends list when request is accepted
-        fetchFriends();
-        showNotification('Friend Request Accepted', `${data.name} accepted your friend request`);
-      }
-    };
+    // Pisahkan inisialisasi WebSocket dan handler pesan
+    useEffect(() => {
+      fetchFriends();
+      fetchFriendRequests();
+    
+      // Initialize WebSocket connection
+      ws.current = ApiService.createWebSocketConnection();
+    
+      return () => {
+        if (ws.current) {
+          ws.current.close();
+        }
+      };
+    }, []);
+    
+    // Handler pesan WebSocket terpisah dengan dependency selectedFriend
+    useEffect(() => {
+      if (!ws.current) return;
+      
+      const messageHandler = (event) => {
+        const data = JSON.parse(event.data);
+    
+        // Handle different message types
+        if (data.type === 'message') {
+          // Jika user sedang di room chat dengan pengirim/penerima pesan
+          if (selectedFriend && (data.sender === selectedFriend.phone || data.receiver === selectedFriend.phone)) {
+            setMessages((prev) => [...prev, data]);
+          } 
+          // Jika tidak di room chat, tampilkan notifikasi
+          else if (data.sender !== null) { // Pastikan bukan pesan yang dikirim sendiri
+            const senderFriend = friends.find(f => f.phone === data.sender);
+            if (senderFriend) {
+              showNotification('New Message', `${senderFriend.name}: ${data.message}`);
+            }
+          }
+        } else if (data.type === 'friend_request') {
+          // Refresh friend requests when new request comes in
+          fetchFriendRequests();
+          // Show notification
+          showNotification('New Friend Request', `${data.name} sent you a friend request`);
+        } else if (data.type === 'friend_request_accepted') {
+          // Refresh friends list when request is accepted
+          fetchFriends();
+          showNotification('Friend Request Accepted', `${data.name} accepted your friend request`);
+        }
+      };
+    
+      ws.current.addEventListener('message', messageHandler);
+    
+      return () => {
+        ws.current?.removeEventListener('message', messageHandler);
+      };
+    }, [selectedFriend, friends]);
 
     return () => {
       if (ws.current) {
