@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ApiService } from "../../services";
-import { User, Search, Plus, Send, ArrowLeft, Phone, X } from "lucide-react";
+import { User, Search, Plus, Send, ArrowLeft, Phone, X, Bell, Check, UserX } from "lucide-react";
 
 export const Friends = () => {
   const [friends, setFriends] = useState([]);
@@ -17,10 +17,18 @@ export const Friends = () => {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const messagesEndRef = useRef(null);
   const ws = useRef(null);
+  // Tambahkan state untuk permintaan pertemanan
+  const [friendRequests, setFriendRequests] = useState([]);
+  const [showFriendRequests, setShowFriendRequests] = useState(false);
+  const [loadingRequests, setLoadingRequests] = useState(false);
+  const [requestActionLoading, setRequestActionLoading] = useState(false);
+  const [requestActionSuccess, setRequestActionSuccess] = useState("");
+  const [requestActionError, setRequestActionError] = useState("");
 
   // Fetch friends list
   useEffect(() => {
     fetchFriends();
+    fetchFriendRequests(); // Tambahkan fetch friend requests
     
     // Initialize WebSocket connection
     ws.current = new WebSocket('ws://localhost:3000');
@@ -176,6 +184,52 @@ export const Friends = () => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  const fetchFriendRequests = async () => {
+    try {
+      setLoadingRequests(true);
+      const response = await ApiService.getFriendRequests();
+      if (response.success) {
+        setFriendRequests(response.data || []);
+      } else {
+        console.error("Failed to load friend requests:", response.message);
+      }
+    } catch (err) {
+      console.error("Friend requests fetch error:", err);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  const handleFriendRequestAction = async (requestId, action) => {
+    try {
+      setRequestActionLoading(true);
+      setRequestActionError("");
+      setRequestActionSuccess("");
+      
+      const response = await ApiService.respondToFriendRequest(requestId, action);
+      
+      if (response.success) {
+        setRequestActionSuccess(response.message || `Friend request ${action === 'accept' ? 'accepted' : 'rejected'} successfully`);
+        // Refresh friend requests and friends list
+        fetchFriendRequests();
+        if (action === 'accept') {
+          fetchFriends();
+        }
+        // Clear success message after a delay
+        setTimeout(() => {
+          setRequestActionSuccess("");
+        }, 3000);
+      } else {
+        setRequestActionError(response.message || `Failed to ${action} friend request`);
+      }
+    } catch (err) {
+      setRequestActionError("An unexpected error occurred");
+      console.error("Friend request action error:", err);
+    } finally {
+      setRequestActionLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
@@ -200,12 +254,27 @@ export const Friends = () => {
               </h1>
             </div>
             {!selectedFriend && (
-              <button
-                onClick={() => setShowAddFriendModal(true)}
-                className="p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors"
-              >
-                <Plus className="w-5 h-5" />
-              </button>
+              <div className="flex items-center space-x-2">
+                {/* Friend Request Button */}
+                <button
+                  onClick={() => setShowFriendRequests(!showFriendRequests)}
+                  className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <Bell className="w-5 h-5 text-gray-600" />
+                  {friendRequests.length > 0 && (
+                    <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                      {friendRequests.length}
+                    </span>
+                  )}
+                </button>
+                {/* Add Friend Button */}
+                <button
+                  onClick={() => setShowAddFriendModal(true)}
+                  className="p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors"
+                >
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -213,6 +282,67 @@ export const Friends = () => {
 
       {/* Main Content */}
       <main className="flex-grow container mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        {/* Friend Requests Dropdown */}
+        {showFriendRequests && !selectedFriend && (
+          <div className="mb-6 bg-white rounded-lg shadow overflow-hidden">
+            <div className="p-4 border-b border-gray-100">
+              <h2 className="font-semibold text-gray-800">Friend Requests</h2>
+            </div>
+            {loadingRequests ? (
+              <div className="flex justify-center items-center p-6">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+              </div>
+            ) : friendRequests.length === 0 ? (
+              <div className="p-6 text-center text-gray-500">
+                <p>No pending friend requests</p>
+              </div>
+            ) : (
+              <div>
+                {friendRequests.map((request) => (
+                  <div key={request.id} className="p-4 border-b border-gray-100 last:border-b-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                          <User className="w-5 h-5 text-indigo-600" />
+                        </div>
+                        <div className="ml-3">
+                          <h3 className="font-medium text-gray-900">{request.name}</h3>
+                          <p className="text-sm text-gray-500">{request.phone}</p>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        {requestActionLoading ? (
+                          <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-indigo-500"></div>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleFriendRequestAction(request.id, 'accept')}
+                              className="p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors"
+                              title="Accept"
+                            >
+                              <Check className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleFriendRequestAction(request.id, 'reject')}
+                              className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                              title="Reject"
+                            >
+                              <UserX className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    {requestActionSuccess && <p className="mt-2 text-sm text-green-600">{requestActionSuccess}</p>}
+                    {requestActionError && <p className="mt-2 text-sm text-red-600">{requestActionError}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Existing content */}
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
