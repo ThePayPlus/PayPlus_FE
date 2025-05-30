@@ -1,7 +1,7 @@
 import './index.css';
 import { useState, useEffect } from 'react';
 import './App.css';
-import { BrowserRouter as Router, Route, Routes} from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { LoadingScreen } from './components/LoadingScreen';
 import { LandingPage } from './components/sections/LandingPage';
 import { Dashboard } from './components/sections/Dashboard';
@@ -31,7 +31,7 @@ function App() {
       <div className={`min-h-screen flex flex-col transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'} bg-white text-purple-700`}>
         <Routes>
           <Route path="/" element={<LandingPage className={'flex-grow'} />} />
-          <Route path='/login' element={<LoginPage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/settings" element={<Settings />} />
@@ -43,9 +43,11 @@ function App() {
           <Route path="/addsavings" element={<AddSavings />} />
           <Route path="/addtosavings/:id" element={<AddToSavings />} />
           <Route path="/topup" element={<TopUpPage />} />
-          <Route path="/friends" element={<Friends />} />
         </Routes>
       </div>
+      <Routes>
+        <Route path="/friends" element={<Friends />} />
+      </Routes>
     </Router>
   );
 }
