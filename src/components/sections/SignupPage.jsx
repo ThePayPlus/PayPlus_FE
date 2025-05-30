@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ApiService } from '../../services/apiService.js';
+import { SignupController } from '../../controllers/SignupController.js';
 
 export const SignupPage = () => {
   const [formData, setFormData] = useState({
@@ -13,13 +13,12 @@ export const SignupPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [controller] = useState(() => new SignupController());
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    const updatedData = controller.updateField(name, value);
+    setFormData(updatedData);
   };
 
   const handleSubmit = async (e) => {
@@ -27,22 +26,20 @@ export const SignupPage = () => {
     setError('');
 
     // Validate form data
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+    const validation = controller.validate();
+    if (!validation.valid) {
+      setError(validation.message);
       return;
     }
 
     setLoading(true);
 
     try {
-      const { name, phone, email, password } = formData;
-      const response = await ApiService.register(name, phone, email, password);
+      const response = await controller.register();
 
       if (response.success) {
-        // Registration successful, redirect to login page
         navigate('/login');
       } else {
-        // Registration failed, show error message
         setError(response.message);
       }
     } catch (err) {

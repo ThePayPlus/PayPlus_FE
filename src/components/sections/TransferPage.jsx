@@ -1,127 +1,114 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ApiService } from '../../services/apiService.js';
-import { Search, User, Phone, DollarSign, Send, ArrowLeft, CheckCircle, AlertCircle, Gift } from 'lucide-react';
+import { Search, User, Send, ArrowLeft, CheckCircle, AlertCircle, Gift } from 'lucide-react';
+import { TransferController } from '../../controllers/TransferController.js';
 
 export const TransferPage = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // 1: Search, 2: Amount, 3: Confirmation, 4: Result
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [amount, setAmount] = useState('');
-  const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
-  // Menghapus state friends dan loadingFriends
-  const [userData, setUserData] = useState(null);
-  const [transferType, setTransferType] = useState('normal'); // 'normal' or 'gift'
+  const [formData, setFormData] = useState({
+    step: 1,
+    searchQuery: '',
+    searchResults: [],
+    selectedUser: null,
+    amount: '',
+    message: '',
+    loading: false,
+    error: '',
+    success: false,
+    userData: null,
+    transferType: 'normal',
+  });
+  const [controller] = useState(() => new TransferController());
 
-  // Fetch user profile only (removed friends fetching)
+  // Fetch user profile only
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const profileResponse = await ApiService.getProfile();
-        if (profileResponse.success) {
-          setUserData(profileResponse.data);
-        }
-        // Menghapus pemanggilan API getFriends
+        const data = await controller.fetchUserData();
+        setFormData((prev) => ({ ...prev, userData: data.userData }));
       } catch (error) {
-        console.error('Error fetching data:', error);
+        // handle error if needed
       }
     };
-
     fetchUserData();
+    // eslint-disable-next-line
   }, []);
 
+  const handleChange = (name, value) => {
+    const updatedData = controller.updateField(name, value);
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await ApiService.searchUser(searchQuery);
-      if (response.success && response.data) {
-        // Validasi untuk mencegah transfer ke diri sendiri
-        if (userData && response.data.phone === userData.phone) {
-          setSearchResults([]);
-          setError('You cannot transfer money to your own account');
-        } else {
-          setSearchResults([response.data]);
-        }
-      } else {
-        setSearchResults([]);
-        setError('User not found');
-      }
-    } catch (err) {
-      setError('An error occurred while searching for user');
-      console.error('Search error:', err);
-    } finally {
-      setLoading(false);
-    }
+    if (!formData.searchQuery.trim()) return;
+    setFormData((prev) => ({ ...prev, loading: true, error: '' }));
+    const result = await controller.searchUser(formData.searchQuery);
+    setFormData((prev) => ({
+      ...prev,
+      searchResults: result.results || [],
+      error: result.error || '',
+      loading: false,
+    }));
   };
 
   const selectUser = (user) => {
-    
-    setSelectedUser(user);
-    setStep(2);
+    setFormData((prev) => ({
+      ...prev,
+      selectedUser: user,
+      step: 2,
+      error: '',
+    }));
   };
 
   const handleAmountChange = (e) => {
     const value = e.target.value;
-    // Only allow numbers
     if (/^\d*$/.test(value)) {
-      setAmount(value);
+      handleChange('amount', value);
     }
   };
 
   const goToConfirmation = () => {
-    if (!amount || parseInt(amount) <= 0) {
-      setError('Please enter a valid amount');
+    const validation = controller.validateAmount(formData.amount);
+    if (!validation.valid) {
+      setFormData((prev) => ({ ...prev, error: validation.message }));
       return;
     }
-    setError('');
-    setStep(3);
+    setFormData((prev) => ({ ...prev, error: '', step: 3 }));
   };
 
   const handleTransfer = async () => {
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await ApiService.transferMoney(
-        selectedUser.phone,
-        parseInt(amount),
-        transferType, // Use the selected transfer type
-        message
-      );
-
-      if (response.success) {
-        setSuccess(true);
-        setStep(4);
-      } else {
-        setError(response.message || 'Transfer failed');
-      }
-    } catch (err) {
-      setError('An error occurred while processing the transfer');
-      console.error('Transfer error:', err);
-    } finally {
-      setLoading(false);
+    setFormData((prev) => ({ ...prev, loading: true, error: '' }));
+    const response = await controller.transferMoney(
+      formData.selectedUser,
+      formData.amount,
+      formData.transferType,
+      formData.message
+    );
+    if (response.success) {
+      setFormData((prev) => ({ ...prev, success: true, step: 4, loading: false }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        error: response.message || 'Transfer failed',
+        loading: false,
+      }));
     }
   };
 
   const resetForm = () => {
-    setStep(1);
-    setSearchQuery('');
-    setSearchResults([]);
-    setSelectedUser(null);
-    setAmount('');
-    setMessage('');
-    setError('');
-    setSuccess(false);
-    setTransferType('normal');
+    setFormData({
+      step: 1,
+      searchQuery: '',
+      searchResults: [],
+      selectedUser: null,
+      amount: '',
+      message: '',
+      loading: false,
+      error: '',
+      success: false,
+      userData: formData.userData,
+      transferType: 'normal',
+    });
   };
 
   const formatCurrency = (amount) => {
@@ -130,6 +117,8 @@ export const TransferPage = () => {
       maximumFractionDigits: 0,
     }).format(amount);
   };
+
+  const { step, searchQuery, searchResults, selectedUser, amount, message, loading, error, success, userData, transferType } = formData;
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -210,7 +199,7 @@ export const TransferPage = () => {
                   type="text"
                   placeholder="Phone number"
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => handleChange('searchQuery', e.target.value)}
                   className="flex-grow p-2 border rounded-l-lg focus:ring-indigo-500 focus:border-indigo-500"
                 />
                 <button
@@ -252,16 +241,13 @@ export const TransferPage = () => {
                 </div>
               )}
             </div>
-
-            {/* Menghapus seluruh bagian Friends List */}
           </div>
         )}
 
-        {/* Langkah-langkah berikutnya tetap sama */}
         {step === 2 && selectedUser && (
           <div className="max-w-md mx-auto">
             <button
-              onClick={() => setStep(1)}
+              onClick={() => setFormData((prev) => ({ ...prev, step: 1 }))}
               className="flex items-center text-indigo-600 mb-6 hover:text-indigo-800 transition-colors duration-200"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />
@@ -288,14 +274,14 @@ export const TransferPage = () => {
                 </label>
                 <div className="grid grid-cols-2 gap-4">
                   <div
-                    onClick={() => setTransferType('normal')}
+                    onClick={() => handleChange('transferType', 'normal')}
                     className={`flex flex-col items-center justify-center p-4 border rounded-lg cursor-pointer transition-all duration-200 ${transferType === 'normal' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'}`}
                   >
                     <Send className={`w-6 h-6 mb-2 ${transferType === 'normal' ? 'text-indigo-600' : 'text-gray-500'}`} />
                     <span className={`text-sm font-medium ${transferType === 'normal' ? 'text-indigo-600' : 'text-gray-700'}`}>Normal</span>
                   </div>
                   <div
-                    onClick={() => setTransferType('gift')}
+                    onClick={() => handleChange('transferType', 'gift')}
                     className={`flex flex-col items-center justify-center p-4 border rounded-lg cursor-pointer transition-all duration-200 ${transferType === 'gift' ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-indigo-300'}`}
                   >
                     <Gift className={`w-6 h-6 mb-2 ${transferType === 'gift' ? 'text-indigo-600' : 'text-gray-500'}`} />
@@ -335,7 +321,7 @@ export const TransferPage = () => {
                 <textarea
                   id="message"
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  onChange={(e) => handleChange('message', e.target.value)}
                   className="p-3 w-full border rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                   rows="3"
                   placeholder={transferType === 'gift' ? "Write a message for your gift" : "Write a message for the recipient"}
@@ -358,7 +344,7 @@ export const TransferPage = () => {
         {step === 3 && selectedUser && (
           <div className="max-w-md mx-auto">
             <button
-              onClick={() => setStep(2)}
+              onClick={() => setFormData((prev) => ({ ...prev, step: 2 }))}
               className="flex items-center text-indigo-600 mb-6 hover:text-indigo-800 transition-colors duration-200"
             >
               <ArrowLeft className="w-4 h-4 mr-1" />

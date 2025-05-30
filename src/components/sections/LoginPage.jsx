@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ApiService } from '../../services/apiService.js';
+import { LoginController } from '../../controllers/LoginController.js';
 
 export const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -11,13 +11,13 @@ export const LoginPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [controller] = useState(() => new LoginController());
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
-    });
+    const newValue = type === 'checkbox' ? checked : value;
+    const updatedData = controller.updateField(name, newValue);
+    setFormData(updatedData);
   };
 
   const handleSubmit = async (e) => {
@@ -26,14 +26,10 @@ export const LoginPage = () => {
     setLoading(true);
 
     try {
-      const { phone, password } = formData;
-      const response = await ApiService.login(phone, password);
-
+      const response = await controller.login();
       if (response.success) {
-        // Login successful, redirect to dashboard
         navigate('/dashboard');
       } else {
-        // Login failed, show error message
         setError(response.message);
       }
     } catch (err) {
