@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiService } from '../../services';
-import { User, Search, Plus, Bell, X, Phone, Check, UserX, ArrowLeftIcon } from 'lucide-react';
+import { User, Search, Plus, Bell, X, Phone, Check, ArrowLeftIcon } from 'lucide-react';
 import ChatRoom from './ChatRoom';
 
 export const Friends = () => {
@@ -32,14 +32,22 @@ export const Friends = () => {
 
     // Handle friend requests
     ws.current.on('friend_request', (data) => {
+      console.log('Friend request received:', data);
       fetchFriendRequests();
       showNotification('New Friend Request', `${data.name} sent you a friend request`);
     });
 
     // Handle accepted friend requests
     ws.current.on('friend_request_accepted', (data) => {
+      console.log('Friend request accepted:', data);
       fetchFriends();
       showNotification('Friend Request Accepted', `${data.name} accepted your friend request`);
+    });
+
+    // Handle rejected friend requests
+    ws.current.on('friend_request_rejected', (data) => {
+      console.log('Friend request rejected:', data);
+      showNotification('Friend Request Rejected', `${data.name} rejected your friend request`);
     });
 
     return () => {
@@ -145,11 +153,22 @@ export const Friends = () => {
 
       if (response.success) {
         setRequestActionSuccess(response.message || `Friend request ${action === 'accept' ? 'accepted' : 'rejected'} successfully`);
+
+        // Emit event melalui WebSocket untuk memberitahu pengirim permintaan
+        if (ws.current) {
+          ws.current.emit('friend_request_response', {
+            requestId,
+            action,
+            friendId: response.data?.friendId, // Pastikan backend mengirimkan friendId
+          });
+        }
+
         // Refresh friend requests and friends list
         fetchFriendRequests();
         if (action === 'accept') {
           fetchFriends();
         }
+
         // Clear success message after a delay
         setTimeout(() => {
           setRequestActionSuccess('');
@@ -323,8 +342,8 @@ export const Friends = () => {
 
       {/* Add Friend Modal */}
       {showAddFriendModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4 border border-gray-200">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-gray-800">Add Friend</h2>
               <button
