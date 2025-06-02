@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 
 class ApiService {
   // Base URL for the backend API
-  static baseUrl = 'https://78nvh33s-3000.asse.devtunnels.ms/api';
+  static baseUrl = 'http://localhost:3000/api';
   static wsUrl = 'wss://78nvh33s-3000.asse.devtunnels.ms';
 
   // Token storage key
@@ -365,6 +365,24 @@ class ApiService {
       return {
         success: false,
         message: error.response?.data?.message || 'Failed to delete savings',
+      };
+    }
+  }
+
+  // Update savings target
+  static async updateSavingsTarget(savingsId, newTarget) {
+    try {
+      const response = await ApiService.api.patch(`/savings/${savingsId}/update-target`, {
+        target: parseInt(newTarget),
+      });
+      return {
+        success: true,
+        message: response.data.message || 'Target tabungan berhasil diperbarui',
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Gagal memperbarui target tabungan',
       };
     }
   }
