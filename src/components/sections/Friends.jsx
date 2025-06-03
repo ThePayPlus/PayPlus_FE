@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiService } from '../../services/apiService.js';
-import { User, Search, Plus, Bell, X, Phone, Check, ArrowLeftIcon } from 'lucide-react';
+import { User, Search, Plus, Bell, X, Phone, Check, ArrowLeftIcon, Trash2 } from 'lucide-react';
 import ChatRoom from './ChatRoom.jsx';
 
 export const Friends = () => {
@@ -21,6 +21,12 @@ export const Friends = () => {
   const [requestActionLoading, setRequestActionLoading] = useState(false);
   const [requestActionSuccess, setRequestActionSuccess] = useState('');
   const [requestActionError, setRequestActionError] = useState('');
+  // State untuk dialog konfirmasi hapus teman
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [friendToDelete, setFriendToDelete] = useState(null);
+  const [deleteFriendLoading, setDeleteFriendLoading] = useState(false);
+  const [deleteFriendError, setDeleteFriendError] = useState('');
+  const [deleteFriendSuccess, setDeleteFriendSuccess] = useState('');
 
   // Fetch friends list
   useEffect(() => {
@@ -169,6 +175,41 @@ export const Friends = () => {
       console.error('Friend request action error:', err);
     } finally {
       setRequestActionLoading(false);
+    }
+  };
+
+  const handleDeleteFriend = async () => {
+    if (!friendToDelete) return;
+
+    try {
+      setDeleteFriendLoading(true);
+      setDeleteFriendError('');
+      setDeleteFriendSuccess('');
+
+      const response = await ApiService.deleteFriend(friendToDelete.phone);
+
+      if (response.success) {
+        setDeleteFriendSuccess(response.message || 'Teman berhasil dihapus');
+        // Refresh daftar teman
+        fetchFriends();
+        // Reset selected friend jika teman yang dihapus sedang dipilih
+        if (selectedFriend && selectedFriend.id === friendToDelete.id) {
+          setSelectedFriend(null);
+        }
+        // Tutup dialog konfirmasi setelah beberapa saat
+        setTimeout(() => {
+          setShowDeleteConfirmation(false);
+          setFriendToDelete(null);
+          setDeleteFriendSuccess('');
+        }, 2000);
+      } else {
+        setDeleteFriendError(response.message || 'Gagal menghapus teman');
+      }
+    } catch (err) {
+      setDeleteFriendError('Terjadi kesalahan yang tidak terduga');
+      console.error('Delete friend error:', err);
+    } finally {
+      setDeleteFriendLoading(false);
     }
   };
 
@@ -377,6 +418,53 @@ export const Friends = () => {
             <button onClick={handleAddFriend} className="w-full py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
               Add Friend
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Friend Confirmation Modal */}
+      {showDeleteConfirmation && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4 border border-gray-200">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-800">Hapus Teman</h2>
+              <button
+                onClick={() => {
+                  setShowDeleteConfirmation(false);
+                  setFriendToDelete(null);
+                  setDeleteFriendError('');
+                  setDeleteFriendSuccess('');
+                }}
+                className="p-1 rounded-full hover:bg-gray-100"
+              >
+                <X className="w-6 h-6 text-gray-500" />
+              </button>
+            </div>
+
+            <div className="mb-6 text-center">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Hapus {friendToDelete?.name} dari daftar teman?</h3>
+              <p className="text-sm text-gray-600">Anda tidak akan dapat mengirim pesan atau melakukan transaksi dengan teman ini lagi.</p>
+              {deleteFriendError && <p className="mt-3 text-sm text-red-600">{deleteFriendError}</p>}
+              {deleteFriendSuccess && <p className="mt-3 text-sm text-green-600">{deleteFriendSuccess}</p>}
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => {
+                  setShowDeleteConfirmation(false);
+                  setFriendToDelete(null);
+                }}
+                className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Batal
+              </button>
+              <button onClick={handleDeleteFriend} disabled={deleteFriendLoading} className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center">
+                {deleteFriendLoading ? <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div> : 'Hapus'}
+              </button>
+            </div>
           </div>
         </div>
       )}

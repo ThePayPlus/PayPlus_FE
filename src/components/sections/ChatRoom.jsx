@@ -180,8 +180,9 @@ const ChatRoom = ({ friend, onBack, ws }) => {
         ) : (
           <div className="space-y-3">
             {messages.map((msg, index) => {
-              // Periksa apakah pesan dikirim oleh pengguna saat ini atau oleh teman
-              const isSentByMe = msg.sender !== friend.phone;
+              const myPhone = localStorage.getItem('user_phone');
+              const senderPhone = msg.sender_phone || msg.sender;
+              const isSentByMe = String(senderPhone) === String(myPhone);
               return (
                 <div key={index} className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[70%] px-4 py-2 rounded-lg ${isSentByMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none'}`}>

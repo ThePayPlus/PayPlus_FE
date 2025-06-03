@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Doughnut } from "react-chartjs-2"
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js"
 import { Link } from "react-router-dom"
-import { ApiService } from "../../services/apiService.js"
+import ExpenseController from "../../controllers/ExpenseController"
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend)
@@ -22,22 +22,11 @@ export default function Expense() {
   const [filteredRecords, setFilteredRecords] = useState([])
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const calculateTotalExpense = (records) => {
-    return records.reduce((acc, record) => acc + Number(record.amount), 0);
-  };
-
   useEffect(() => {
     const fetchExpenseRecords = async () => {
-      const response = await ApiService.getExpenseRecords()
+      const response = await ExpenseController.fetchExpenseData();
       if (response.success) {
-        const totalExpense = calculateTotalExpense(response.records);
-        setExpenseData({
-          totalExpense,
-          totalTransactions: response.records.length,
-          normalExpense: response.records.filter(record => record.type === "normal").reduce((acc, record) => acc + Number(record.amount), 0),
-          giftExpense: response.records.filter(record => record.type === "gift").reduce((acc, record) => acc + Number(record.amount), 0),
-          expenseRecords: response.records,
-        });
+        setExpenseData(response.data);
       } else {
         console.error(response.message);
       }
@@ -47,44 +36,15 @@ export default function Expense() {
   }, []);
 
   useEffect(() => {
-    if (activeFilter === "all") {
-      setFilteredRecords(expenseData.expenseRecords)
-    } else {
-      setFilteredRecords(expenseData.expenseRecords.filter((record) => record.type === activeFilter))
-    }
+    setFilteredRecords(ExpenseController.filterRecordsByType(ExpenseData.expenseRecords, activeFilter))
   }, [activeFilter, expenseData.expenseRecords])
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "decimal",
-      maximumFractionDigits: 0,
-    }).format(amount)
-  }
+  const chartData = ExpenseController.prepareChartData(
+    expenseData.normalIncome, 
+    expenseData.giftIncome
+  );
 
-  const chartData = {
-    labels: ["Normal Expense", "Gift Expense"],
-    datasets: [
-      {
-        data: [expenseData.normalExpense, expenseData.giftExpense],
-        backgroundColor: ["#3B82F6", "#8B5CF6"],
-        hoverOffset: 4,
-      },
-    ],
-  }
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: "bottom",
-        labels: {
-          boxWidth: 12,
-          padding: 10,
-        },
-      },
-    },
-  }
+  const chartOptions = ExpenseController.getChartOptions();
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -185,7 +145,7 @@ export default function Expense() {
             <div>
               <p className="mb-2 text-sm font-medium text-gray-600">Total Expense</p>
               <p id="totalExpense" className="text-lg font-semibold text-gray-700">
-                Rp. {formatCurrency(expenseData.totalExpense)}
+              p. {ExpenseController.formatCurrency(expenseData.totalExpense)}
               </p>
             </div>
           </div>
@@ -215,7 +175,7 @@ export default function Expense() {
             <div>
               <p className="mb-2 text-sm font-medium text-gray-600">Normal Expense</p>
               <p id="normalExpense" className="text-lg font-semibold text-gray-700">
-                Rp. {formatCurrency(expenseData.normalExpense)}
+                Rp. {ExpenseController.formatCurrency(expenseData.normalExpense)}
               </p>
             </div>
           </div>
@@ -235,7 +195,7 @@ export default function Expense() {
             <div>
               <p className="mb-2 text-sm font-medium text-gray-600">Gift Expense</p>
               <p id="giftExpense" className="text-lg font-semibold text-gray-700">
-                Rp. {formatCurrency(expenseData.giftExpense)}
+                Rp. {ExpenseController.formatCurrency(expenseData.giftExpense)}
               </p>
             </div>
           </div>
@@ -291,24 +251,21 @@ export default function Expense() {
               >
                 <div className="p-6">
                   <div className="flex justify-between items-center mb-4">
-                    <span className="text-2xl font-bold text-gray-800">Rp. {formatCurrency(expense.amount)}</span>
+                    <span className="text-2xl font-bold text-gray-800">
+                      Rp. {ExpenseController.formatCurrency(expense.amount)}
+                    </span>
                     <span className="text-sm font-medium text-gray-500">{expense.date}</span>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Sender:</span>
-                      <span className="font-medium text-gray-800">{expense.senderName}</span>
+                      <span className="font-medium text-gray-800">{expense.receiverName}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Type:</span>
                       <span
-                        className={`font-medium ${
-                          expense.type === "gift"
-                            ? "text-purple-600"
-                            : "text-blue-600"
-                        }`}
-                      >
-                        {expense.type.charAt(0).toUpperCase() + expense.type.slice(1)}
+                        className={`font-medium ${ExpenseController.getExpenseTypeClass(expense.type)}`}>
+                        {ExpenseController.capitalizeExpenseType(expense.type)}
                       </span>
                     </div>
                     {expense.type === "gift" && expense.message && (
