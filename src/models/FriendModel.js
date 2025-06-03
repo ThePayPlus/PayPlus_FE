@@ -3,16 +3,11 @@ class Friend {
     this.id = id;
     this.name = name;
     this.phone = phone;
-    this.status = status; // online, offline, etc.
+    this.status = status;
   }
 
   static fromJson(json) {
-    return new Friend(
-      json.id,
-      json.name,
-      json.phone,
-      json.status || 'online'
-    );
+    return new Friend(json.id, json.name, json.phone, json.status || 'online');
   }
 }
 
@@ -25,12 +20,7 @@ class FriendRequest {
   }
 
   static fromJson(json) {
-    return new FriendRequest(
-      json.id,
-      json.name,
-      json.phone,
-      json.status || 'pending'
-    );
+    return new FriendRequest(json.id, json.name, json.phone, json.status || 'pending');
   }
 }
 

@@ -6,28 +6,26 @@ class FriendController {
   static async getFriends() {
     try {
       const response = await ApiService.getFriends();
-      
+
       if (response.success) {
         // Convert raw data to Friend model instances
-        const friends = Array.isArray(response.data.friends) 
-          ? response.data.friends.map(friend => Friend.fromJson(friend))
-          : [];
-          
+        const friends = Array.isArray(response.data.friends) ? response.data.friends.map((friend) => Friend.fromJson(friend)) : [];
+
         return {
           success: true,
-          friends: friends
+          friends: friends,
         };
       } else {
         return {
           success: false,
-          message: response.message || 'Failed to load friends'
+          message: response.message || 'Failed to load friends',
         };
       }
     } catch (err) {
       console.error('Friends fetch error:', err);
       return {
         success: false,
-        message: 'An unexpected error occurred'
+        message: 'An unexpected error occurred',
       };
     }
   }
@@ -37,7 +35,7 @@ class FriendController {
     if (!phoneNumber.trim()) {
       return {
         success: false,
-        message: 'Please enter a phone number'
+        message: 'Please enter a phone number',
       };
     }
 
@@ -45,7 +43,7 @@ class FriendController {
     if (phoneNumber === myPhone) {
       return {
         success: false,
-        message: 'Anda tidak dapat menambahkan diri sendiri sebagai teman'
+        message: 'Anda tidak dapat menambahkan diri sendiri sebagai teman',
       };
     }
 
@@ -56,7 +54,7 @@ class FriendController {
       if (!searchResponse.success) {
         return {
           success: false,
-          message: 'User not found. Please check the phone number.'
+          message: 'User not found. Please check the phone number.',
         };
       }
 
@@ -67,7 +65,7 @@ class FriendController {
       console.error('Add friend error:', err);
       return {
         success: false,
-        message: 'An unexpected error occurred'
+        message: 'An unexpected error occurred',
       };
     }
   }
@@ -76,28 +74,25 @@ class FriendController {
   static async getFriendRequests() {
     try {
       const response = await ApiService.getFriendRequests();
-      
+
       if (response.success) {
-        // Convert raw data to FriendRequest model instances
-        const requests = Array.isArray(response.data) 
-          ? response.data.map(request => FriendRequest.fromJson(request))
-          : [];
-          
+        const requests = Array.isArray(response.data) ? response.data.map((request) => FriendRequest.fromJson(request)) : [];
+
         return {
           success: true,
-          requests: requests
+          requests: requests,
         };
       } else {
         return {
           success: false,
-          message: response.message || 'Failed to load friend requests'
+          message: response.message || 'Failed to load friend requests',
         };
       }
     } catch (err) {
       console.error('Friend requests fetch error:', err);
       return {
         success: false,
-        message: 'Failed to load friend requests'
+        message: 'Failed to load friend requests',
       };
     }
   }
@@ -111,7 +106,7 @@ class FriendController {
       console.error('Friend request action error:', err);
       return {
         success: false,
-        message: 'An unexpected error occurred'
+        message: 'An unexpected error occurred',
       };
     }
   }
@@ -125,7 +120,7 @@ class FriendController {
       console.error('Delete friend error:', err);
       return {
         success: false,
-        message: 'An unexpected error occurred'
+        message: 'An unexpected error occurred',
       };
     }
   }

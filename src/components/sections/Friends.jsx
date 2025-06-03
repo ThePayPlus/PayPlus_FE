@@ -261,9 +261,6 @@ export const Friends = () => {
                           <h3 className="font-medium text-gray-900">{friend.name}</h3>
                           <p className="text-sm text-gray-500">{friend.phone}</p>
                         </div>
-                        <div className="ml-auto">
-                          <span className={`inline-block w-3 h-3 rounded-full ${friend.status === 'online' ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                        </div>
                       </div>
                     </div>
                   ))}

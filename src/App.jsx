@@ -17,6 +17,7 @@ import Settings from './components/sections/Settings';
 import Income from './components/sections/IncomeRecord';
 import Expense from './components/sections/ExpenseRecord';
 import { TopUpPage } from './components/sections/TopUpPage';
+import { Chatbot } from './components/sections/Chatbot';
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -44,6 +45,7 @@ function App() {
           <Route path="/addtosavings/:id" element={<AddToSavings />} />
           <Route path="/topup" element={<TopUpPage />} />
           <Route path="/friends" element={<Friends />} />
+          <Route path="/chatbot" element={<Chatbot />} />
         </Routes>
       </div>
     </Router>
