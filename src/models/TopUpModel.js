@@ -1,38 +1,25 @@
-import { ApiService } from '../services/apiService';
-
-class TopUpModel {
-  constructor() {
-    this.bankOptions = [
-      { name: 'BRI', image: require('../assets/BRI.png') },
-      { name: 'BCA', image: require('../assets/BCA.png') },
-      { name: 'BNI', image: require('../assets/BNI.png') },
-      { name: 'Mandiri', image: require('../assets/mandiri.png') },
-      { name: 'Bank Jatim', image: require('../assets/jatim.png') },
-      { name: 'Bank Bali', image: require('../assets/bali.png') },
-      { name: 'Bank BJB', image: require('../assets/bjb.png') },
-      { name: 'Bank Kalteng', image: require('../assets/kalteng.png') },
-      { name: 'Bank Sumsel', image: require('../assets/sumsel.png') },
-    ];
+export class TopUpModel {
+  constructor(selectedBank = '', topupAmount = '', loading = false, result = null, error = '', redirectCountdown = null) {
+    this.selectedBank = selectedBank;
+    this.topupAmount = topupAmount;
+    this.loading = loading;
+    this.result = result;
+    this.error = error;
+    this.redirectCountdown = redirectCountdown;
   }
 
-  async topUp(amount) {
-    try {
-      const response = await ApiService.topup(amount);
-      return response;
-    } catch (error) {
-      console.error('Topup error:', error);
-      throw error;
-    }
+  setField(field, value) {
+    this[field] = value;
   }
 
-  getBankOptions() {
-    return this.bankOptions;
-  }
-
-  getBankImage(bankName) {
-    const bank = this.bankOptions.find(bank => bank.name === bankName);
-    return bank ? bank.image : null;
+  getData() {
+    return {
+      selectedBank: this.selectedBank,
+      topupAmount: this.topupAmount,
+      loading: this.loading,
+      result: this.result,
+      error: this.error,
+      redirectCountdown: this.redirectCountdown
+    };
   }
 }
-
-export default TopUpModel;

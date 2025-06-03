@@ -1,29 +1,55 @@
-import TopUpModel from '../models/TopUpModel';
+import { ApiService } from '../services/apiService.js';
+import { TopUpModel } from '../models/TopUpModel.js';
 
-class TopUpController {
-  constructor() {
-    this.model = new TopUpModel();
+export class TopUpController {
+  constructor(initialBank = '') {
+    this.model = new TopUpModel(initialBank);
   }
 
-  getBankOptions() {
-    return this.model.getBankOptions();
+  updateField(name, value) {
+    this.model.setField(name, value);
+    return this.model.getData();
   }
 
-  getBankImage(bankName) {
-    return this.model.getBankImage(bankName);
+  resetForm() {
+    this.model.setField('loading', true);
+    this.model.setField('error', '');
+    this.model.setField('result', null);
+    this.model.setField('redirectCountdown', null);
+    return this.model.getData();
   }
 
-  async processTopUp(amount) {
+  async submitTopUp() {
     try {
-      const response = await this.model.topUp(amount);
+      const { topupAmount } = this.model.getData();
+      const response = await ApiService.topup(topupAmount);
+      
+      if (response.success) {
+        this.model.setField('result', {
+          message: response.message,
+          amount: response.data.amount,
+          newBalance: response.data.newBalance
+        });
+        this.model.setField('redirectCountdown', 3);
+      } else {
+        this.model.setField('error', response.message);
+      }
+      
       return response;
     } catch (error) {
-      return {
-        success: false,
-        message: 'Terjadi kesalahan saat melakukan top up'
-      };
+      console.error('Topup error:', error);
+      this.model.setField('error', 'Terjadi kesalahan saat melakukan top up');
+      return { success: false, message: 'Terjadi kesalahan saat melakukan top up' };
+    } finally {
+      this.model.setField('loading', false);
     }
   }
-}
 
-export default TopUpController;
+  decrementRedirectCountdown() {
+    const { redirectCountdown } = this.model.getData();
+    if (redirectCountdown !== null && redirectCountdown > 0) {
+      this.model.setField('redirectCountdown', redirectCountdown - 1);
+    }
+    return this.model.getData();
+  }
+}
