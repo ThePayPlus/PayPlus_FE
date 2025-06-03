@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, User, Send, ArrowLeft, CheckCircle, AlertCircle, Gift } from 'lucide-react';
 import { TransferController } from '../../controllers/TransferController.js';
+import FriendController from '../../controllers/FriendController.js';
 
 export const TransferPage = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +19,8 @@ export const TransferPage = () => {
     transferType: 'normal',
   });
   const [controller] = useState(() => new TransferController());
+  const [transferMode, setTransferMode] = useState('search'); // 'search' or 'friend'
+  const [friends, setFriends] = useState([]);
 
   // Fetch user profile only
   useEffect(() => {
@@ -32,6 +35,17 @@ export const TransferPage = () => {
     fetchUserData();
     // eslint-disable-next-line
   }, []);
+
+  // Fetch friends when mode is 'friend'
+  useEffect(() => {
+    if (transferMode === 'friend') {
+      const fetchFriends = async () => {
+        const response = await FriendController.getFriends();
+        if (response.success) setFriends(response.friends);
+      };
+      fetchFriends();
+    }
+  }, [transferMode]);
 
   const handleChange = (name, value) => {
     const updatedData = controller.updateField(name, value);
@@ -190,56 +204,102 @@ export const TransferPage = () => {
               </div>
             )}
 
-            {/* Search Form */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">Find Recipient</h2>
-              <div className="flex mb-4">
-                <input
-                  type="text"
-                  placeholder="Phone number"
-                  value={searchQuery}
-                  onChange={(e) => handleChange('searchQuery', e.target.value)}
-                  className="flex-grow p-2 border rounded-l-lg focus:ring-indigo-500 focus:border-indigo-500"
-                />
-                <button
-                  onClick={handleSearch}
-                  disabled={loading}
-                  className="bg-indigo-600 text-white p-2 rounded-r-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center"
-                >
-                  {loading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <Search className="w-5 h-5" />
-                  )}
-                </button>
+            {/* Transfer Mode Tabs */}
+            <div className="flex mb-4">
+              <button
+                className={`flex-1 py-2 rounded-l-lg ${transferMode === 'search' ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-600 border'}`}
+                onClick={() => setTransferMode('search')}
+              >
+                Search Number
+              </button>
+              <button
+                className={`flex-1 py-2 rounded-r-lg ${transferMode === 'friend' ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-600 border'}`}
+                onClick={() => setTransferMode('friend')}
+              >
+                From Friends
+              </button>
+            </div>
+
+            {/* Search by Number */}
+            {transferMode === 'search' && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">Find Recipient</h2>
+                <div className="flex mb-4">
+                  <input
+                    type="text"
+                    placeholder="Phone number"
+                    value={searchQuery}
+                    onChange={(e) => handleChange('searchQuery', e.target.value)}
+                    className="flex-grow p-2 border rounded-l-lg focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                  <button
+                    onClick={handleSearch}
+                    disabled={loading}
+                    className="bg-indigo-600 text-white p-2 rounded-r-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center"
+                  >
+                    {loading ? (
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <Search className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
+
+                {error && <p className="text-red-500 mb-4">{error}</p>}
+
+                {/* Search Results */}
+                {searchResults.length > 0 && (
+                  <div className="mt-4">
+                    <h3 className="text-md font-medium mb-2 text-gray-700">Search Results</h3>
+                    <div className="space-y-2">
+                      {searchResults.map((user) => (
+                        <div
+                          key={user.phone}
+                          onClick={() => selectUser(user)}
+                          className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors duration-200"
+                        >
+                          <div className="bg-indigo-100 p-2 rounded-full mr-3">
+                            <User className="w-5 h-5 text-indigo-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-800">{user.name}</p>
+                            <p className="text-sm text-gray-500">{user.phone}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
+            )}
 
-              {error && <p className="text-red-500 mb-4">{error}</p>}
-
-              {/* Search Results */}
-              {searchResults.length > 0 && (
-                <div className="mt-4">
-                  <h3 className="text-md font-medium mb-2 text-gray-700">Search Results</h3>
+            {/* Select from Friends */}
+            {transferMode === 'friend' && (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-xl font-semibold mb-4 text-gray-800">Select Friend</h2>
+                {friends.length === 0 ? (
+                  <p className="text-gray-500">You have no friends yet.</p>
+                ) : (
                   <div className="space-y-2">
-                    {searchResults.map((user) => (
+                    {friends.map((friend) => (
                       <div
-                        key={user.phone}
-                        onClick={() => selectUser(user)}
+                        key={friend.phone}
+                        onClick={() => selectUser(friend)}
                         className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors duration-200"
                       >
                         <div className="bg-indigo-100 p-2 rounded-full mr-3">
                           <User className="w-5 h-5 text-indigo-600" />
                         </div>
                         <div>
-                          <p className="font-medium text-gray-800">{user.name}</p>
-                          <p className="text-sm text-gray-500">{user.phone}</p>
+                          <p className="font-medium text-gray-800">{friend.name}</p>
+                          <p className="text-sm text-gray-500">{friend.phone}</p>
                         </div>
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
