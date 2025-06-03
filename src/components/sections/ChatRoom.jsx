@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, ArrowLeft, User } from 'lucide-react';
-import { ApiService } from '../../services/apiService.js';
+import { Send, User } from 'lucide-react';
+import { ApiService } from '../../services/apiService';
 
 const ChatRoom = ({ friend, onBack, ws }) => {
   const [messages, setMessages] = useState([]);
@@ -21,11 +21,10 @@ const ChatRoom = ({ friend, onBack, ws }) => {
       console.log('Message received:', data);
       if (friend && (data.sender === friend.phone || data.receiver === friend.phone)) {
         // Cek apakah pesan ini adalah pesan yang dikirim oleh pengguna saat ini
-        // Jika ya, jangan tambahkan lagi ke state
         const myPhone = localStorage.getItem('user_phone');
         const isMyMessage = data.sender === myPhone;
 
-        if (!isMyMessage) {
+        if (!isMyMessage || !data.isLocalMessage) {
           setMessages((prev) => [...prev, data]);
         }
       }
@@ -111,7 +110,6 @@ const ChatRoom = ({ friend, onBack, ws }) => {
             receiver: friend.phone,
             message: newMessage,
             sent_at: new Date().toISOString(),
-            // Tambahkan flag untuk menandai pesan yang dikirim oleh pengguna saat ini
             isLocalMessage: true,
           };
           setMessages((prev) => [...prev, newMsg]);
@@ -150,16 +148,10 @@ const ChatRoom = ({ friend, onBack, ws }) => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)]">
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="bg-white p-4 rounded-lg shadow mb-4">
+      <div className="bg-gray-100 p-3 border-b border-gray-200">
         <div className="flex items-center">
-          <button onClick={onBack} className="mr-3 p-2 rounded-full hover:bg-gray-100">
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <h1 className="text-xl font-semibold text-gray-800">Chat</h1>
-        </div>
-        <div className="flex items-center mt-2">
           <div className="relative">
             <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
               <User className="w-5 h-5 text-indigo-600" />
@@ -174,7 +166,7 @@ const ChatRoom = ({ friend, onBack, ws }) => {
       </div>
 
       {/* Messages */}
-      <div className="flex-grow overflow-y-auto mb-4 p-4 bg-white rounded-lg shadow">
+      <div className="flex-grow overflow-y-auto p-4 bg-gray-50">
         {loadingMessages ? (
           <div className="flex justify-center items-center h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
@@ -207,7 +199,7 @@ const ChatRoom = ({ friend, onBack, ws }) => {
       </div>
 
       {/* Message Input */}
-      <div className="bg-white p-3 rounded-lg shadow">
+      <div className="bg-white p-3 border-t border-gray-200">
         {isTyping && (
           <div className="text-xs text-gray-500 mb-1 ml-2 flex items-center">
             <div className="mr-2">{friend.name} sedang mengetik</div>
