@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { TopUpController } from '../../controllers/TopUpController.js';
+import { Link, useNavigate } from 'react-router-dom';
+import TopUpController from '../../controllers/TopUpController';
 import BRI from '../../assets/BRI.png';
 import BCA from '../../assets/BCA.png';
 import BNI from '../../assets/BNI.png';
@@ -25,40 +25,50 @@ const bankOptions = [
 
 export const TopUpPage = () => {
   const navigate = useNavigate();
-  const [controller] = useState(new TopUpController(bankOptions[0].name));
-  const [state, setState] = useState(controller.model.getData());
+  const [controller] = useState(new TopUpController());
+  const [selectedBank, setSelectedBank] = useState(bankOptions[0].name);
+  const [topup, setTopup] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
+  const [redirectCountdown, setRedirectCountdown] = useState(null);
 
   useEffect(() => {
     let timer;
-    if (state.redirectCountdown !== null) {
-      if (state.redirectCountdown <= 0) {
+    if (redirectCountdown !== null) {
+      if (redirectCountdown <= 0) {
         navigate('/Dashboard');
       } else {
         timer = setTimeout(() => {
-          const newState = controller.decrementRedirectCountdown();
-          setState({...newState});
+          const newCountdown = controller.updateRedirectCountdown();
+          setRedirectCountdown(newCountdown);
         }, 1000);
       }
     }
     return () => clearTimeout(timer);
-  }, [state.redirectCountdown, navigate, controller]);
+  }, [redirectCountdown, navigate, controller]);
 
   const handleBankChange = (e) => {
-    const newState = controller.updateField('selectedBank', e.target.value);
-    setState({...newState});
-  };
-
-  const handleTopUpChange = (e) => {
-    const newState = controller.updateField('topupAmount', e.target.value);
-    setState({...newState});
+    const bank = e.target.value;
+    controller.setSelectedBank(bank);
+    setSelectedBank(bank);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setState({...controller.resetForm()});
+    setLoading(true);
+    controller.setTopupAmount(topup);
     
     const response = await controller.submitTopUp();
-    setState({...controller.model.getData()});
+    
+    if (response.success) {
+      setResult(response.result);
+      setRedirectCountdown(response.redirectCountdown);
+    } else {
+      setError(response.error);
+    }
+    
+    setLoading(false);
   };
 
   return (
@@ -67,9 +77,9 @@ export const TopUpPage = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <a href="/Dashboard">
+            <Link to="/dashboard">
                 <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" className="h-10" />
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -77,29 +87,21 @@ export const TopUpPage = () => {
       <main className="flex items-center justify-center min-h-[calc(100vh-64px)]">
         <div className="bg-white rounded-lg shadow-xs p-6 hover:shadow-md transition-shadow duration-300 max-w-sm w-full">
           <h2 className="text-xl font-semibold text-gray-700 mb-4 text-center">Select a bank for top-up</h2>
-          <select 
-            value={state.selectedBank} 
-            onChange={handleBankChange} 
-            className="w-full p-3 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
+          <select value={selectedBank} onChange={handleBankChange} className="w-full p-3 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
             {bankOptions.map((bank, index) => (
               <option key={index} value={bank.name}>{bank.name}</option>
             ))}
           </select>
           <div className="flex justify-center mt-4">
-            <img 
-              src={bankOptions.find(bank => bank.name === state.selectedBank).image} 
-              alt={state.selectedBank} 
-              className="h-10" 
-            />
+            <img src={bankOptions.find(bank => bank.name === selectedBank).image} alt={selectedBank} className="h-10" />
           </div>
           <form onSubmit={handleSubmit} className="flex flex-col items-center mt-4">
             <div className="relative w-full mb-4">
               <input
                 type="number"
                 name="topup"
-                value={state.topupAmount}
-                onChange={handleTopUpChange}
+                value={topup}
+                onChange={(e) => setTopup(e.target.value)}
                 className="w-full p-3 bg-gray-100 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 placeholder="Input Amount"
                 required
@@ -108,22 +110,22 @@ export const TopUpPage = () => {
             <button 
               type="submit" 
               className="p-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none w-full"
-              disabled={state.loading}
+              disabled={loading}
             >
-              {state.loading ? 'Processing...' : 'Confirm'}
+              {loading ? 'Processing...' : 'Confirm'}
             </button>
           </form>
           
-          {state.error && <p className="text-red-500 mt-4 text-center">{state.error}</p>}
+          {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
           
-          {state.result && (
+          {result && (
             <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
-              <p className="text-green-600 text-center font-medium">{state.result.message}</p>
-              <p className="text-gray-700 text-center mt-2">Amount: Rp{state.result.amount.toLocaleString()}</p>
-              <p className="text-gray-700 text-center">New Balance: Rp{state.result.newBalance.toLocaleString()}</p>
-              {state.redirectCountdown !== null && (
+              <p className="text-green-600 text-center font-medium">{result.message}</p>
+              <p className="text-gray-700 text-center mt-2">Amount: Rp{result.amount.toLocaleString()}</p>
+              <p className="text-gray-700 text-center">New Balance: Rp{result.newBalance.toLocaleString()}</p>
+              {redirectCountdown !== null && (
                 <p className="text-blue-600 text-center mt-2">
-                  Redirecting to Dashboard in {state.redirectCountdown} second{state.redirectCountdown !== 1 ? 's' : ''}...
+                  Redirecting to Dashboard in {redirectCountdown} second{redirectCountdown !== 1 ? 's' : ''}...
                 </p>
               )}
             </div>

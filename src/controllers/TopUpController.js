@@ -1,55 +1,61 @@
-import { ApiService } from '../services/apiService.js';
-import { TopUpModel } from '../models/TopUpModel.js';
+import { ApiService } from '../services/apiService';
 
 export class TopUpController {
-  constructor(initialBank = '') {
-    this.model = new TopUpModel(initialBank);
+  constructor() {
+    this.selectedBank = null;
+    this.topupAmount = '';
+    this.loading = false;
+    this.result = null;
+    this.error = '';
+    this.redirectCountdown = null;
   }
 
-  updateField(name, value) {
-    this.model.setField(name, value);
-    return this.model.getData();
+  setSelectedBank(bank) {
+    this.selectedBank = bank;
+    return this.selectedBank;
   }
 
-  resetForm() {
-    this.model.setField('loading', true);
-    this.model.setField('error', '');
-    this.model.setField('result', null);
-    this.model.setField('redirectCountdown', null);
-    return this.model.getData();
+  setTopupAmount(amount) {
+    this.topupAmount = amount;
+    return this.topupAmount;
   }
 
   async submitTopUp() {
+    this.loading = true;
+    this.error = '';
+    this.result = null;
+    this.redirectCountdown = null;
+    
     try {
-      const { topupAmount } = this.model.getData();
-      const response = await ApiService.topup(topupAmount);
+      const response = await ApiService.topup(this.topupAmount);
       
       if (response.success) {
-        this.model.setField('result', {
+        this.result = {
           message: response.message,
           amount: response.data.amount,
           newBalance: response.data.newBalance
-        });
-        this.model.setField('redirectCountdown', 3);
+        };
+        this.redirectCountdown = 3; // Mulai hitung mundur 3 detik
+        return { success: true, result: this.result, redirectCountdown: this.redirectCountdown };
       } else {
-        this.model.setField('error', response.message);
+        this.error = response.message;
+        return { success: false, error: this.error };
       }
-      
-      return response;
     } catch (error) {
       console.error('Topup error:', error);
-      this.model.setField('error', 'Terjadi kesalahan saat melakukan top up');
-      return { success: false, message: 'Terjadi kesalahan saat melakukan top up' };
+      this.error = 'Terjadi kesalahan saat melakukan top up';
+      return { success: false, error: this.error };
     } finally {
-      this.model.setField('loading', false);
+      this.loading = false;
     }
   }
 
-  decrementRedirectCountdown() {
-    const { redirectCountdown } = this.model.getData();
-    if (redirectCountdown !== null && redirectCountdown > 0) {
-      this.model.setField('redirectCountdown', redirectCountdown - 1);
+  updateRedirectCountdown() {
+    if (this.redirectCountdown !== null && this.redirectCountdown > 0) {
+      this.redirectCountdown -= 1;
     }
-    return this.model.getData();
+    return this.redirectCountdown;
   }
 }
+
+export default TopUpController;

@@ -1,153 +1,107 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ApiService } from '../../services/apiService.js';
+import { SavingsController } from '../../controllers/SavingsController.js';
+import { SavingsModel } from '../../models/SavingsModel.js';
 
 export const SavingsPage = () => {
+  // State untuk controller
+  const [controller] = useState(new SavingsController());
+  
+  // State untuk UI
   const [savingsList, setSavingsList] = useState([]);
   const [alert, setAlert] = useState('');
-  const [alertType, setAlertType] = useState(''); // 'success', 'error', 'transfer', etc.
+  const [alertType, setAlertType] = useState('');
   const [totalTarget, setTotalTarget] = useState(0);
   const [totalCollected, setTotalCollected] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  // State baru untuk edit target
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedSavings, setSelectedSavings] = useState(null);
   const [newTarget, setNewTarget] = useState('');
 
+  // Mengambil data saat komponen dimuat
   useEffect(() => {
     fetchSavingsData();
   }, []);
 
+  // Mengambil data dari controller
   const fetchSavingsData = async () => {
-    try {
-      setLoading(true);
-      const response = await ApiService.getSavings();
-      
-      if (response.success) {
-        // Perbaikan: Cek berbagai kemungkinan struktur data response
-        let data = [];
-        
-        if (response.data) {
-          // Jika response.data adalah array langsung
-          if (Array.isArray(response.data)) {
-            data = response.data;
-          }
-          // Jika response.data memiliki property 'savings'
-          else if (response.data.savings && Array.isArray(response.data.savings)) {
-            data = response.data.savings;
-          }
-          // Jika response.data memiliki property 'records'
-          else if (response.data.records && Array.isArray(response.data.records)) {
-            data = response.data.records;
-          }
-          // Jika response.data adalah object dengan data savings di dalamnya
-          else if (typeof response.data === 'object') {
-            // Cari property yang berisi array
-            const possibleKeys = ['savings', 'records', 'data'];
-            for (const key of possibleKeys) {
-              if (response.data[key] && Array.isArray(response.data[key])) {
-                data = response.data[key];
-                break;
-              }
-            }
-          }
-        }
-        
-        setSavingsList(data);
-        calculateTotals(data);
-        setError('');
-      } else {
-        setError(response.message || 'Gagal memuat data savings');
-        setSavingsList([]);
-      }
-    } catch (err) {
-      setError('Terjadi kesalahan saat memuat data');
-      console.error('Fetch savings error:', err);
+    setLoading(true);
+    const result = await controller.fetchSavingsData();
+    
+    if (result.success) {
+      setSavingsList(result.savingsList);
+      setTotalTarget(result.totalTarget);
+      setTotalCollected(result.totalCollected);
+      setError('');
+    } else {
+      setError(result.error);
       setSavingsList([]);
-    } finally {
-      setLoading(false);
     }
+    
+    setLoading(false);
   };
 
-  const calculateTotals = (list) => {
-    let totalTarget = 0;
-    let totalCollected = 0;
-    list.forEach(s => {
-      totalTarget += Number(s.target) || 0;
-      totalCollected += Number(s.terkumpul) || 0;
-    });
-    setTotalTarget(totalTarget);
-    setTotalCollected(totalCollected);
-  };
-
+  // Menghapus savings
   const handleDeleteSavings = async (savingsId) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus savings ini?')) {
-      try {
-        const response = await ApiService.deleteSavings(savingsId);
-        if (response.success) {
-          setAlert('Savings berhasil dihapus');
-          fetchSavingsData(); // Refresh data
-          setTimeout(() => setAlert(''), 3000);
-        } else {
-          setAlert(response.message || 'Gagal menghapus savings');
-        }
-      } catch (err) {
-        setAlert('Terjadi kesalahan saat menghapus savings');
-        console.error('Delete savings error:', err);
+      setLoading(true); // Menampilkan loading state
+      const result = await controller.deleteSavings(savingsId);
+      setAlert(result.message);
+      setAlertType(result.alertType || '');
+      
+      if (result.success) {
+        // Refresh data setelah berhasil menghapus
+        await fetchSavingsData();
+        setTimeout(() => setAlert(''), 3000);
+      } else {
+        setLoading(false); // Hentikan loading jika gagal
       }
     }
   };
 
+  // Transfer ke balance
   const transferToBalance = async (savingsId) => {
     if (window.confirm('Are you sure you want to transfer these savings to your balance?')) {
-      try {
-        const response = await ApiService.deleteSavings(savingsId);
-        if (response.success) {
-          setAlert('Savings successfully transferred');
-          setAlertType('transfer'); // Set a custom type for transfer
-          fetchSavingsData();
-          setTimeout(() => { setAlert(''); setAlertType(''); }, 3000);
-        } else {
-          setAlert(response.message || 'Failed to transfer savings');
-          setAlertType('error');
-        }
-      } catch (err) {
-        setAlert('An error occurred during the savings transfer.');
-        setAlertType('error');
-        console.error('Delete savings error:', err);
+      setLoading(true); // Menampilkan loading state
+      const result = await controller.transferToBalance(savingsId);
+      setAlert(result.message);
+      setAlertType(result.alertType || '');
+      
+      if (result.success) {
+        // Refresh data setelah berhasil transfer
+        await fetchSavingsData();
+        setTimeout(() => { setAlert(''); setAlertType(''); }, 3000);
+      } else {
+        setLoading(false); // Hentikan loading jika gagal
       }
     }
   };
 
-  // Fungsi untuk menampilkan modal edit target
+  // Menampilkan modal edit target
   const handleShowEditModal = (savings) => {
-    setSelectedSavings(savings);
-    setNewTarget(savings.target.toString());
+    const selected = controller.setSelectedSavings(savings);
+    setSelectedSavings(selected);
+    setNewTarget(selected.target.toString());
     setShowEditModal(true);
   };
 
-  // Fungsi untuk menyimpan target baru
+  // Menyimpan target baru
   const handleUpdateTarget = async () => {
     if (!selectedSavings || !newTarget) return;
     
-    try {
-      const response = await ApiService.updateSavingsTarget(selectedSavings.id, newTarget);
-      
-      if (response.success) {
-        setAlert('Target tabungan berhasil diperbarui');
-        setAlertType('success');
-        setShowEditModal(false);
-        fetchSavingsData(); // Refresh data
-        setTimeout(() => { setAlert(''); setAlertType(''); }, 3000);
-      } else {
-        setAlert(response.message || 'Gagal memperbarui target tabungan');
-        setAlertType('error');
-      }
-    } catch (err) {
-      setAlert('Terjadi kesalahan saat memperbarui target tabungan');
-      setAlertType('error');
-      console.error('Update target error:', err);
+    setLoading(true); // Menampilkan loading state
+    const result = await controller.updateSavingsTarget(selectedSavings.id, newTarget);
+    setAlert(result.message);
+    setAlertType(result.alertType || '');
+    
+    if (result.success) {
+      setShowEditModal(false);
+      // Refresh data setelah berhasil update
+      await fetchSavingsData();
+      setTimeout(() => { setAlert(''); setAlertType(''); }, 3000);
+    } else {
+      setLoading(false); // Hentikan loading jika gagal
     }
   };
 
@@ -209,7 +163,7 @@ export const SavingsPage = () => {
                 <div>
                   <p className="mb-2 text-sm font-medium text-gray-600">Total Savings Target</p>
                   <p id="totalSavings" className="text-lg font-semibold text-gray-700">
-                    {`Rp ${Number(totalTarget || 0).toLocaleString('id-ID')}`}
+                    {SavingsModel.formatCurrency(totalTarget)}
                   </p>
                 </div>
               </div>
@@ -222,7 +176,7 @@ export const SavingsPage = () => {
                 <div>
                   <p className="mb-2 text-sm font-medium text-gray-600">Savings Collected</p>
                   <p id="savingsCollected" className="text-lg font-semibold text-gray-700">
-                    {`Rp ${Number(totalCollected || 0).toLocaleString('id-ID')}`}
+                    {SavingsModel.formatCurrency(totalCollected)}
                   </p>
                 </div>
               </div>
@@ -242,13 +196,13 @@ export const SavingsPage = () => {
                     <p className="text-gray-600 mb-4">{s.deskripsi}</p>
                     <div className="mb-2">
                       <p className="text-sm font-medium text-gray-500">Target</p>
-                      <p className="text-lg font-semibold text-gray-700">Rp {s.target.toLocaleString('id-ID')}</p>
+                      <p className="text-lg font-semibold text-gray-700">{SavingsModel.formatCurrency(s.target)}</p>
                     </div>
                     <div className="mb-2">
                       <p className="text-sm font-medium text-gray-500">Amount Collected</p>
-                      <p className="text-lg font-semibold text-green-600">Rp {s.terkumpul.toLocaleString('id-ID')}</p>
+                      <p className="text-lg font-semibold text-green-600">{SavingsModel.formatCurrency(s.terkumpul)}</p>
                     </div>
-                    {s.target !== s.terkumpul && s.target > s.terkumpul ? (
+                    {!s.isTargetAchieved() ? (
                       <>
                         <Link to={`/addtosavings/${s.id}`}>
                           <button className="mt-4 mr-2 bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600">
