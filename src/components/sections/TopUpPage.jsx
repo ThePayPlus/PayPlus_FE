@@ -1,30 +1,32 @@
-import React, { useState } from 'react';
-import BRI from '../../assets/BRI.png';
-import BCA from '../../assets/BCA.png';
-import BNI from '../../assets/BNI.png';
-import Mandiri from '../../assets/mandiri.png';
-import Jatim from '../../assets/jatim.png';
-import Bali from '../../assets/bali.png';
-import BJB from '../../assets/bjb.png';
-import Kalteng from '../../assets/kalteng.png';
-import Sumsel from '../../assets/sumsel.png';
-
-const bankOptions = [
-  { name: 'BRI', image: BRI },
-  { name: 'BCA', image: BCA },
-  { name: 'BNI', image: BNI },
-  { name: 'Mandiri', image: Mandiri },
-  { name: 'Bank Jatim', image: Jatim },
-  { name: 'Bank Bali', image: Bali },
-  { name: 'Bank BJB', image: BJB },
-  { name: 'Bank Kalteng', image: Kalteng },
-  { name: 'Bank Sumsel', image: Sumsel },
-];
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import TopUpController from '../../controllers/TopUpController';
 
 export const TopUpPage = () => {
+  const controller = new TopUpController();
+  const bankOptions = controller.getBankOptions();
+  
+  const navigate = useNavigate();
   const [selectedBank, setSelectedBank] = useState(bankOptions[0].name);
   const [topup, setTopup] = useState('');
-  const [saldo, setSaldo] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
+  const [redirectCountdown, setRedirectCountdown] = useState(null);
+
+  useEffect(() => {
+    let timer;
+    if (redirectCountdown !== null) {
+      if (redirectCountdown <= 0) {
+        navigate('/Dashboard');
+      } else {
+        timer = setTimeout(() => {
+          setRedirectCountdown(redirectCountdown - 1);
+        }, 1000);
+      }
+    }
+    return () => clearTimeout(timer);
+  }, [redirectCountdown, navigate]);
 
   const handleBankChange = (e) => {
     setSelectedBank(e.target.value);
@@ -32,18 +34,28 @@ export const TopUpPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
+    setResult(null);
+    setRedirectCountdown(null);
+    
     try {
-      const response = await fetch('/User?action=topup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({ topup }),
-      });
-      const result = await response.text();
-      setSaldo(result);
+      const response = await controller.processTopUp(topup);
+      
+      if (response.success) {
+        setResult({
+          message: response.message,
+          amount: response.data.amount,
+          newBalance: response.data.newBalance
+        });
+        setRedirectCountdown(3); // Mulai hitung mundur 3 detik
+      } else {
+        setError(response.message);
+      }
     } catch (error) {
-      console.error('Topup error:', error);
+      setError('Terjadi kesalahan saat melakukan top up');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,9 +65,9 @@ export const TopUpPage = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <a href="/Dashboard">
+              <Link to="/dashboard">
                 <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" className="h-10" />
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -69,12 +81,12 @@ export const TopUpPage = () => {
             ))}
           </select>
           <div className="flex justify-center mt-4">
-            <img src={bankOptions.find(bank => bank.name === selectedBank).image} alt={selectedBank} className="h-10" />
+            <img src={controller.getBankImage(selectedBank)} alt={selectedBank} className="h-10" />
           </div>
           <form onSubmit={handleSubmit} className="flex flex-col items-center mt-4">
             <div className="relative w-full mb-4">
               <input
-                type="text"
+                type="number"
                 name="topup"
                 value={topup}
                 onChange={(e) => setTopup(e.target.value)}
@@ -83,9 +95,29 @@ export const TopUpPage = () => {
                 required
               />
             </div>
-            <button type="submit" className="p-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none w-full">Confirm</button>
+            <button 
+              type="submit" 
+              className="p-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none w-full"
+              disabled={loading}
+            >
+              {loading ? 'Processing...' : 'Confirm'}
+            </button>
           </form>
-          {saldo && <h4 className="text-green-500 mt-4 text-center">{saldo}</h4>}
+          
+          {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
+          
+          {result && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+              <p className="text-green-600 text-center font-medium">{result.message}</p>
+              <p className="text-gray-700 text-center mt-2">Amount: Rp{result.amount.toLocaleString()}</p>
+              <p className="text-gray-700 text-center">New Balance: Rp{result.newBalance.toLocaleString()}</p>
+              {redirectCountdown !== null && (
+                <p className="text-blue-600 text-center mt-2">
+                  Redirecting to Dashboard in {redirectCountdown} second{redirectCountdown !== 1 ? 's' : ''}...
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </main>
     </div>

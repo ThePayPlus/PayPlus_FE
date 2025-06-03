@@ -596,6 +596,29 @@ class ApiService {
     }
   }
 
+  // Top up balance
+  static async topup(amount) {
+    try {
+      const response = await ApiService.api.post('/topup', {
+        amount: parseInt(amount),
+      });
+
+      return {
+        success: true,
+        message: response.data.message || 'Top up berhasil',
+        data: {
+          amount: response.data.amount,
+          newBalance: response.data.newBalance
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Gagal melakukan top up',
+      };
+    }
+  }
+
   // Send message to chatbot
   static async sendChatbotMessage(message) {
     try {
@@ -621,3 +644,6 @@ ApiService.initializeAuth();
 
 export default ApiService;
 export { ApiService };
+
+
+  
