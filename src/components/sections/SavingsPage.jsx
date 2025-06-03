@@ -10,6 +10,10 @@ export const SavingsPage = () => {
   const [totalCollected, setTotalCollected] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // State baru untuk edit target
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedSavings, setSelectedSavings] = useState(null);
+  const [newTarget, setNewTarget] = useState('');
 
   useEffect(() => {
     fetchSavingsData();
@@ -113,6 +117,37 @@ export const SavingsPage = () => {
         setAlertType('error');
         console.error('Delete savings error:', err);
       }
+    }
+  };
+
+  // Fungsi untuk menampilkan modal edit target
+  const handleShowEditModal = (savings) => {
+    setSelectedSavings(savings);
+    setNewTarget(savings.target.toString());
+    setShowEditModal(true);
+  };
+
+  // Fungsi untuk menyimpan target baru
+  const handleUpdateTarget = async () => {
+    if (!selectedSavings || !newTarget) return;
+    
+    try {
+      const response = await ApiService.updateSavingsTarget(selectedSavings.id, newTarget);
+      
+      if (response.success) {
+        setAlert('Target tabungan berhasil diperbarui');
+        setAlertType('success');
+        setShowEditModal(false);
+        fetchSavingsData(); // Refresh data
+        setTimeout(() => { setAlert(''); setAlertType(''); }, 3000);
+      } else {
+        setAlert(response.message || 'Gagal memperbarui target tabungan');
+        setAlertType('error');
+      }
+    } catch (err) {
+      setAlert('Terjadi kesalahan saat memperbarui target tabungan');
+      setAlertType('error');
+      console.error('Update target error:', err);
     }
   };
 
@@ -221,6 +256,12 @@ export const SavingsPage = () => {
                           </button>
                         </Link>
                         <button 
+                          onClick={() => handleShowEditModal(s)}
+                          className="mt-4 mr-2 bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600"
+                        >
+                          Edit Target
+                        </button>
+                        <button 
                           onClick={() => handleDeleteSavings(s.id)}
                           className="mt-4 bg-red-500 text-white px-4 py-2 rounded shadow hover:bg-red-700"
                         >
@@ -249,6 +290,42 @@ export const SavingsPage = () => {
           </>
         )}
       </main>
+      
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h2 className="text-xl font-semibold mb-4">Edit Target Tabungan</h2>
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="newTarget">
+                Target Baru
+              </label>
+              <input
+                id="newTarget"
+                type="number"
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                value={newTarget}
+                onChange={(e) => setNewTarget(e.target.value)}
+                min="0"
+                required
+              />
+            </div>
+            <div className="flex justify-end">
+              <button
+                className="mr-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+                onClick={() => setShowEditModal(false)}
+              >
+                Batal
+              </button>
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                onClick={handleUpdateTarget}
+              >
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
