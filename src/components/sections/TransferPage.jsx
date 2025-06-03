@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Search, User, Send, ArrowLeft, CheckCircle, AlertCircle, Gift } from 'lucide-react';
 import { TransferController } from '../../controllers/TransferController.js';
 
 export const TransferPage = () => {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     step: 1,
     searchQuery: '',
@@ -316,7 +315,7 @@ export const TransferPage = () => {
 
               <div className="mb-6">
                 <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                  Message {transferType === 'gift' ? '' : '(Optional)'}
+                  Message (Only for Gift)
                 </label>
                 <textarea
                   id="message"
@@ -324,9 +323,14 @@ export const TransferPage = () => {
                   onChange={(e) => handleChange('message', e.target.value)}
                   className="p-3 w-full border rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
                   rows="3"
-                  placeholder={transferType === 'gift' ? "Write a message for your gift" : "Write a message for the recipient"}
+                  placeholder="Write a message for your gift"
                   required={transferType === 'gift'}
+                  disabled={transferType !== 'gift'}
+                  style={transferType !== 'gift' ? { backgroundColor: '#f3f4f6', color: '#a1a1aa', cursor: 'not-allowed' } : {}}
                 ></textarea>
+                {transferType !== 'gift' && (
+                  <p className="text-xs text-gray-400 mt-1">Message can only be filled for Gift transfers.</p>
+                )}
               </div>
 
               {error && <p className="text-red-500 mb-4">{error}</p>}
