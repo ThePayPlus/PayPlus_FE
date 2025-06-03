@@ -36,7 +36,7 @@ export default function Expense() {
   }, []);
 
   useEffect(() => {
-    setFilteredRecords(ExpenseController.filterRecordsByType(ExpenseData.expenseRecords, activeFilter))
+    setFilteredRecords(ExpenseController.filterRecordsByType(expenseData.expenseRecords, activeFilter))
   }, [activeFilter, expenseData.expenseRecords])
 
   const chartData = ExpenseController.prepareChartData(
