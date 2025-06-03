@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, User } from 'lucide-react';
-import { ApiService } from '../../services/apiService';
+import { Send, User, Trash2 } from 'lucide-react';
+import ChatController from '../../controllers/ChatController.js';
+import Message from '../../models/MessageModel.js';
 
-const ChatRoom = ({ friend, onBack, ws }) => {
+const ChatRoom = ({ friend, ws }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -25,7 +26,8 @@ const ChatRoom = ({ friend, onBack, ws }) => {
         const isMyMessage = data.sender === myPhone;
 
         if (!isMyMessage || !data.isLocalMessage) {
-          setMessages((prev) => [...prev, data]);
+          const newMessage = Message.fromJson(data);
+          setMessages((prev) => [...prev, newMessage]);
         }
       }
     };
@@ -52,7 +54,7 @@ const ChatRoom = ({ friend, onBack, ws }) => {
       ws.current.on('stop-typing', handleStopTyping);
 
       // Emit a join-room event to ensure proper room connection
-      ws.current.emit('join-chat', { friendPhone: friend.phone });
+      ChatController.joinChatRoom(ws.current, friend.phone);
     }
 
     return () => {
@@ -73,7 +75,7 @@ const ChatRoom = ({ friend, onBack, ws }) => {
   const fetchMessages = async (friendPhone) => {
     try {
       setLoadingMessages(true);
-      const response = await ApiService.getMessages(friendPhone);
+      const response = await ChatController.getMessages(friendPhone);
       if (response.success) {
         setMessages(response.messages || []);
       } else {
@@ -89,38 +91,21 @@ const ChatRoom = ({ friend, onBack, ws }) => {
   const handleSendMessage = () => {
     if (!newMessage.trim() || !friend) return;
 
-    try {
-      const messageData = {
-        receiver: friend.phone,
-        message: newMessage,
-      };
+    const messageData = {
+      receiver: friend.phone,
+      message: newMessage,
+    };
 
-      console.log('Sending message:', messageData);
+    ChatController.sendMessage(ws.current, messageData, (result) => {
+      if (result.success) {
+        setMessages((prev) => [...prev, result.message]);
+      } else {
+        console.error('Failed to send message:', result.message);
+      }
+    });
 
-      // Send via Socket.IO
-      ws.current.emit('message', messageData, (acknowledgement) => {
-        console.log('Message acknowledgement:', acknowledgement);
-
-        // Hanya tambahkan pesan ke state jika tidak ada acknowledgement error
-        if (!acknowledgement || !acknowledgement.error) {
-          // Add message to local state immediately for better UX
-          const myPhone = localStorage.getItem('user_phone');
-          const newMsg = {
-            sender: myPhone,
-            receiver: friend.phone,
-            message: newMessage,
-            sent_at: new Date().toISOString(),
-            isLocalMessage: true,
-          };
-          setMessages((prev) => [...prev, newMsg]);
-        }
-      });
-
-      // Clear input field
-      setNewMessage('');
-    } catch (err) {
-      console.error('Send message error:', err);
-    }
+    // Clear input field
+    setNewMessage('');
   };
 
   const handleTypingIndicator = () => {
@@ -130,38 +115,56 @@ const ChatRoom = ({ friend, onBack, ws }) => {
     if (typingTimeout) clearTimeout(typingTimeout);
 
     // Send typing event
-    console.log('Sending typing indicator to:', friend.phone);
-    ws.current.emit('typing', { receiver: friend.phone });
+    ChatController.sendTypingIndicator(ws.current, friend.phone);
 
     // Set timeout to stop typing after 2 seconds of inactivity
     const timeout = setTimeout(() => {
-      console.log('Sending stop typing indicator to:', friend.phone);
-      ws.current.emit('stop-typing', { receiver: friend.phone });
+      ChatController.sendStopTypingIndicator(ws.current, friend.phone);
     }, 2000);
 
     setTypingTimeout(timeout);
   };
 
-  const formatTime = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const handleDeleteFriend = async () => {
+    if (!friend) return;
+
+    if (window.confirm(`Apakah Anda yakin ingin menghapus ${friend.name} dari daftar teman?`)) {
+      try {
+        const response = await ChatController.deleteFriend(friend.phone);
+        if (response.success) {
+          alert(response.message);
+          // Redirect ke halaman utama atau refresh daftar teman
+          window.location.reload();
+        } else {
+          alert(`Gagal menghapus teman: ${response.message}`);
+        }
+      } catch (err) {
+        console.error('Delete friend error:', err);
+        alert('Terjadi kesalahan saat menghapus teman');
+      }
+    }
   };
 
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="bg-gray-100 p-3 border-b border-gray-200">
-        <div className="flex items-center">
-          <div className="relative">
-            <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-              <User className="w-5 h-5 text-indigo-600" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="relative">
+              <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                <User className="w-5 h-5 text-indigo-600" />
+              </div>
+              <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
             </div>
-            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+            <div className="ml-3">
+              <h3 className="font-medium text-gray-900">{friend.name}</h3>
+              <p className="text-xs text-gray-500">{friend.phone}</p>
+            </div>
           </div>
-          <div className="ml-3">
-            <h3 className="font-medium text-gray-900">{friend.name}</h3>
-            <p className="text-xs text-gray-500">{friend.phone}</p>
-          </div>
+          <button onClick={handleDeleteFriend} className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors" title="Hapus teman">
+            <Trash2 className="w-5 h-5" />
+          </button>
         </div>
       </div>
 
@@ -180,16 +183,14 @@ const ChatRoom = ({ friend, onBack, ws }) => {
         ) : (
           <div className="space-y-3">
             {messages.map((msg, index) => {
-              const myPhone = localStorage.getItem('user_phone');
-              const senderPhone = msg.sender_phone || msg.sender;
-              const isSentByMe = String(senderPhone) === String(myPhone);
+              const isSentByMe = msg.isSentByMe();
               return (
                 <div key={index} className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[70%] px-4 py-2 rounded-lg ${isSentByMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none'}`}>
                     <p>{msg.message}</p>
                   </div>
                   <div className={`flex items-end ${isSentByMe ? 'ml-2' : 'mr-2'}`}>
-                    <p className={`text-xs ${isSentByMe ? 'text-gray-500' : 'text-gray-500'}`}>{formatTime(msg.sent_at)}</p>
+                    <p className={`text-xs ${isSentByMe ? 'text-gray-500' : 'text-gray-500'}`}>{msg.formatTime()}</p>
                   </div>
                 </div>
               );

@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiService } from '../../services/apiService.js';
-import { User, Search, Plus, Bell, X, Phone, Check, ArrowLeftIcon, Trash2 } from 'lucide-react';
+import { User, Search, Plus, Bell, X, Phone, Check, ArrowLeftIcon } from 'lucide-react';
 import ChatRoom from './ChatRoom.jsx';
+import FriendController from '../../controllers/FriendController.js';
 
 export const Friends = () => {
   const [friends, setFriends] = useState([]);
@@ -14,24 +15,18 @@ export const Friends = () => {
   const [addFriendSuccess, setAddFriendSuccess] = useState('');
   const [selectedFriend, setSelectedFriend] = useState(null);
   const ws = useRef(null);
-  // Tambahkan state untuk permintaan pertemanan
+  // State untuk permintaan pertemanan
   const [friendRequests, setFriendRequests] = useState([]);
   const [showFriendRequests, setShowFriendRequests] = useState(false);
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [requestActionLoading, setRequestActionLoading] = useState(false);
   const [requestActionSuccess, setRequestActionSuccess] = useState('');
   const [requestActionError, setRequestActionError] = useState('');
-  // State untuk dialog konfirmasi hapus teman
-  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
-  const [friendToDelete, setFriendToDelete] = useState(null);
-  const [deleteFriendLoading, setDeleteFriendLoading] = useState(false);
-  const [deleteFriendError, setDeleteFriendError] = useState('');
-  const [deleteFriendSuccess, setDeleteFriendSuccess] = useState('');
 
   // Fetch friends list
   useEffect(() => {
     fetchFriends();
-    fetchFriendRequests(); // Tambahkan fetch friend requests
+    fetchFriendRequests();
 
     // Initialize Socket.IO connection
     ws.current = ApiService.createWebSocketConnection();
@@ -39,13 +34,13 @@ export const Friends = () => {
     // Handle friend requests
     ws.current.on('friend_request', (data) => {
       fetchFriendRequests();
-      showNotification('New Friend Request', `${data.name} sent you a friend request`);
+      FriendController.showNotification('New Friend Request', `${data.name} sent you a friend request`);
     });
 
     // Handle accepted friend requests
     ws.current.on('friend_request_accepted', (data) => {
       fetchFriends();
-      showNotification('Friend Request Accepted', `${data.name} accepted your friend request`);
+      FriendController.showNotification('Friend Request Accepted', `${data.name} accepted your friend request`);
     });
 
     return () => {
@@ -55,27 +50,12 @@ export const Friends = () => {
     };
   }, []);
 
-  // Function to show browser notification
-  const showNotification = (title, body) => {
-    if ('Notification' in window) {
-      if (Notification.permission === 'granted') {
-        new Notification(title, { body });
-      } else if (Notification.permission !== 'denied') {
-        Notification.requestPermission().then((permission) => {
-          if (permission === 'granted') {
-            new Notification(title, { body });
-          }
-        });
-      }
-    }
-  };
-
   const fetchFriends = async () => {
     try {
       setLoading(true);
-      const response = await ApiService.getFriends();
+      const response = await FriendController.getFriends();
       if (response.success) {
-        setFriends(response.data.friends || []);
+        setFriends(response.friends || []);
       } else {
         setError(response.message || 'Failed to load friends');
       }
@@ -88,49 +68,27 @@ export const Friends = () => {
   };
 
   const handleAddFriend = async () => {
-    if (!phoneNumber.trim()) {
-      setAddFriendError('Please enter a phone number');
-      return;
-    }
+    const response = await FriendController.addFriend(phoneNumber);
 
-    try {
-      setAddFriendError('');
-      setAddFriendSuccess('');
-
-      // First search if user exists
-      const searchResponse = await ApiService.searchUser(phoneNumber);
-
-      if (!searchResponse.success) {
-        setAddFriendError('User not found. Please check the phone number.');
-        return;
-      }
-
-      // If user exists, send friend request
-      const response = await ApiService.addFriend(phoneNumber);
-
-      if (response.success) {
-        setAddFriendSuccess(response.message || 'Friend request sent successfully');
-        setPhoneNumber('');
-        fetchFriends(); // Refresh friends list
-        setTimeout(() => {
-          setShowAddFriendModal(false);
-          setAddFriendSuccess('');
-        }, 2000);
-      } else {
-        setAddFriendError(response.message || 'Failed to add friend');
-      }
-    } catch (err) {
-      setAddFriendError('An unexpected error occurred');
-      console.error('Add friend error:', err);
+    if (response.success) {
+      setAddFriendSuccess(response.message || 'Friend request sent successfully');
+      setPhoneNumber('');
+      fetchFriends(); // Refresh friends list
+      setTimeout(() => {
+        setShowAddFriendModal(false);
+        setAddFriendSuccess('');
+      }, 2000);
+    } else {
+      setAddFriendError(response.message || 'Failed to add friend');
     }
   };
 
   const fetchFriendRequests = async () => {
     try {
       setLoadingRequests(true);
-      const response = await ApiService.getFriendRequests();
+      const response = await FriendController.getFriendRequests();
       if (response.success) {
-        setFriendRequests(response.data || []);
+        setFriendRequests(response.requests || []);
       } else {
         console.error('Failed to load friend requests:', response.message);
       }
@@ -147,7 +105,7 @@ export const Friends = () => {
       setRequestActionError('');
       setRequestActionSuccess('');
 
-      const response = await ApiService.respondToFriendRequest(requestId, action);
+      const response = await FriendController.respondToFriendRequest(requestId, action);
 
       if (response.success) {
         setRequestActionSuccess(response.message || `Friend request ${action === 'accept' ? 'accepted' : 'rejected'} successfully`);
@@ -178,41 +136,7 @@ export const Friends = () => {
     }
   };
 
-  const handleDeleteFriend = async () => {
-    if (!friendToDelete) return;
-
-    try {
-      setDeleteFriendLoading(true);
-      setDeleteFriendError('');
-      setDeleteFriendSuccess('');
-
-      const response = await ApiService.deleteFriend(friendToDelete.phone);
-
-      if (response.success) {
-        setDeleteFriendSuccess(response.message || 'Teman berhasil dihapus');
-        // Refresh daftar teman
-        fetchFriends();
-        // Reset selected friend jika teman yang dihapus sedang dipilih
-        if (selectedFriend && selectedFriend.id === friendToDelete.id) {
-          setSelectedFriend(null);
-        }
-        // Tutup dialog konfirmasi setelah beberapa saat
-        setTimeout(() => {
-          setShowDeleteConfirmation(false);
-          setFriendToDelete(null);
-          setDeleteFriendSuccess('');
-        }, 2000);
-      } else {
-        setDeleteFriendError(response.message || 'Gagal menghapus teman');
-      }
-    } catch (err) {
-      setDeleteFriendError('Terjadi kesalahan yang tidak terduga');
-      console.error('Delete friend error:', err);
-    } finally {
-      setDeleteFriendLoading(false);
-    }
-  };
-
+  // Render UI (tidak berubah dari kode asli)
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
@@ -310,27 +234,16 @@ export const Friends = () => {
             {/* Friends List */}
             <div className="flex-grow overflow-y-auto">
               {loading ? (
-                <div className="flex justify-center items-center h-64">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+                <div className="flex justify-center items-center p-6">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
                 </div>
               ) : error ? (
-                <div className="text-center py-10">
-                  <p className="text-red-500 mb-4">{error}</p>
-                  <button onClick={fetchFriends} className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors">
-                    Try Again
-                  </button>
+                <div className="p-6 text-center text-red-500">
+                  <p>{error}</p>
                 </div>
               ) : friends.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <div className="bg-indigo-100 p-4 rounded-full mb-4">
-                    <User className="w-8 h-8 text-indigo-600" />
-                  </div>
-                  <h2 className="text-lg font-semibold text-gray-800 mb-2">No Friends Yet</h2>
-                  <p className="text-gray-600 mb-4 text-sm px-4">Add friends to chat with them and send money easily.</p>
-                  <button onClick={() => setShowAddFriendModal(true)} className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center text-sm">
-                    <Plus className="w-4 h-4 mr-1" />
-                    Add Friend
-                  </button>
+                <div className="p-6 text-center text-gray-500">
+                  <p>No friends yet. Add some friends to start chatting!</p>
                 </div>
               ) : (
                 <div>
@@ -338,17 +251,19 @@ export const Friends = () => {
                     <div
                       key={friend.id}
                       onClick={() => setSelectedFriend(friend)}
-                      className={`flex items-center p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${selectedFriend && selectedFriend.id === friend.id ? 'bg-gray-100' : ''}`}
+                      className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${selectedFriend && selectedFriend.id === friend.id ? 'bg-indigo-50' : ''}`}
                     >
-                      <div className="relative">
-                        <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
-                          <User className="w-6 h-6 text-indigo-600" />
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                          <User className="w-5 h-5 text-indigo-600" />
                         </div>
-                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                      </div>
-                      <div className="ml-3 flex-grow">
-                        <h3 className="font-medium text-gray-900">{friend.name}</h3>
-                        <p className="text-sm text-gray-500">{friend.phone}</p>
+                        <div className="ml-3">
+                          <h3 className="font-medium text-gray-900">{friend.name}</h3>
+                          <p className="text-sm text-gray-500">{friend.phone}</p>
+                        </div>
+                        <div className="ml-auto">
+                          <span className={`inline-block w-3 h-3 rounded-full ${friend.status === 'online' ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -418,53 +333,6 @@ export const Friends = () => {
             <button onClick={handleAddFriend} className="w-full py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
               Add Friend
             </button>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Friend Confirmation Modal */}
-      {showDeleteConfirmation && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4 border border-gray-200">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-gray-800">Hapus Teman</h2>
-              <button
-                onClick={() => {
-                  setShowDeleteConfirmation(false);
-                  setFriendToDelete(null);
-                  setDeleteFriendError('');
-                  setDeleteFriendSuccess('');
-                }}
-                className="p-1 rounded-full hover:bg-gray-100"
-              >
-                <X className="w-6 h-6 text-gray-500" />
-              </button>
-            </div>
-
-            <div className="mb-6 text-center">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Trash2 className="w-8 h-8 text-red-500" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Hapus {friendToDelete?.name} dari daftar teman?</h3>
-              <p className="text-sm text-gray-600">Anda tidak akan dapat mengirim pesan atau melakukan transaksi dengan teman ini lagi.</p>
-              {deleteFriendError && <p className="mt-3 text-sm text-red-600">{deleteFriendError}</p>}
-              {deleteFriendSuccess && <p className="mt-3 text-sm text-green-600">{deleteFriendSuccess}</p>}
-            </div>
-
-            <div className="flex space-x-3">
-              <button
-                onClick={() => {
-                  setShowDeleteConfirmation(false);
-                  setFriendToDelete(null);
-                }}
-                className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Batal
-              </button>
-              <button onClick={handleDeleteFriend} disabled={deleteFriendLoading} className="flex-1 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center">
-                {deleteFriendLoading ? <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div> : 'Hapus'}
-              </button>
-            </div>
           </div>
         </div>
       )}

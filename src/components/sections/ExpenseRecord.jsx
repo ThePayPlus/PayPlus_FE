@@ -1,13 +1,13 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { Doughnut } from "react-chartjs-2"
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js"
-import { Link } from "react-router-dom"
-import ExpenseController from "../../controllers/ExpenseController"
+import { useState, useEffect } from 'react';
+import { Doughnut } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Link } from 'react-router-dom';
+import ExpenseController from '../../controllers/ExpenseController';
 
 // Register Chart.js components
-ChartJS.register(ArcElement, Tooltip, Legend)
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default function Expense() {
   const [expenseData, setExpenseData] = useState({
@@ -16,11 +16,11 @@ export default function Expense() {
     normalExpense: 0,
     giftExpense: 0,
     expenseRecords: [],
-  })
+  });
 
-  const [activeFilter, setActiveFilter] = useState("all")
-  const [filteredRecords, setFilteredRecords] = useState([])
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [filteredRecords, setFilteredRecords] = useState([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchExpenseRecords = async () => {
@@ -36,13 +36,10 @@ export default function Expense() {
   }, []);
 
   useEffect(() => {
-    setFilteredRecords(ExpenseController.filterRecordsByType(expenseData.expenseRecords, activeFilter))
-  }, [activeFilter, expenseData.expenseRecords])
+    setFilteredRecords(ExpenseController.filterRecordsByType(expenseData.expenseRecords, activeFilter));
+  }, [activeFilter, expenseData.expenseRecords]);
 
-  const chartData = ExpenseController.prepareChartData(
-    expenseData.normalExpense, 
-    expenseData.giftExpense
-  );
+  const chartData = ExpenseController.prepareChartData(expenseData.normalExpense, expenseData.giftExpense);
 
   const chartOptions = ExpenseController.getChartOptions();
 
@@ -72,10 +69,7 @@ export default function Expense() {
               </Link>
             </nav>
             <div className="sm:hidden">
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
-              >
+              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
@@ -84,34 +78,19 @@ export default function Expense() {
           </div>
           {mobileMenuOpen && (
             <div className="sm:hidden py-2 pb-4">
-              <Link
-                to="/dashboard"
-                className="block px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
-              >
+              <Link to="/dashboard" className="block px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Dashboard
               </Link>
-              <Link
-                to="/transfer"
-                className="block px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
-              >
+              <Link to="/transfer" className="block px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Transfer
               </Link>
-              <Link
-                to="/savings"
-                className="block px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
-              >
+              <Link to="/savings" className="block px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Savings
               </Link>
-              <Link
-                to="/bills"
-                className="block px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
-              >
+              <Link to="/bills" className="block px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Bills
               </Link>
-              <Link
-                to="/income"
-                className="block px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
-              >
+              <Link to="/income" className="block px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Incomes
               </Link>
             </div>
@@ -129,23 +108,15 @@ export default function Expense() {
           <div className="flex items-center p-4 bg-white rounded-lg shadow-xs">
             <div className="p-3 mr-4 text-green-500 bg-green-100 rounded-full">
               <svg className="w-5 h-5" fill="currentColor" viewBox="1 1 22 22">
-                <path
-                  fillRule="evenodd"
-                  d="M7 6a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-2v-4a3 3 0 0 0-3-3H7V6Z"
-                  clipRule="evenodd"
-                />
-                <path
-                  fillRule="evenodd"
-                  d="M2 11a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7Zm7.5 1a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"
-                  clipRule="evenodd"
-                />
+                <path fillRule="evenodd" d="M7 6a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-2v-4a3 3 0 0 0-3-3H7V6Z" clipRule="evenodd" />
+                <path fillRule="evenodd" d="M2 11a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7Zm7.5 1a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" clipRule="evenodd" />
                 <path d="M10.5 14.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" />
               </svg>
             </div>
             <div>
               <p className="mb-2 text-sm font-medium text-gray-600">Total Expense</p>
               <p id="totalExpense" className="text-lg font-semibold text-gray-700">
-              p. {ExpenseController.formatCurrency(expenseData.totalExpense)}
+                Rp. {ExpenseController.formatCurrency(expenseData.totalExpense)}
               </p>
             </div>
           </div>
@@ -184,11 +155,7 @@ export default function Expense() {
           <div className="flex items-center p-4 bg-white rounded-lg shadow-xs">
             <div className="p-3 mr-4 text-purple-500 bg-purple-100 rounded-full">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17C5.06 5.687 5 5.35 5 5zm4 1V5a1 1 0 10-1 1h1zm3 0a1 1 0 10-1-1v1h1z"
-                  clipRule="evenodd"
-                ></path>
+                <path fillRule="evenodd" d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17C5.06 5.687 5 5.35 5 5zm4 1V5a1 1 0 10-1 1h1zm3 0a1 1 0 10-1-1v1h1z" clipRule="evenodd"></path>
                 <path d="M9 11H3v5a2 2 0 002 2h4v-7zM11 18h4a2 2 0 002-2v-5h-6v7z"></path>
               </svg>
             </div>
@@ -204,7 +171,7 @@ export default function Expense() {
         {/* Expense Distribution Chart */}
         <div className="mb-8 bg-white rounded-lg shadow-xs p-4 flex flex-col items-center">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">Expense Distribution</h2>
-          <div style={{ width: "300px", height: "150px" }}>
+          <div style={{ width: '300px', height: '150px' }}>
             <Doughnut data={chartData} options={chartOptions} />
           </div>
         </div>
@@ -214,26 +181,20 @@ export default function Expense() {
           <h2 className="text-2xl font-semibold text-gray-800">Recent Transactions</h2>
           <div className="space-x-2 mt-2 sm:mt-0">
             <button
-              onClick={() => setActiveFilter("all")}
-              className={`filter-btn px-4 py-2 rounded-md transition-all duration-300 hover:bg-blue-500 hover:text-white ${
-                activeFilter === "all" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
-              }`}
+              onClick={() => setActiveFilter('all')}
+              className={`filter-btn px-4 py-2 rounded-md transition-all duration-300 hover:bg-blue-500 hover:text-white ${activeFilter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
             >
               All
             </button>
             <button
-              onClick={() => setActiveFilter("normal")}
-              className={`filter-btn px-4 py-2 rounded-md transition-all duration-300 hover:bg-blue-500 hover:text-white ${
-                activeFilter === "normal" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
-              }`}
+              onClick={() => setActiveFilter('normal')}
+              className={`filter-btn px-4 py-2 rounded-md transition-all duration-300 hover:bg-blue-500 hover:text-white ${activeFilter === 'normal' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
             >
               Normal
             </button>
             <button
-              onClick={() => setActiveFilter("gift")}
-              className={`filter-btn px-4 py-2 rounded-md transition-all duration-300 hover:bg-blue-500 hover:text-white ${
-                activeFilter === "gift" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
-              }`}
+              onClick={() => setActiveFilter('gift')}
+              className={`filter-btn px-4 py-2 rounded-md transition-all duration-300 hover:bg-blue-500 hover:text-white ${activeFilter === 'gift' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'}`}
             >
               Gift
             </button>
@@ -244,16 +205,10 @@ export default function Expense() {
         <div id="expenseCards" className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredRecords.length > 0 ? (
             filteredRecords.map((expense, index) => (
-              <div
-                key={expense.id}
-                className="bg-white shadow rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg expense-card"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
+              <div key={expense.id} className="bg-white shadow rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg expense-card" style={{ animationDelay: `${index * 0.1}s` }}>
                 <div className="p-6">
                   <div className="flex justify-between items-center mb-4">
-                    <span className="text-2xl font-bold text-gray-800">
-                      Rp. {ExpenseController.formatCurrency(expense.amount)}
-                    </span>
+                    <span className="text-2xl font-bold text-gray-800">Rp. {ExpenseController.formatCurrency(expense.amount)}</span>
                     <span className="text-sm font-medium text-gray-500">{expense.date}</span>
                   </div>
                   <div className="space-y-2">
@@ -263,12 +218,9 @@ export default function Expense() {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Type:</span>
-                      <span
-                        className={`font-medium ${ExpenseController.getExpenseTypeClass(expense.type)}`}>
-                        {ExpenseController.capitalizeExpenseType(expense.type)}
-                      </span>
+                      <span className={`font-medium ${ExpenseController.getExpenseTypeClass(expense.type)}`}>{ExpenseController.capitalizeExpenseType(expense.type)}</span>
                     </div>
-                    {expense.type === "gift" && expense.message && (
+                    {expense.type === 'gift' && expense.message && (
                       <div className="mt-4">
                         <span className="text-sm text-gray-600">Message:</span>
                         <p className="mt-1 text-sm text-gray-800">{expense.message}</p>
@@ -303,5 +255,5 @@ export default function Expense() {
         }
       `}</style>
     </div>
-  )
+  );
 }

@@ -4,7 +4,7 @@ import { io } from 'socket.io-client';
 class ApiService {
   // Base URL for the backend API
   static baseUrl = 'http://localhost:3000/api';
-  static wsUrl = 'wss://78nvh33s-3000.asse.devtunnels.ms';
+  static wsUrl = 'ws://localhost:3000';
 
   // Token storage key
   static tokenKey = 'auth_token';
@@ -608,8 +608,8 @@ class ApiService {
         message: response.data.message || 'Top up berhasil',
         data: {
           amount: response.data.amount,
-          newBalance: response.data.newBalance
-        }
+          newBalance: response.data.newBalance,
+        },
       };
     } catch (error) {
       return {
@@ -644,6 +644,3 @@ ApiService.initializeAuth();
 
 export default ApiService;
 export { ApiService };
-
-
-  
