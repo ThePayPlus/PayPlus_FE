@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { ApiService } from '../../services/apiService.js';
 import { ArrowDownLeft, ArrowUpRight, ChevronRight, CreditCard, Droplet, File, Heart, Home, Send, Truck, Wifi, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SavingsModel } from '../../models/SavingsModel.js';
 
 export const Dashboard = () => {
   const [userData, setUserData] = useState(null);
@@ -54,14 +55,26 @@ export const Dashboard = () => {
             billsTotal = upcomingBills.reduce((total, bill) => total + bill.amount, 0);
           }
 
-          // Process savings data (this would typically come from an API, but we'll use mock data for now)
-          // In a real app, you would fetch this from a savings API endpoint
-          const savingsTotal = balance * 0.2; // Assuming 20% of balance is savings for demo purposes
-          const savingsGoals = [
-            { name: 'New Car', collected: savingsTotal * 0.5, target: savingsTotal * 1.5 },
-            { name: 'Vacation', collected: savingsTotal * 0.3, target: savingsTotal * 0.8 },
-            { name: 'Emergency Fund', collected: savingsTotal * 0.2, target: savingsTotal * 1.2 },
-          ];
+          // Fetch real savings data from API
+          const savingsResponse = await ApiService.getSavings();
+          let savingsTotal = 0;
+          let savingsGoals = [];
+
+          if (savingsResponse.success && savingsResponse.data) {
+            // Get total savings amount from summary
+            savingsTotal = parseInt(savingsResponse.data.summary.total_terkumpul) || 0;
+            
+            // Map savings records to goals format
+            savingsGoals = savingsResponse.data.records.map(record => {
+              // Create a SavingsModel instance for each record
+              const savingsModel = new SavingsModel(record);
+              return {
+                name: savingsModel.namaSavings,
+                collected: parseInt(savingsModel.terkumpul),
+                target: parseInt(savingsModel.target)
+              };
+            });
+          }
 
           setFinancialData({
             balance: balance || 0,
