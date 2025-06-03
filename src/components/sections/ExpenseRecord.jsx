@@ -40,8 +40,8 @@ export default function Expense() {
   }, [activeFilter, expenseData.expenseRecords])
 
   const chartData = ExpenseController.prepareChartData(
-    expenseData.normalIncome, 
-    expenseData.giftIncome
+    expenseData.normalExpense, 
+    expenseData.giftExpense
   );
 
   const chartOptions = ExpenseController.getChartOptions();
