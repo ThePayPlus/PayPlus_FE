@@ -371,8 +371,17 @@ class ApiService {
   // Update savings target
   static async updateSavingsTarget(savingsId, newTarget) {
     try {
+      // Validasi target tidak boleh 0 atau negatif
+      const targetValue = parseInt(newTarget);
+      if (targetValue <= 0) {
+        return {
+          success: false,
+          message: 'Target tabungan tidak boleh 0 atau negatif',
+        };
+      }
+      
       const response = await ApiService.api.patch(`/savings/${savingsId}/update-target`, {
-        target: parseInt(newTarget),
+        target: targetValue,
       });
       return {
         success: true,

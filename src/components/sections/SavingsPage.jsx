@@ -19,6 +19,7 @@ export const SavingsPage = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedSavings, setSelectedSavings] = useState(null);
   const [newTarget, setNewTarget] = useState('');
+  const [modalError, setModalError] = useState(''); // Tambahkan state untuk error di modal
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Mengambil data saat komponen dimuat
@@ -92,17 +93,29 @@ export const SavingsPage = () => {
   const handleUpdateTarget = async () => {
     if (!selectedSavings || !newTarget) return;
     
+    // Reset modal error sebelum validasi
+    setModalError('');
+    
+    // Validasi target tidak boleh 0 atau negatif
+    const targetValue = parseInt(newTarget);
+    if (targetValue <= 0) {
+      setModalError('Target tabungan tidak boleh 0 atau negatif');
+      return;
+    }
+    
     setLoading(true); // Menampilkan loading state
     const result = await controller.updateSavingsTarget(selectedSavings.id, newTarget);
-    setAlert(result.message);
-    setAlertType(result.alertType || '');
     
     if (result.success) {
       setShowEditModal(false);
+      setAlert(result.message);
+      setAlertType(result.alertType || '');
       // Refresh data setelah berhasil update
       await fetchSavingsData();
       setTimeout(() => { setAlert(''); setAlertType(''); }, 3000);
     } else {
+      // Tampilkan error di dalam modal
+      setModalError(result.message);
       setLoading(false); // Hentikan loading jika gagal
     }
   };
@@ -297,9 +310,17 @@ export const SavingsPage = () => {
       </main>
       
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-auto">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-            <h2 className="text-xl font-semibold mb-4">Edit Target Tabungan</h2>
+            <h2 className="text-xl font-semibold mb-4 text-purple-600">Edit Target Tabungan</h2>
+            
+            {/* Tampilkan pesan error di dalam modal */}
+            {modalError && (
+              <div className="mb-4 text-red-600 bg-red-100 p-3 rounded">
+                {modalError}
+              </div>
+            )}
+            
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="newTarget">
                 Target Baru
@@ -317,7 +338,10 @@ export const SavingsPage = () => {
             <div className="flex justify-end">
               <button
                 className="mr-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
-                onClick={() => setShowEditModal(false)}
+                onClick={() => {
+                  setShowEditModal(false);
+                  setModalError(''); // Reset error saat menutup modal
+                }}
               >
                 Batal
               </button>
@@ -329,6 +353,13 @@ export const SavingsPage = () => {
               </button>
             </div>
           </div>
+          <div 
+            className="fixed inset-0 -z-10" 
+            onClick={() => {
+              setShowEditModal(false);
+              setModalError(''); // Reset error saat menutup modal
+            }}
+          ></div>
         </div>
       )}
     </div>
