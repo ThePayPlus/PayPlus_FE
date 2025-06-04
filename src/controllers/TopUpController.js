@@ -35,7 +35,7 @@ export class TopUpController {
           amount: response.data.amount,
           newBalance: response.data.newBalance
         };
-        this.redirectCountdown = 3; // Mulai hitung mundur 3 detik
+        this.redirectCountdown = 3;
         return { success: true, result: this.result, redirectCountdown: this.redirectCountdown };
       } else {
         this.error = response.message;
@@ -43,7 +43,7 @@ export class TopUpController {
       }
     } catch (error) {
       console.error('Topup error:', error);
-      this.error = 'Terjadi kesalahan saat melakukan top up';
+      this.error = 'An error occurred while topping up';
       return { success: false, error: this.error };
     } finally {
       this.loading = false;
