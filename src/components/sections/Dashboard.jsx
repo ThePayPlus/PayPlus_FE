@@ -18,7 +18,6 @@ import {
   Calendar,
   Bell,
   Settings,
-  Users,
   LogOut,
   Plus,
   Eye,
@@ -28,6 +27,7 @@ import {
   CreditCard,
   BarChart3,
   Clock,
+  Bot,
 } from "lucide-react"
 import { Link } from "react-router-dom"
 import { SavingsModel } from "../../models/SavingsModel.js"
@@ -224,13 +224,6 @@ export const Dashboard = () => {
                         <Settings className="w-4 h-4 mr-3 text-gray-500" />
                         Settings
                       </Link>
-                      <Link
-                        to="/friends"
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        <Users className="w-4 h-4 mr-3 text-gray-500" />
-                        Friends
-                      </Link>
                       <button
                         onClick={handleLogout}
                         className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 text-left"
@@ -305,12 +298,6 @@ export const Dashboard = () => {
               <Calendar className="w-5 h-5 mr-3 text-gray-500" />
               Bills
             </Link>
-            <div className="pt-4 mt-4 border-t border-gray-100">
-              <Link to="/settings" className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg">
-                <Settings className="w-5 h-5 mr-3 text-gray-500" />
-                Settings
-              </Link>
-            </div>
           </nav>
         </aside>
 
@@ -414,7 +401,7 @@ export const Dashboard = () => {
                   </Link>
 
                   <Link
-                    to="/bills/pay"
+                    to="/bills"
                     className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 text-center"
                   >
                     <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-2">
@@ -424,13 +411,13 @@ export const Dashboard = () => {
                   </Link>
 
                   <Link
-                    to="/savings/add"
+                    to="/friends"
                     className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 text-center"
                   >
                     <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
                       <Target className="w-5 h-5 text-purple-600" />
                     </div>
-                    <p className="font-medium text-gray-900">Save</p>
+                    <p className="font-medium text-gray-900">Friends</p>
                   </Link>
                 </div>
               </div>
@@ -648,10 +635,10 @@ export const Dashboard = () => {
 
       {/* Floating Action Button */}
       <Link
-        to="/transfer"
+        to="/chatbot"
         className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-md hover:bg-blue-700 transition-colors flex items-center justify-center"
       >
-        <Send className="w-6 h-6" />
+        <Bot className="w-6 h-6" />
       </Link>
     </div>
   )
