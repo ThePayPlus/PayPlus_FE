@@ -18,6 +18,7 @@ import Income from './components/sections/IncomeRecord';
 import Expense from './components/sections/ExpenseRecord';
 import { TopUpPage } from './components/sections/TopUpPage';
 import { Chatbot } from './components/sections/Chatbot';
+import { TransactionHistory } from './components/sections/TransactionHistory';
 
 function App() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -46,6 +47,7 @@ function App() {
           <Route path="/topup" element={<TopUpPage />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/chatbot" element={<Chatbot />} />
+          <Route path="/transactions" element={<TransactionHistory />} />
         </Routes>
       </div>
     </Router>
