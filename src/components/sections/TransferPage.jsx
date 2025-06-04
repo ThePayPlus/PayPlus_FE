@@ -403,55 +403,6 @@ export const TransferPage = () => {
               </button>
             </div>
 
-            {/* Recent Transfers */}
-            {recentTransfers.length > 0 && (
-              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center mr-3">
-                      <History className="w-5 h-5 text-slate-600" />
-                    </div>
-                    <h2 className="text-xl font-semibold text-slate-900">Recent Transfers</h2>
-                  </div>
-                  <Link to="/history" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                    View All
-                  </Link>
-                </div>
-                <div className="space-y-4">
-                  {recentTransfers.slice(0, 3).map((transfer, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 transition-all duration-200 group"
-                    >
-                      <div className="flex items-center">
-                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mr-4">
-                          <User className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-slate-900">{transfer.recipient_name}</p>
-                          <p className="text-sm text-slate-500">{formatDate(transfer.date)}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold text-slate-900">Rp {formatCurrency(transfer.amount)}</p>
-                        <button
-                          onClick={() =>
-                            selectUser({
-                              name: transfer.recipient_name,
-                              phone: transfer.recipient_phone,
-                            })
-                          }
-                          className="text-sm text-blue-600 hover:text-blue-700 flex items-center mt-1 group-hover:translate-x-1 transition-transform duration-200"
-                        >
-                          Send Again <ChevronRight className="w-3 h-3 ml-1" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Transfer Content */}
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
               {/* Search by Number */}
@@ -467,7 +418,7 @@ export const TransferPage = () => {
                   <div className="relative mb-6">
                     <input
                       type="text"
-                      placeholder="Enter phone number (e.g., +62812345678)"
+                      placeholder="Enter phone number"
                       value={searchQuery}
                       onChange={(e) => handleChange("searchQuery", e.target.value)}
                       className="w-full pl-12 pr-4 py-4 border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-lg"
