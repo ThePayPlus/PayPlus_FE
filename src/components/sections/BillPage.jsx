@@ -300,7 +300,7 @@ export const BillPage = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-500 font-medium">Total Bills</p>
-                <p className="text-2xl font-bold text-gray-800">Rp {BillModel.formatCurrency(totalBillAmount)}</p>
+                <p className="text-2xl font-bold text-gray-800">Rp {BillController.formatCurrency(totalBillAmount)}</p>
               </div>
             </div>
           </div>
@@ -313,7 +313,7 @@ export const BillPage = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-500 font-medium">Upcoming Bills</p>
-                <p className="text-2xl font-bold text-gray-800">{bills.filter(bill => !BillModel.isOverdue(bill.dueDate)).length}</p>
+                <p className="text-2xl font-bold text-gray-800">{bills.filter(bill => !BillController.isOverdue(bill.dueDate)).length}</p>
               </div>
             </div>
           </div>
@@ -326,7 +326,7 @@ export const BillPage = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-500 font-medium">Overdue Bills</p>
-                <p className="text-2xl font-bold text-gray-800">{bills.filter(bill => BillModel.isOverdue(bill.dueDate)).length}</p>
+                <p className="text-2xl font-bold text-gray-800">{bills.filter(bill => BillController.isOverdue(bill.dueDate)).length}</p>
               </div>
             </div>
           </div>
@@ -334,7 +334,7 @@ export const BillPage = () => {
 
         {/* Add/Edit Bill Form */}
         {showAddBillForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-opacity-10 backdrop-blur-md flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6 animate-fadeIn">
               <h2 className="text-xl font-bold mb-4">{editingBill ? 'Edit Bill' : 'Add New Bill'}</h2>
               
@@ -477,7 +477,7 @@ export const BillPage = () => {
               className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               <Plus className="mr-2 h-5 w-5" />
-              Tambah Tagihan Pertama
+              Add First Bill
             </button>
           </div>
         ) : (
@@ -486,7 +486,7 @@ export const BillPage = () => {
             {Object.entries(billsByCategory).map(([category, categoryBills]) => (
               <div key={category} className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
                 <div 
-                  className={`px-6 py-4 flex items-center ${BillModel.getCategoryColor(category)} cursor-pointer`}
+                  className={`px-6 py-4 flex items-center ${BillController.getCategoryColor(category)} cursor-pointer`}
                   onClick={() => toggleCategoryExpand(category)}
                 >
                   <div className="mr-3">
@@ -521,16 +521,16 @@ export const BillPage = () => {
                             <h4 className="text-lg font-medium text-gray-900">{bill.name}</h4>
                             <div className="flex items-center mt-1">
                               <span className={`text-sm ${
-                                BillModel.isOverdue(bill.dueDate) ? 'text-red-600 font-medium' : 
-                                BillModel.isDueTomorrow(bill.dueDate) ? 'text-yellow-600 font-medium' : 
+                                BillController.isOverdue(bill.dueDate) ? 'text-red-600 font-medium' : 
+                                BillController.isDueTomorrow(bill.dueDate) ? 'text-yellow-600 font-medium' : 
                                 'text-gray-500'
                               }`}>
-                                Due on {BillModel.formatDate(bill.dueDate)}
+                                Due on {BillController.formatDate(bill.dueDate)}
                               </span>
                             </div>
                           </div>
                           <div className="flex flex-col items-end">
-                            <span className="text-xl font-bold text-gray-900">Rp {BillModel.formatCurrency(bill.amount)}</span>
+                            <span className="text-xl font-bold text-gray-900">Rp {BillController.formatCurrency(bill.amount)}</span>
                             <div className="flex mt-2 space-x-2">
                               <button
                                 onClick={(e) => {
