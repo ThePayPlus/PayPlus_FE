@@ -115,7 +115,7 @@ export const LandingPage = () => {
                 <Link to="/signup" className="bg-indigo-600 text-white font-semibold px-8 py-3 rounded-full hover:bg-indigo-700 transition duration-300 text-center shadow-lg hover:shadow-xl transform hover:-translate-y-1">
                   Get Started Free
                 </Link>
-                <a href="#learn-more" className="flex items-center justify-center sm:justify-start space-x-2 text-indigo-600 font-medium hover:text-indigo-700 transition duration-300">
+                <a href="#everything" className="flex items-center justify-center sm:justify-start space-x-2 text-indigo-600 font-medium hover:text-indigo-700 transition duration-300">
                   <span>Learn more</span>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
@@ -186,7 +186,7 @@ export const LandingPage = () => {
                 <div className="pt-8">
                   <h3 className="text-xl font-bold mb-3">Smart Budgeting</h3>
                   <p className="text-gray-600 mb-4">Set and track budgets with our intuitive interface. Stay on top of your spending and save more effectively.</p>
-                  <a href="#" className="inline-flex items-center text-indigo-600 hover:text-indigo-700 font-medium">
+                  <a href="#everything" className="inline-flex items-center text-indigo-600 hover:text-indigo-700 font-medium">
                     <span>Learn more</span>
                     <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
@@ -210,7 +210,7 @@ export const LandingPage = () => {
                 <div className="pt-8">
                   <h3 className="text-xl font-bold mb-3">Expense Tracking</h3>
                   <p className="text-gray-600 mb-4">Automatically categorize and analyze your spending habits to identify saving opportunities.</p>
-                  <a href="#" className="inline-flex items-center text-purple-600 hover:text-purple-700 font-medium">
+                  <a href="#everything" className="inline-flex items-center text-purple-600 hover:text-purple-700 font-medium">
                     <span>Learn more</span>
                     <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
@@ -242,7 +242,7 @@ export const LandingPage = () => {
         </section>
 
         {/* App Screenshot Section */}
-        <section className="py-24 bg-white">
+        <section id="everything" className="py-24 bg-white">
           <div className="container mx-auto px-6">
             <div className="max-w-3xl mx-auto text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">Everything You Need in One Place</h2>
