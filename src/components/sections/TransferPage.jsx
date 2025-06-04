@@ -38,7 +38,6 @@ export const TransferPage = () => {
   const [controller] = useState(() => new TransferController())
   const [transferMode, setTransferMode] = useState("search")
   const [friends, setFriends] = useState([])
-  const [recentTransfers, setRecentTransfers] = useState([])
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Fetch user profile only
@@ -57,19 +56,6 @@ export const TransferPage = () => {
       }
     }
     fetchUserData()
-
-    // Fetch recent transfers
-    const fetchRecentTransfers = async () => {
-      try {
-        const result = await controller.fetchRecentTransfers()
-        if (result.success) {
-          setRecentTransfers(result.records || [])
-        }
-      } catch (error) {
-        console.error("Error fetching recent transfers:", error)
-      }
-    }
-    fetchRecentTransfers()
   }, [])
 
   // Fetch friends when mode is 'friend'
@@ -135,15 +121,6 @@ export const TransferPage = () => {
     )
     if (response.success) {
       setFormData((prev) => ({ ...prev, success: true, step: 4, loading: false }))
-      // Refresh recent transfers after successful transfer
-      try {
-        const result = await controller.fetchRecentTransfers()
-        if (result.success) {
-          setRecentTransfers(result.records || [])
-        }
-      } catch (error) {
-        console.error("Error fetching recent transfers:", error)
-      }
     } else {
       setFormData((prev) => ({
         ...prev,
