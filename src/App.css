@@ -35,3 +35,27 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  /* Adjust modal width on mobile */
+  .max-w-md {
+    max-width: 90%;
+  }
+  
+  /* Ensure proper spacing on mobile */
+  .p-6 {
+    padding: 1rem;
+  }
+  
+  /* Adjust font sizes for better readability on small screens */
+  .text-2xl {
+    font-size: 1.25rem;
+  }
+  
+  /* Ensure buttons are easier to tap on mobile */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

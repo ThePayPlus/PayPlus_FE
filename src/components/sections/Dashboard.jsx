@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { ApiService } from "../../services/apiService.js"
+import { useState, useEffect } from 'react';
+import { ApiService } from '../../services/apiService.js';
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -29,6 +29,7 @@ import {
   Clock,
   Bot,
   X,
+  Handshake,
 } from "lucide-react"
 import { Link } from "react-router-dom"
 import { SavingsModel } from "../../models/SavingsModel.js"
@@ -45,6 +46,7 @@ export const Dashboard = () => {
   const [recentTransactions, setRecentTransactions] = useState([]) // Tambahkan state ini
   const [recentTransactionsLoading, setRecentTransactionsLoading] = useState(true) // Tambahkan state ini
 
+
   // Financial data state
   const [financialData, setFinancialData] = useState({
     balance: 0,
@@ -58,21 +60,21 @@ export const Dashboard = () => {
       total: 0,
       upcoming: [],
     },
-  })
-  const [financialDataLoading, setFinancialDataLoading] = useState(true)
+  });
+  const [financialDataLoading, setFinancialDataLoading] = useState(true);
   // State untuk notifikasi
-  const [notifications, setNotifications] = useState([])
-  const [showNotifications, setShowNotifications] = useState(false)
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Tambahkan fungsi dismissNotification di sini
   const dismissNotification = (id) => {
-    setNotifications((prev) => prev.filter((notification) => notification.id !== id))
-  }
+    setNotifications((prev) => prev.filter((notification) => notification.id !== id));
+  };
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await ApiService.getProfile()
+        const response = await ApiService.getProfile();
         if (response.success) {
           setUserData(response.data)
           const { balance, total_income, total_expense } = response.data
@@ -96,13 +98,13 @@ export const Dashboard = () => {
           if (savingsResponse.success && savingsResponse.data) {
             savingsTotal = Number.parseInt(savingsResponse.data.summary.total_terkumpul) || 0
             savingsGoals = savingsResponse.data.records.map((record) => {
-              const savingsModel = new SavingsModel(record)
+              const savingsModel = new SavingsModel(record);
               return {
                 name: savingsModel.namaSavings,
                 collected: Number.parseInt(savingsModel.terkumpul),
                 target: Number.parseInt(savingsModel.target),
-              }
-            })
+              };
+            });
           }
 
           setFinancialData({
@@ -117,21 +119,21 @@ export const Dashboard = () => {
               total: billsTotal,
               upcoming: upcomingBills,
             },
-          })
+          });
         } else {
-          setError(response.message || "Failed to load user profile")
+          setError(response.message || 'Failed to load user profile');
         }
       } catch (err) {
-        setError("An unexpected error occurred")
-        console.error("Profile fetch error:", err)
+        setError('An unexpected error occurred');
+        console.error('Profile fetch error:', err);
       } finally {
-        setLoading(false)
-        setFinancialDataLoading(false)
+        setLoading(false);
+        setFinancialDataLoading(false);
       }
-    }
+    };
 
-    fetchUserProfile()
-  }, [])
+    fetchUserProfile();
+  }, []);
 
   // Tambahkan useEffect baru untuk mengambil recent transactions
   useEffect(() => {
@@ -154,45 +156,45 @@ export const Dashboard = () => {
   }, []);
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "decimal",
+    return new Intl.NumberFormat('id-ID', {
+      style: 'decimal',
       maximumFractionDigits: 0,
-    }).format(amount)
-  }
+    }).format(amount);
+  };
 
   const getCategoryIcon = (category) => {
-    const iconClass = "w-4 h-4"
+    const iconClass = 'w-4 h-4';
     switch (category) {
-      case "Rent":
-        return <Home className={iconClass} />
-      case "Electricity":
-        return <Zap className={iconClass} />
-      case "Internet":
-        return <Wifi className={iconClass} />
-      case "Water":
-        return <Droplet className={iconClass} />
-      case "Vehicle":
-        return <Truck className={iconClass} />
-      case "Heart":
-        return <Heart className={iconClass} />
+      case 'Rent':
+        return <Home className={iconClass} />;
+      case 'Electricity':
+        return <Zap className={iconClass} />;
+      case 'Internet':
+        return <Wifi className={iconClass} />;
+      case 'Water':
+        return <Droplet className={iconClass} />;
+      case 'Vehicle':
+        return <Truck className={iconClass} />;
+      case 'Heart':
+        return <Heart className={iconClass} />;
       default:
-        return <File className={iconClass} />
+        return <File className={iconClass} />;
     }
-  }
+  };
 
   const handleLogout = async () => {
     try {
-      const response = await ApiService.logout()
+      const response = await ApiService.logout();
       if (response.success) {
-        window.location.href = "/"
+        window.location.href = '/';
       } else {
-        setError(response.message || "Logout failed")
+        setError(response.message || 'Logout failed');
       }
     } catch (error) {
-      setError("An unexpected error occurred during logout")
-      console.error("Logout error:", error)
+      setError('An unexpected error occurred during logout');
+      console.error('Logout error:', error);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -201,56 +203,34 @@ export const Dashboard = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <button
-                className="md:hidden mr-2 p-2 rounded-lg hover:bg-gray-100"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
+              <button className="md:hidden mr-2 p-2 rounded-lg hover:bg-gray-100" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                 <Menu className="w-5 h-5 text-gray-600" />
               </button>
-              <img
-                src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true"
-                alt="PayPlus Logo"
-                className="h-10"
-              />
+              <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" className="h-10" />
             </div>
 
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <button 
-                  className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
-                  onClick={() => setShowNotifications(!showNotifications)}
-                >
+                <button className="relative p-2 rounded-full hover:bg-gray-100 transition-colors" onClick={() => setShowNotifications(!showNotifications)}>
                   <Bell className="w-5 h-5 text-gray-600" />
-                  {notifications.length > 0 && (
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs">
-                      {notifications.length}
-                    </div>
-                  )}
+                  {notifications.length > 0 && <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs">{notifications.length}</div>}
                 </button>
 
                 {showNotifications && notifications.length > 0 && (
                   <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg overflow-hidden shadow-xl z-10 border border-gray-100">
                     <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50">
                       <p className="font-medium text-gray-900">Notifikasi</p>
-                      <button 
-                        className="text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"
-                        onClick={() => setNotifications([])}
-                      >
+                      <button className="text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors" onClick={() => setNotifications([])}>
                         Hapus Semua
                       </button>
                     </div>
                     <div className="max-h-80 overflow-y-auto">
                       {notifications.map((notification) => (
-                        <div
-                          key={notification.id}
-                          className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${notification.type === 'overdue' ? 'bg-red-50' : 'bg-yellow-50'}`}
-                        >
+                        <div key={notification.id} className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${notification.type === 'overdue' ? 'bg-red-50' : 'bg-yellow-50'}`}>
                           <div className="flex justify-between items-start">
                             <div className="flex items-start space-x-3">
                               <div className={`mt-0.5 p-1.5 rounded-full ${notification.type === 'overdue' ? 'bg-red-100 text-red-500' : 'bg-yellow-100 text-yellow-500'}`}>
-                                {notification.type === 'overdue' ? 
-                                  <Clock className="w-4 h-4" /> : 
-                                  <Calendar className="w-4 h-4" />}
+                                {notification.type === 'overdue' ? <Clock className="w-4 h-4" /> : <Calendar className="w-4 h-4" />}
                               </div>
                               <div>
                                 <p className={`text-sm font-semibold ${notification.type === 'overdue' ? 'text-red-700' : 'text-yellow-700'}`}>
@@ -267,11 +247,7 @@ export const Dashboard = () => {
                                 </Link>
                               </div>
                             </div>
-                            <button
-                              onClick={() => dismissNotification(notification.id)}
-                              className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100"
-                              aria-label="Dismiss notification"
-                            >
+                            <button onClick={() => dismissNotification(notification.id)} className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100" aria-label="Dismiss notification">
                               <X className="w-4 h-4" />
                             </button>
                           </div>
@@ -289,31 +265,20 @@ export const Dashboard = () => {
               </div>
 
               <div className="relative">
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png"
-                  alt="Profile"
-                  className="w-9 h-9 rounded-full cursor-pointer border border-gray-200"
-                  onClick={() => setShowDropdown(!showDropdown)}
-                />
+                <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png" alt="Profile" className="w-9 h-9 rounded-full cursor-pointer border border-gray-200" onClick={() => setShowDropdown(!showDropdown)} />
 
                 {showDropdown && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg overflow-hidden shadow-lg z-10 border border-gray-100">
                     <div className="px-4 py-3 border-b border-gray-100">
-                      <p className="font-medium text-gray-900">{userData?.name || "User Name"}</p>
-                      <p className="text-xs text-gray-500">{userData?.phone || "08123456789"}</p>
+                      <p className="font-medium text-gray-900">{userData?.name || 'User Name'}</p>
+                      <p className="text-xs text-gray-500">{userData?.phone || '08123456789'}</p>
                     </div>
                     <div className="py-1">
-                      <Link
-                        to="/settings"
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      >
+                      <Link to="/settings" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                         <Settings className="w-4 h-4 mr-3 text-gray-500" />
                         Settings
                       </Link>
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 text-left"
-                      >
+                      <button onClick={handleLogout} className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 text-left">
                         <LogOut className="w-4 h-4 mr-3 text-gray-500" />
                         Logout
                       </button>
@@ -332,11 +297,7 @@ export const Dashboard = () => {
           <div className="container mx-auto px-4">
             <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 mb-2">
               <Search className="w-4 h-4 text-gray-500 mr-2" />
-              <input
-                type="text"
-                placeholder="Search transactions..."
-                className="bg-transparent border-none focus:outline-none text-sm w-full"
-              />
+              <input type="text" placeholder="Search transactions..." className="bg-transparent border-none focus:outline-none text-sm w-full" />
             </div>
             <nav className="flex justify-between">
               <Link to="/dashboard" className="text-blue-600 px-3 py-2 text-sm font-medium">
@@ -361,10 +322,7 @@ export const Dashboard = () => {
         {/* Sidebar Navigation - Desktop Only */}
         <aside className="hidden md:block w-64 bg-white border-r border-gray-100 p-4">
           <nav className="space-y-1 sticky top-20">
-            <Link
-              to="/dashboard"
-              className="flex items-center px-4 py-3 text-blue-600 bg-blue-50 rounded-lg font-medium"
-            >
+            <Link to="/dashboard" className="flex items-center px-4 py-3 text-blue-600 bg-blue-50 rounded-lg font-medium">
               <Home className="w-5 h-5 mr-3" />
               Dashboard
             </Link>
@@ -404,11 +362,11 @@ export const Dashboard = () => {
               {/* Welcome and Balance Section - Side by Side on Desktop */}
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
                 <div className="md:w-1/2">
-                  <h1 className="text-2xl font-bold text-gray-900">Welcome back, {userData?.name || "User"}</h1>
+                  <h1 className="text-2xl font-bold text-gray-900">Welcome back, {userData?.name || 'User'}</h1>
                   <p className="text-gray-600 mt-1">Heres your financial overview</p>
 
                   <div className="mt-6 flex flex-wrap gap-4">
-                    <Link to="/income" className="bg-white rounded-lg shadow-sm p-4 flex items-center space-x-3 flex-1 min-w-[180px] cursor-pointer hover:shadow-md transition-all duration-300">  
+                    <Link to="/income" className="bg-white rounded-lg shadow-sm p-4 flex items-center space-x-3 flex-1 min-w-[180px] cursor-pointer hover:shadow-md transition-all duration-300">
                       <div className="p-2 bg-green-100 rounded-md">
                         <TrendingUp className="w-5 h-5 text-green-600" />
                       </div>
@@ -437,21 +395,13 @@ export const Dashboard = () => {
                       <div>
                         <div className="flex items-center space-x-2">
                           <p className="text-blue-100 font-medium">Available Balance</p>
-                          <button
-                            onClick={() => setBalanceVisible(!balanceVisible)}
-                            className="p-1 hover:bg-white/10 rounded-full transition-colors"
-                          >
+                          <button onClick={() => setBalanceVisible(!balanceVisible)} className="p-1 hover:bg-white/10 rounded-full transition-colors">
                             {balanceVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                           </button>
                         </div>
-                        <h2 className="text-3xl font-bold mt-1">
-                          {balanceVisible ? `Rp. ${formatCurrency(financialData.balance || 0)}` : "Rp. ••••••••"}
-                        </h2>
+                        <h2 className="text-3xl font-bold mt-1">{balanceVisible ? `Rp. ${formatCurrency(financialData.balance || 0)}` : 'Rp. ••••••••'}</h2>
                       </div>
-                      <Link
-                        to="/topup"
-                        className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition-colors"
-                      >
+                      <Link to="/topup" className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition-colors">
                         <Plus className="w-4 h-4 inline mr-1" />
                         Top Up
                       </Link>
@@ -466,42 +416,30 @@ export const Dashboard = () => {
                   <h2 className="text-lg font-bold text-gray-900">Quick Actions</h2>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <Link
-                    to="/transfer"
-                    className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 text-center"
-                  >
+                  <Link to="/transfer" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 text-center">
                     <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
                       <Send className="w-5 h-5 text-blue-600" />
                     </div>
                     <p className="font-medium text-gray-900">Transfer</p>
                   </Link>
 
-                  <Link
-                    to="/topup"
-                    className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 text-center"
-                  >
+                  <Link to="/topup" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 text-center">
                     <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
                       <Plus className="w-5 h-5 text-green-600" />
                     </div>
                     <p className="font-medium text-gray-900">Top Up</p>
                   </Link>
 
-                  <Link
-                    to="/bills"
-                    className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 text-center"
-                  >
+                  <Link to="/bills" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 text-center">
                     <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-2">
                       <Calendar className="w-5 h-5 text-amber-600" />
                     </div>
                     <p className="font-medium text-gray-900">Pay Bills</p>
                   </Link>
 
-                  <Link
-                    to="/friends"
-                    className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 text-center"
-                  >
+                  <Link to="/friends" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 text-center">
                     <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <Target className="w-5 h-5 text-purple-600" />
+                      <Handshake className="w-5 h-5 text-purple-600" />
                     </div>
                     <p className="font-medium text-gray-900">Friends</p>
                   </Link>
@@ -610,7 +548,6 @@ export const Dashboard = () => {
                   </div>
                 </div>
               </div>
-
               {/* Savings Goals and Financial Insights - Side by Side */}
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Savings Goals */}
@@ -691,12 +628,9 @@ export const Dashboard = () => {
       </div>
 
       {/* Floating Action Button */}
-      <Link
-        to="/chatbot"
-        className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-md hover:bg-blue-700 transition-colors flex items-center justify-center"
-      >
+      <Link to="/chatbot" className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-md hover:bg-blue-700 transition-colors flex items-center justify-center">
         <Bot className="w-6 h-6" />
       </Link>
     </div>
-  )
-}
+  );
+};

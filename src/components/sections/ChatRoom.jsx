@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, User, Trash2 } from 'lucide-react';
+import { Send, User, UserRoundX, ArrowLeft } from 'lucide-react';
 import ChatController from '../../controllers/ChatController.js';
 import Message from '../../models/MessageModel.js';
 
-const ChatRoom = ({ friend, ws }) => {
+const ChatRoom = ({ friend, onBack, ws }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -128,7 +128,7 @@ const ChatRoom = ({ friend, ws }) => {
   const handleDeleteFriend = async () => {
     if (!friend) return;
 
-    if (window.confirm(`Apakah Anda yakin ingin menghapus ${friend.name} dari daftar teman?`)) {
+    if (window.confirm(`Are you sure want to delete ${friend.name} from your friend list?`)) {
       try {
         const response = await ChatController.deleteFriend(friend.phone);
         if (response.success) {
@@ -136,7 +136,7 @@ const ChatRoom = ({ friend, ws }) => {
           // Redirect ke halaman utama atau refresh daftar teman
           window.location.reload();
         } else {
-          alert(`Gagal menghapus teman: ${response.message}`);
+          alert(`Error delete friend: ${response.message}`);
         }
       } catch (err) {
         console.error('Delete friend error:', err);
@@ -151,6 +151,9 @@ const ChatRoom = ({ friend, ws }) => {
       <div className="bg-gray-100 p-3 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
+            <button onClick={onBack} className="md:hidden mr-2 p-1 rounded-full hover:bg-gray-200 transition-colors" aria-label="Back">
+              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            </button>
             <div className="relative">
               <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
                 <User className="w-5 h-5 text-indigo-600" />
@@ -163,7 +166,7 @@ const ChatRoom = ({ friend, ws }) => {
             </div>
           </div>
           <button onClick={handleDeleteFriend} className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors" title="Hapus teman">
-            <Trash2 className="w-5 h-5" />
+            <UserRoundX className="w-5 h-5" />
           </button>
         </div>
       </div>
@@ -186,8 +189,8 @@ const ChatRoom = ({ friend, ws }) => {
               const isSentByMe = msg.isSentByMe();
               return (
                 <div key={index} className={`flex ${isSentByMe ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[70%] px-4 py-2 rounded-lg ${isSentByMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none'}`}>
-                    <p>{msg.message}</p>
+                  <div className={`max-w-[85%] sm:max-w-[70%] px-4 py-2 rounded-lg ${isSentByMe ? 'bg-indigo-600 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none'}`}>
+                    <p className="break-words">{msg.message}</p>
                   </div>
                   <div className={`flex items-end ${isSentByMe ? 'ml-2' : 'mr-2'}`}>
                     <p className={`text-xs ${isSentByMe ? 'text-gray-500' : 'text-gray-500'}`}>{msg.formatTime()}</p>
@@ -224,7 +227,11 @@ const ChatRoom = ({ friend, ws }) => {
             className="flex-grow px-4 py-3 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
           />
-          <button onClick={handleSendMessage} className="h-[46px] px-4 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700 transition-colors flex items-center justify-center">
+          <button
+            onClick={handleSendMessage}
+            className="h-[46px] px-4 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700 transition-colors flex items-center justify-center shadow-md transform hover:scale-105 active:scale-95 duration-200 disabled:bg-indigo-400 disabled:cursor-not-allowed"
+            disabled={!newMessage.trim()}
+          >
             <Send className="w-5 h-5" />
           </button>
         </div>

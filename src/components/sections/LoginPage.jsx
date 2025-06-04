@@ -1,48 +1,48 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { Eye, EyeOff, Phone, Lock, ArrowRight, AlertCircle } from "lucide-react"
-import { LoginController } from "../../controllers/LoginController.js"
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, Phone, Lock, ArrowRight, AlertCircle } from 'lucide-react';
+import { LoginController } from '../../controllers/LoginController.js';
 
 export const LoginPage = () => {
   const [formData, setFormData] = useState({
-    phone: "",
-    password: "",
+    phone: '',
+    password: '',
     rememberMe: false,
-  })
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const navigate = useNavigate()
-  const [controller] = useState(() => new LoginController())
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+  const [controller] = useState(() => new LoginController());
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target
-    const newValue = type === "checkbox" ? checked : value
-    const updatedData = controller.updateField(name, newValue)
-    setFormData(updatedData)
-  }
+    const { name, value, type, checked } = e.target;
+    const newValue = type === 'checkbox' ? checked : value;
+    const updatedData = controller.updateField(name, newValue);
+    setFormData(updatedData);
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
     try {
-      const response = await controller.login()
+      const response = await controller.login();
       if (response.success) {
-        navigate("/dashboard")
+        navigate('/dashboard');
       } else {
-        setError(response.message)
+        setError(response.message);
       }
     } catch (err) {
-      setError("An unexpected error occurred. Please try again.")
-      console.error("Login error:", err)
+      setError('An unexpected error occurred. Please try again.');
+      console.error('Login error:', err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
@@ -58,13 +58,7 @@ export const LoginPage = () => {
           {/* Logo Section */}
           <div className="text-center mb-8">
             <Link to="/" className="inline-block">
-              <img
-                id="logo"
-                className="mx-auto h-24 w-auto mb-0 drop-shadow-lg"
-                src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true"
-                alt="PayPlus Logo"
-                style={{ maxHeight: "60px", marginBottom: "-32px" }}
-              />
+              <img id="logo" className="mx-auto h-24 w-auto mb-0 drop-shadow-lg" src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" style={{ maxHeight: '60px', marginBottom: '-32px' }} />
             </Link>
           </div>
 
@@ -116,7 +110,7 @@ export const LoginPage = () => {
                   <Lock className="w-5 h-5 text-slate-400" />
                 </div>
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   id="password"
                   name="password"
                   value={formData.password}
@@ -125,11 +119,7 @@ export const LoginPage = () => {
                   className="w-full pl-12 pr-12 py-4 bg-white/70 border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-slate-900 placeholder-slate-400"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors duration-200"
-                >
+                <button type="button" onClick={() => setShowPassword((prev) => !prev)} className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors duration-200">
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
@@ -139,45 +129,17 @@ export const LoginPage = () => {
             <div className="flex items-center justify-between">
               <label className="flex items-center cursor-pointer group">
                 <div className="relative">
-                  <input
-                    type="checkbox"
-                    name="rememberMe"
-                    checked={formData.rememberMe}
-                    onChange={handleChange}
-                    className="sr-only"
-                  />
-                  <div
-                    className={`w-5 h-5 border-2 rounded-md transition-all duration-200 ${
-                      formData.rememberMe
-                        ? "bg-blue-600 border-blue-600"
-                        : "border-slate-300 group-hover:border-blue-400"
-                    }`}
-                  >
+                  <input type="checkbox" name="rememberMe" checked={formData.rememberMe} onChange={handleChange} className="sr-only" />
+                  <div className={`w-5 h-5 border-2 rounded-md transition-all duration-200 ${formData.rememberMe ? 'bg-blue-600 border-blue-600' : 'border-slate-300 group-hover:border-blue-400'}`}>
                     {formData.rememberMe && (
-                      <svg
-                        className="w-3 h-3 text-white absolute top-0.5 left-0.5"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                          clipRule="evenodd"
-                        />
+                      <svg className="w-3 h-3 text-white absolute top-0.5 left-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     )}
                   </div>
                 </div>
-                <span className="ml-3 text-sm text-slate-600 group-hover:text-slate-900 transition-colors duration-200">
-                  Remember me
-                </span>
+                <span className="ml-3 text-sm text-slate-600 group-hover:text-slate-900 transition-colors duration-200">Remember me</span>
               </label>
-              <Link
-                to="/forgot-password"
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
-              >
-                Forgot password?
-              </Link>
             </div>
 
             {/* Login Button */}
@@ -212,10 +174,7 @@ export const LoginPage = () => {
 
           {/* Sign Up Link */}
           <div className="text-center">
-            <Link
-              to="/signup"
-              className="inline-flex items-center justify-center w-full py-3 px-6 border-2 border-slate-200 rounded-xl text-slate-700 font-semibold hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 group"
-            >
+            <Link to="/signup" className="inline-flex items-center justify-center w-full py-3 px-6 border-2 border-slate-200 rounded-xl text-slate-700 font-semibold hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 group">
               Create an account
               <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
             </Link>
@@ -227,5 +186,5 @@ export const LoginPage = () => {
         <div className="absolute -z-10 bottom-4 right-4 w-72 h-72 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl"></div>
       </div>
     </div>
-  )
-}
+  );
+};
