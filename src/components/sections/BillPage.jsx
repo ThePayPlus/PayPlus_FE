@@ -12,6 +12,7 @@ import {
   File,
   AlertTriangle,
   X,
+  Menu,
   Pencil,
   Plus,
   Calendar,
@@ -32,7 +33,7 @@ export const BillPage = () => {
   const [notifications, setNotifications] = useState([]);
   const [showAddBillForm, setShowAddBillForm] = useState(false);
   const [editingBill, setEditingBill] = useState(null);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [newBill, setNewBill] = useState({
     name: '',
     amount: '',
@@ -158,51 +159,64 @@ export const BillPage = () => {
                 <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" className="h-10" />
               </Link>
             </div>
+            {/* Desktop Navigation */}
             <nav className="hidden sm:flex space-x-4">
+              <Link to="/topUp" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Top-Up
+              </Link>
               <Link to="/transfer" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Transfer
               </Link>
-              <Link to="/savings" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
-                Savings
-              </Link>
-              <Link to="/income" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
-                Income
+              <Link to="/bills" className="text-indigo-600 font-medium border-b-2 border-indigo-600 hover:text-indigo-800 transition-colors duration-200">
+                Bills
               </Link>
               <Link to="/expense" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Expenses
               </Link>
-            </nav>
-            <div className="md:hidden">
-              <button
-                onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="text-gray-600 hover:text-indigo-600 transition-colors duration-200"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
-          </div>
-          {showMobileMenu && (
-            <div className="md:hidden py-2 pb-4 animate-fadeIn">
-              <Link
-                to="/income"
-                className="block px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors duration-200"
-              >
+              <Link to="/income" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Income
               </Link>
-              <Link
-                to="/bills"
-                className="block px-4 py-2 text-indigo-600 font-medium"
-              >
-                Tagihan
-              </Link>
-              <Link
-                to="/Savings"
-                className="block px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors duration-200"
-              >
+              <Link to="/savings" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Savings
               </Link>
+              <Link to="/friends" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Friends
+              </Link>
+            </nav>
+            {/* Mobile menu button */}
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+              className="sm:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6 text-gray-600" /> : <Menu className="w-6 h-6 text-gray-600" />}
+            </button>
+          </div>
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="sm:hidden py-4 border-t border-gray-200">
+              <nav className="flex flex-col space-y-4">
+                <Link to="/topUp" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Top-Up
+                </Link>
+                <Link to="/transfer" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Transfer
+                </Link>
+                <Link to="/bills" className="text-indigo-600 font-medium border-b-2 border-indigo-600 hover:text-indigo-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Bills
+                </Link>
+                <Link to="/expense" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Expenses
+                </Link>
+                <Link to="/income" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Income
+                </Link>
+                <Link to="/savings" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Savings
+                </Link>
+                <Link to="/friends" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Friends
+                </Link>
+              </nav>
             </div>
           )}
         </div>
