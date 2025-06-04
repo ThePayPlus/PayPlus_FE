@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, User, Trash2, ArrowLeft } from 'lucide-react';
+import { Send, User, UserRoundX, ArrowLeft } from 'lucide-react';
 import ChatController from '../../controllers/ChatController.js';
 import Message from '../../models/MessageModel.js';
 
@@ -151,11 +151,7 @@ const ChatRoom = ({ friend, onBack, ws }) => {
       <div className="bg-gray-100 p-3 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <button 
-              onClick={onBack} 
-              className="md:hidden mr-2 p-1 rounded-full hover:bg-gray-200 transition-colors"
-              aria-label="Back"
-            >
+            <button onClick={onBack} className="md:hidden mr-2 p-1 rounded-full hover:bg-gray-200 transition-colors" aria-label="Back">
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
             <div className="relative">
@@ -170,7 +166,7 @@ const ChatRoom = ({ friend, onBack, ws }) => {
             </div>
           </div>
           <button onClick={handleDeleteFriend} className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors" title="Hapus teman">
-            <Trash2 className="w-5 h-5" />
+            <UserRoundX className="w-5 h-5" />
           </button>
         </div>
       </div>
