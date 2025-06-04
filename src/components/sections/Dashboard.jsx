@@ -28,9 +28,11 @@ import {
   BarChart3,
   Clock,
   Bot,
+  X,
 } from "lucide-react"
 import { Link } from "react-router-dom"
 import { SavingsModel } from "../../models/SavingsModel.js"
+import BillController from "../../controllers/BillController"
 
 export const Dashboard = () => {
   const [userData, setUserData] = useState(null)
@@ -55,6 +57,9 @@ export const Dashboard = () => {
     },
   })
   const [financialDataLoading, setFinancialDataLoading] = useState(true)
+  // State untuk notifikasi
+  const [notifications, setNotifications] = useState([])
+  const [showNotifications, setShowNotifications] = useState(false)
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -70,6 +75,10 @@ export const Dashboard = () => {
           let billsTotal = 0
           let upcomingBills = []
 
+          // Tambahkan ini di bagian atas import
+          
+          // Kemudahkan kode ini di dalam useEffect fetchUserProfile
+          
           if (billsResponse.success && billsResponse.data && billsResponse.data.bills) {
             upcomingBills = billsResponse.data.bills.map((bill) => ({
               name: bill.name,
@@ -79,6 +88,10 @@ export const Dashboard = () => {
             }))
 
             billsTotal = upcomingBills.reduce((total, bill) => total + bill.amount, 0)
+            
+            // Tambahkan ini untuk mendapatkan notifikasi
+            const billNotifications = BillController.checkBillsStatus(upcomingBills)
+            setNotifications(billNotifications)
           }
 
           const savingsResponse = await ApiService.getSavings()
@@ -197,10 +210,78 @@ export const Dashboard = () => {
             </div>
 
             <div className="flex items-center space-x-4">
-              <button className="relative p-2 rounded-full hover:bg-gray-100 transition-colors">
-                <Bell className="w-5 h-5 text-gray-600" />
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full"></div>
-              </button>
+              <div className="relative">
+                <button 
+                  className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  onClick={() => setShowNotifications(!showNotifications)}
+                >
+                  <Bell className="w-5 h-5 text-gray-600" />
+                  {notifications.length > 0 && (
+                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs">
+                      {notifications.length}
+                    </div>
+                  )}
+                </button>
+
+                {showNotifications && notifications.length > 0 && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg overflow-hidden shadow-xl z-10 border border-gray-100">
+                    <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50">
+                      <p className="font-medium text-gray-900">Notifikasi</p>
+                      <button 
+                        className="text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                        onClick={() => setNotifications([])}
+                      >
+                        Hapus Semua
+                      </button>
+                    </div>
+                    <div className="max-h-80 overflow-y-auto">
+                      {notifications.map((notification) => (
+                        <div
+                          key={notification.id}
+                          className={`p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${notification.type === 'overdue' ? 'bg-red-50' : 'bg-yellow-50'}`}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-start space-x-3">
+                              <div className={`mt-0.5 p-1.5 rounded-full ${notification.type === 'overdue' ? 'bg-red-100 text-red-500' : 'bg-yellow-100 text-yellow-500'}`}>
+                                {notification.type === 'overdue' ? 
+                                  <Clock className="w-4 h-4" /> : 
+                                  <Calendar className="w-4 h-4" />}
+                              </div>
+                              <div>
+                                <p className={`text-sm font-semibold ${notification.type === 'overdue' ? 'text-red-700' : 'text-yellow-700'}`}>
+                                  {notification.type === 'overdue' ? 'Tagihan Terlambat' : 'Tagihan Jatuh Tempo Besok'}
+                                </p>
+                                <p className="text-sm mt-1 text-gray-700">{notification.message}</p>
+                                <Link 
+                                  to="/bills" 
+                                  className="text-xs text-blue-600 hover:text-blue-800 mt-2 inline-flex items-center font-medium"
+                                  onClick={() => setShowNotifications(false)}
+                                >
+                                  Lihat Detail
+                                  <ArrowUpRight className="w-3 h-3 ml-1" />
+                                </Link>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => dismissNotification(notification.id)}
+                              className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100"
+                              aria-label="Dismiss notification"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {notifications.length === 0 && (
+                      <div className="p-6 text-center text-gray-500 flex flex-col items-center">
+                        <Bell className="w-8 h-8 text-gray-300 mb-2" />
+                        <p>Tidak ada notifikasi</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
 
               <div className="relative">
                 <img
@@ -642,4 +723,9 @@ export const Dashboard = () => {
       </Link>
     </div>
   )
+}
+
+// Tambahkan fungsi dismissNotification di bawah handleLogout
+const dismissNotification = (id) => {
+  setNotifications(notifications.filter(notification => notification.id !== id));
 }
