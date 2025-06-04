@@ -196,7 +196,7 @@ export const Dashboard = () => {
               <img
                 src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true"
                 alt="PayPlus Logo"
-                className="h-8"
+                className="h-10"
               />
             </div>
 
