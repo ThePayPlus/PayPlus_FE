@@ -27,8 +27,6 @@ import Sumsel from "../../assets/sumsel.png"
 
 const bankOptions = [
   { name: "BRI", image: BRI },
-  { name: "BCA", image: BCA },
-  { name: "BNI", image: BNI },
   { name: "Mandiri", image: Mandiri },
   { name: "Bank Jatim", image: Jatim },
   { name: "Bank Bali", image: Bali },
