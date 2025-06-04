@@ -5,6 +5,7 @@ import { Doughnut } from "react-chartjs-2"
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js"
 import { Link } from "react-router-dom"
 import IncomeController from "../../controllers/income_controller"
+import { Menu, X } from 'lucide-react';
 
 // Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend)
@@ -61,12 +62,13 @@ export default function Income() {
                 <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" className="h-10" />
               </Link>
             </div>
+            {/* Desktop Navigation */}
             <nav className="hidden sm:flex space-x-4">
+              <Link to="/topUp" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Top-Up
+              </Link>
               <Link to="/transfer" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Transfer
-              </Link>
-              <Link to="/savings" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
-                Savings
               </Link>
               <Link to="/bills" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Bills
@@ -74,44 +76,54 @@ export default function Income() {
               <Link to="/expense" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Expenses
               </Link>
-            </nav>
-            <div className="sm:hidden">
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
-          </div>
-          {mobileMenuOpen && (
-            <div className="sm:hidden py-2 pb-4">
-              <Link
-                to="/transfer"
-                className="block px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
-              >
-                Transfer
+              <Link to="/income" className="text-indigo-600 font-medium border-b-2 border-indigo-600 hover:text-indigo-800 transition-colors duration-200">
+                Income
               </Link>
-              <Link
-                to="/savings"
-                className="block px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
-              >
+              <Link to="/savings" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Savings
               </Link>
-              <Link
-                to="/bills"
-                className="block px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
-              >
-                Bills
+              <Link to="/friends" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Friends
               </Link>
-              <Link
-                to="/expense"
-                className="block px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
-              >
-                Expenses
-              </Link>
+            </nav>
+            {/* Mobile menu button */}
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="sm:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+            >
+              {mobileMenuOpen ? (
+                <X className="w-6 h-6 text-gray-600" />
+              ) : (
+                <Menu className="w-6 h-6 text-gray-600" />
+              )}
+            </button>
+          </div>
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="sm:hidden py-4 border-t border-gray-200">
+              <nav className="flex flex-col space-y-4">
+                <Link to="/topUp" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Top-Up
+                </Link>
+                <Link to="/transfer" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Transfer
+                </Link>
+                <Link to="/bills" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Bills
+                </Link>
+                <Link to="/expense" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Expenses
+                </Link>
+                <Link to="/income" className="text-indigo-600 font-medium border-b-2 border-indigo-600 hover:text-indigo-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Income
+                </Link>
+                <Link to="/savings" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Savings
+                </Link>
+                <Link to="/friends" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Friends
+                </Link>
+              </nav>
             </div>
           )}
         </div>

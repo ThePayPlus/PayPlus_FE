@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import TopUpController from '../../controllers/TopUpController';
+import { Menu, X } from 'lucide-react';
 import BRI from '../../assets/BRI.png';
 import BCA from '../../assets/BCA.png';
 import BNI from '../../assets/BNI.png';
@@ -32,6 +33,8 @@ export const TopUpPage = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const [redirectCountdown, setRedirectCountdown] = useState(null);
+  
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   useEffect(() => {
     let timer;
@@ -77,11 +80,67 @@ export const TopUpPage = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-            <Link to="/dashboard">
+              <Link to="/dashboard">
                 <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" className="h-10" />
               </Link>
             </div>
+            {/* Desktop Navigation */}
+            <nav className="hidden sm:flex space-x-4">
+              <Link to="/topUp" className="text-indigo-600 font-medium border-b-2 border-indigo-600 hover:text-indigo-800 transition-colors duration-200">
+                Top-Up
+              </Link>
+              <Link to="/transfer" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Transfer
+              </Link>
+              <Link to="/bills" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Bills
+              </Link>
+              <Link to="/expense" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Expenses
+              </Link>
+              <Link to="/income" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Income
+              </Link>
+              <Link to="/savings" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Savings
+              </Link>
+              <Link to="/friends" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Friends
+              </Link>
+            </nav>
+            {/* Mobile menu button */}
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="sm:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+              {mobileMenuOpen ? <X className="w-6 h-6 text-gray-600" /> : <Menu className="w-6 h-6 text-gray-600" />}
+            </button>
           </div>
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="sm:hidden py-4 border-t border-gray-200">
+              <nav className="flex flex-col space-y-4">
+                <Link to="/topUp" className="text-indigo-600 font-medium border-b-2 border-indigo-600 hover:text-indigo-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Top-Up
+                </Link>
+                <Link to="/transfer" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Transfer
+                </Link>
+                <Link to="/bills" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Bills
+                </Link>
+                <Link to="/Expense" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Expenses
+                </Link>
+                <Link to="/Income" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Income
+                </Link>
+                <Link to="/savings" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Savings
+                </Link>
+                <Link to="/Friends" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Friends
+                </Link>
+              </nav>
+            </div>
+          )}
         </div>
       </header>
       <main className="flex items-center justify-center min-h-[calc(100vh-64px)]">
