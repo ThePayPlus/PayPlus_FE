@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiService } from '../../services/apiService.js';
-import { User, Search, Plus, Bell, X, Phone, Check, ArrowLeftIcon } from 'lucide-react';
+import { User, Search, Plus, Bell, X, Phone, Check, Menu } from 'lucide-react';
 import ChatRoom from './ChatRoom.jsx';
 import FriendController from '../../controllers/FriendController.js';
 
@@ -22,6 +22,7 @@ export const Friends = () => {
   const [requestActionLoading, setRequestActionLoading] = useState(false);
   const [requestActionSuccess, setRequestActionSuccess] = useState('');
   const [requestActionError, setRequestActionError] = useState('');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Fetch friends list
   useEffect(() => {
@@ -73,7 +74,7 @@ export const Friends = () => {
     if (response.success) {
       setAddFriendSuccess(response.message || 'Friend request sent successfully');
       setPhoneNumber('');
-      fetchFriends(); // Refresh friends list
+      fetchFriends();
       setTimeout(() => {
         setShowAddFriendModal(false);
         setAddFriendSuccess('');
@@ -144,23 +145,90 @@ export const Friends = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <Link to="/dashboard" className="mr-2 p-2 rounded-full hover:bg-gray-100">
-                <ArrowLeftIcon className="w-5 h-5 text-gray-600" />
+              <Link to="/dashboard">
+                <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" className="h-10" />
               </Link>
-              <h1 className="text-xl font-semibold text-gray-800">Chat</h1>
             </div>
-            <div className="flex items-center space-x-2">
+            {/* Desktop Navigation */}
+            <nav className="hidden sm:flex space-x-4">
+              <Link to="/topUp" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Top-Up
+              </Link>
+              <Link to="/transfer" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Transfer
+              </Link>
+              <Link to="/bills" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Bills
+              </Link>
+              <Link to="/expense" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Expenses
+              </Link>
+              <Link to="/income" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Income
+              </Link>
+              <Link to="/savings" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Savings
+              </Link>
+              <Link to="/friends" className="text-indigo-600 font-medium border-b-2 border-indigo-600 hover:text-indigo-800 transition-colors duration-200">
+                Friends
+              </Link>
+            </nav>
+            {/* Friend Actions */}
+            <div className="flex items-center space-x-3">
               {/* Friend Request Button */}
-              <button onClick={() => setShowFriendRequests(!showFriendRequests)} className="relative p-2 rounded-full hover:bg-gray-100 transition-colors">
+              <button onClick={() => setShowFriendRequests(!showFriendRequests)} className="relative p-2 rounded-full hover:bg-gray-100 transition-colors duration-200" aria-label="Friend Requests">
                 <Bell className="w-5 h-5 text-gray-600" />
                 {friendRequests.length > 0 && <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">{friendRequests.length}</span>}
               </button>
               {/* Add Friend Button */}
-              <button onClick={() => setShowAddFriendModal(true)} className="p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors">
-                <Plus className="w-5 h-5" />
+              <button onClick={() => setShowAddFriendModal(true)} className="hidden sm:flex items-center space-x-1 px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200">
+                <Plus className="w-4 h-4" />
+                <span>Add Friend</span>
+              </button>
+              {/* Mobile menu button */}
+              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="sm:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                {mobileMenuOpen ? <X className="w-6 h-6 text-gray-600" /> : <Menu className="w-6 h-6 text-gray-600" />}
               </button>
             </div>
           </div>
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="sm:hidden py-4 border-t border-gray-200">
+              <nav className="flex flex-col space-y-4">
+                <Link to="/topUp" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Top-Up
+                </Link>
+                <Link to="/transfer" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Transfer
+                </Link>
+                <Link to="/bills" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Bills
+                </Link>
+                <Link to="/expense" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Expenses
+                </Link>
+                <Link to="/income" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Income
+                </Link>
+                <Link to="/savings" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Savings
+                </Link>
+                <Link to="/friends" className="text-indigo-600 font-medium border-b-2 border-indigo-600 hover:text-indigo-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Friends
+                </Link>
+                <button
+                  onClick={() => {
+                    setShowAddFriendModal(true);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="flex items-center space-x-1 px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 w-full"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Friend</span>
+                </button>
+              </nav>
+            </div>
+          )}
         </div>
       </header>
 

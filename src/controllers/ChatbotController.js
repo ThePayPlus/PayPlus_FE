@@ -8,18 +8,15 @@ class ChatbotController {
   }
 
   /**
-   * Mengirim pesan ke chatbot dan mendapatkan respons
-   * @param {string} message - Pesan yang dikirim pengguna
-   * @returns {Promise<ChatbotMessage>} - Objek pesan dengan respons dari chatbot
+   * @param {string} message
+   * @returns {Promise<ChatbotMessage>}
    */
   async sendMessage(message) {
     this.isLoading = true;
 
     try {
-      // Buat objek pesan baru
       const newMessage = new ChatbotMessage(Date.now().toString(), message, '', new Date());
 
-      // Tambahkan ke history dengan status loading
       newMessage.isLoading = true;
       this.chatHistory.push(newMessage);
 
@@ -52,15 +49,12 @@ class ChatbotController {
 
   /**
    * Mendapatkan seluruh riwayat chat
-   * @returns {Array<ChatbotMessage>} - Array berisi objek pesan
+   * @returns {Array<ChatbotMessage>}
    */
   getChatHistory() {
     return this.chatHistory;
   }
 
-  /**
-   * Menghapus seluruh riwayat chat
-   */
   clearChatHistory() {
     this.chatHistory = [];
   }
