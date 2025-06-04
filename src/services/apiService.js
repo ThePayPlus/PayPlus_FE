@@ -613,7 +613,7 @@ class ApiService {
 
       return {
         success: true,
-        message: response.data.message || 'Top up berhasil',
+        message: response.data.message || 'Top up successful',
         data: {
           amount: response.data.amount,
           newBalance: response.data.newBalance,
@@ -622,7 +622,7 @@ class ApiService {
     } catch (error) {
       return {
         success: false,
-        message: error.response?.data?.message || 'Gagal melakukan top up',
+        message: error.response?.data?.message || 'Failed to top up',
       };
     }
   }
