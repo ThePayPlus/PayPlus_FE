@@ -12,7 +12,6 @@ export const AddToSavings = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // Ambil data savings dari backend
     const fetchSaving = async () => {
       setLoading(true);
       setError('');
@@ -38,10 +37,10 @@ export const AddToSavings = () => {
           const saving = data.find((item) => String(item.id) === String(id));
           setSavingToEdit(saving || null);
         } else {
-          setError(response.message || 'Gagal memuat data savings');
+          setError(response.message || 'Failed to load savings data');
         }
       } catch (err) {
-        setError('Terjadi kesalahan saat memuat data');
+        setError('An error occurred while loading data');
       } finally {
         setLoading(false);
       }
@@ -59,17 +58,17 @@ export const AddToSavings = () => {
       if (response.success) {
         navigate('/savings');
       } else {
-        setError(response.message || 'Gagal menambah dana ke savings');
+        setError(response.message || 'Failed to add funds to savings');
       }
     } catch (err) {
-      setError('Terjadi kesalahan saat menambah dana');
+      setError('An error occurred while adding funds');
     } finally {
       setLoading(false);
     }
   };
 
   if (loading) {
-    return <p className="text-center text-gray-500">Memuat data...</p>;
+    return <p className="text-center text-gray-500">Loading data...</p>;
   }
 
   if (error) {
@@ -77,7 +76,7 @@ export const AddToSavings = () => {
   }
 
   if (!savingToEdit) {
-    return <p className="text-center text-red-500">Saving tidak ditemukan.</p>;
+    return <p className="text-center text-red-500">Saving not found.</p>;
   }
 
   console.log('savingToEdit', savingToEdit);
@@ -141,7 +140,7 @@ export const AddToSavings = () => {
             />
           </div>
           <button type="submit" className="w-full bg-green-500 text-white py-2 px-4 rounded shadow hover:bg-green-600" disabled={loading}>
-            {loading ? 'Menambah...' : 'Add Amount'}
+            {loading ? 'Adding...' : 'Add Amount'}
           </button>
         </form>
       </main>
