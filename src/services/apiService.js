@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 
 class ApiService {
   // Base URL for the backend API
-  static baseUrl = 'https://78nvh33s-3000.asse.devtunnels.ms/api';
+  static baseUrl = 'http://localhost:3000/api';
   static wsUrl = 'ws://localhost:3000';
   // Token storage key
   static tokenKey = 'auth_token';
@@ -30,6 +30,8 @@ class ApiService {
 
     socket.on('connect', () => {
       console.log('Socket.IO connection established with ID:', socket.id);
+      // Kirim status online saat terhubung
+      socket.emit('user_status', { status: 'online' });
     });
 
     socket.on('connect_error', (error) => {
@@ -38,6 +40,17 @@ class ApiService {
 
     socket.on('disconnect', (reason) => {
       console.log('Socket.IO disconnected:', reason);
+      // Kirim status offline saat terputus jika memungkinkan
+      if (socket.connected) {
+        socket.emit('user_status', { status: 'offline' });
+      }
+    });
+
+    // Tambahkan event untuk window sebelum unload untuk mengirim status offline
+    window.addEventListener('beforeunload', () => {
+      if (socket.connected) {
+        socket.emit('user_status', { status: 'offline' });
+      }
     });
 
     return socket;

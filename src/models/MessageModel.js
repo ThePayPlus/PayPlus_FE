@@ -9,14 +9,7 @@ class Message {
   }
 
   static fromJson(json) {
-    return new Message(
-      json.id || '',
-      json.sender || json.sender_phone || '',
-      json.receiver || json.receiver_phone || '',
-      json.message || '',
-      json.sent_at || new Date().toISOString(),
-      json.isLocalMessage || false
-    );
+    return new Message(json.id || '', json.sender || json.sender_phone || '', json.receiver || json.receiver_phone || '', json.message || '', json.sent_at || new Date().toISOString(), json.isLocalMessage || false);
   }
 
   isSentByMe() {
