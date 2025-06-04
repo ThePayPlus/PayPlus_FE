@@ -110,7 +110,7 @@ export const TopUpPage = () => {
                 <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" className="h-10" />
               </Link>
             </div>
-            {/* Desktop Navigation */}
+            {/* Navigation */}
             <nav className="hidden sm:flex space-x-4">
               <Link to="/topUp" className="text-indigo-600 font-medium border-b-2 border-indigo-600 hover:text-indigo-800 transition-colors duration-200">
                 Top-Up
@@ -172,13 +172,11 @@ export const TopUpPage = () => {
 
       <main className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         <div className="max-w-md mx-auto">
-          {/* Page Title */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-slate-900 mb-2">Top Up Your Account</h1>
             <p className="text-slate-600">Add funds to your PayPlus wallet</p>
           </div>
 
-          {/* Main Card */}
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 p-8">
             {!result ? (
               <>
@@ -240,7 +238,6 @@ export const TopUpPage = () => {
                         id="amount"
                         value={topup}
                         onChange={(e) => {
-                          // Only allow numbers
                           const value = e.target.value.replace(/[^0-9]/g, "")
                           setTopup(value)
                         }}
@@ -302,7 +299,6 @@ export const TopUpPage = () => {
                 </form>
               </>
             ) : (
-              // Success Result
               <div className="text-center">
                 <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Check className="w-10 h-10 text-green-500" />
@@ -339,8 +335,6 @@ export const TopUpPage = () => {
               </div>
             )}
           </div>
-
-          
         </div>
       </main>
     </div>

@@ -19,7 +19,6 @@ export const AddSavings = () => {
       ...prev,
       [name]: value
     }));
-    // Clear error when user starts typing
     if (error) setError('');
   };
 
@@ -34,19 +33,19 @@ export const AddSavings = () => {
       
       // Validation
       if (!nama.trim()) {
-        setError('Nama savings tidak boleh kosong');
+        setError('The savings name cannot be blank.');
         setLoading(false);
         return;
       }
       
       if (!deskripsi.trim()) {
-        setError('Deskripsi tidak boleh kosong');
+        setError('Description cannot be empty');
         setLoading(false);
         return;
       }
       
       if (!target || parseInt(target) <= 0) {
-        setError('Target harus lebih dari 0');
+        setError('The target must be more than 0');
         setLoading(false);
         return;
       }
@@ -54,23 +53,21 @@ export const AddSavings = () => {
       const response = await ApiService.addSavings(nama, deskripsi, target);
 
       if (response.success) {
-        setSuccess('Savings berhasil ditambahkan!');
-        // Reset form
+        setSuccess('Savings successfully added!');
         setFormData({
           nama: '',
           deskripsi: '',
           target: ''
         });
         
-        // Redirect to savings page after 2 seconds
         setTimeout(() => {
           navigate('/savings');
         }, 2000);
       } else {
-        setError(response.message || 'Gagal menambahkan savings');
+        setError(response.message || 'Failed to add savings');
       }
     } catch (err) {
-      setError('Terjadi kesalahan yang tidak terduga');
+      setError('An unexpected error has occurred');
       console.error('Add savings error:', err);
     } finally {
       setLoading(false);
@@ -127,7 +124,7 @@ export const AddSavings = () => {
               required
               disabled={loading}
               className="mt-1 p-2 w-full border rounded-lg focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
-              placeholder="Contoh: Beli Motor"
+              placeholder="Example: Holiday"
             />
           </div>
           <div className="mb-4">
@@ -141,7 +138,7 @@ export const AddSavings = () => {
               required
               disabled={loading}
               className="mt-1 p-2 w-full border rounded-lg focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
-              placeholder="Deskripsi tujuan savings Anda"
+              placeholder="Description of your savings goals"
             ></textarea>
           </div>
           <div className="mb-4">
@@ -156,7 +153,7 @@ export const AddSavings = () => {
               required
               disabled={loading}
               className="mt-1 p-2 w-full border rounded-lg focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
-              placeholder="Contoh: 5000000"
+              placeholder="Example: 5000000"
             />
           </div>
           <button 
@@ -168,7 +165,7 @@ export const AddSavings = () => {
                 : 'bg-blue-500 hover:bg-blue-600'
             } text-white`}
           >
-            {loading ? 'Menambahkan...' : 'Add'}
+            {loading ? 'Adding...' : 'Add'}
           </button>
         </form>
       </main>

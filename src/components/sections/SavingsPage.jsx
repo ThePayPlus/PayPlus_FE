@@ -5,10 +5,7 @@ import { SavingsModel } from '../../models/SavingsModel.js';
 import { Menu, X } from 'lucide-react';
 
 export const SavingsPage = () => {
-  // State untuk controller
   const [controller] = useState(new SavingsController());
-  
-  // State untuk UI
   const [savingsList, setSavingsList] = useState([]);
   const [alert, setAlert] = useState('');
   const [alertType, setAlertType] = useState('');
@@ -19,15 +16,13 @@ export const SavingsPage = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedSavings, setSelectedSavings] = useState(null);
   const [newTarget, setNewTarget] = useState('');
-  const [modalError, setModalError] = useState(''); // Tambahkan state untuk error di modal
+  const [modalError, setModalError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  // Mengambil data saat komponen dimuat
   useEffect(() => {
     fetchSavingsData();
   }, []);
 
-  // Mengambil data dari controller
   const fetchSavingsData = async () => {
     setLoading(true);
     const result = await controller.fetchSavingsData();
@@ -45,43 +40,38 @@ export const SavingsPage = () => {
     setLoading(false);
   };
 
-  // Menghapus savings
   const handleDeleteSavings = async (savingsId) => {
-    if (window.confirm('Apakah Anda yakin ingin menghapus savings ini?')) {
-      setLoading(true); // Menampilkan loading state
+    if (window.confirm('Are you sure you want to delete these savings?')) {
+      setLoading(true);
       const result = await controller.deleteSavings(savingsId);
       setAlert(result.message);
       setAlertType(result.alertType || '');
       
       if (result.success) {
-        // Refresh data setelah berhasil menghapus
         await fetchSavingsData();
         setTimeout(() => setAlert(''), 3000);
       } else {
-        setLoading(false); // Hentikan loading jika gagal
+        setLoading(false);
       }
     }
   };
 
-  // Transfer ke balance
   const transferToBalance = async (savingsId) => {
     if (window.confirm('Are you sure you want to transfer these savings to your balance?')) {
-      setLoading(true); // Menampilkan loading state
+      setLoading(true);
       const result = await controller.transferToBalance(savingsId);
       setAlert(result.message);
       setAlertType(result.alertType || '');
       
       if (result.success) {
-        // Refresh data setelah berhasil transfer
         await fetchSavingsData();
         setTimeout(() => { setAlert(''); setAlertType(''); }, 3000);
       } else {
-        setLoading(false); // Hentikan loading jika gagal
+        setLoading(false);
       }
     }
   };
 
-  // Menampilkan modal edit target
   const handleShowEditModal = (savings) => {
     const selected = controller.setSelectedSavings(savings);
     setSelectedSavings(selected);
@@ -89,34 +79,29 @@ export const SavingsPage = () => {
     setShowEditModal(true);
   };
 
-  // Menyimpan target baru
   const handleUpdateTarget = async () => {
     if (!selectedSavings || !newTarget) return;
     
-    // Reset modal error sebelum validasi
     setModalError('');
     
-    // Validasi target tidak boleh 0 atau negatif
     const targetValue = parseInt(newTarget);
     if (targetValue <= 0) {
-      setModalError('Target tabungan tidak boleh 0 atau negatif');
+      setModalError('The savings target cannot be 0 or negative.');
       return;
     }
     
-    setLoading(true); // Menampilkan loading state
+    setLoading(true);
     const result = await controller.updateSavingsTarget(selectedSavings.id, newTarget);
     
     if (result.success) {
       setShowEditModal(false);
       setAlert(result.message);
       setAlertType(result.alertType || '');
-      // Refresh data setelah berhasil update
       await fetchSavingsData();
       setTimeout(() => { setAlert(''); setAlertType(''); }, 3000);
     } else {
-      // Tampilkan error di dalam modal
       setModalError(result.message);
-      setLoading(false); // Hentikan loading jika gagal
+      setLoading(false);
     }
   };
 
@@ -130,7 +115,7 @@ export const SavingsPage = () => {
                 <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" className="h-10" />
               </Link>
             </div>
-            {/* Desktop Navigation */}
+            {/* Navigation */}
             <nav className="hidden sm:flex space-x-4">
               <Link to="/topUp" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Top-Up
@@ -312,9 +297,8 @@ export const SavingsPage = () => {
       {showEditModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-auto">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-            <h2 className="text-xl font-semibold mb-4 text-purple-600">Edit Target Tabungan</h2>
+            <h2 className="text-xl font-semibold mb-4 text-purple-600">Edit Target</h2>
             
-            {/* Tampilkan pesan error di dalam modal */}
             {modalError && (
               <div className="mb-4 text-red-600 bg-red-100 p-3 rounded">
                 {modalError}
@@ -323,7 +307,7 @@ export const SavingsPage = () => {
             
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="newTarget">
-                Target Baru
+                New Target
               </label>
               <input
                 id="newTarget"
@@ -340,7 +324,7 @@ export const SavingsPage = () => {
                 className="mr-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
                 onClick={() => {
                   setShowEditModal(false);
-                  setModalError(''); // Reset error saat menutup modal
+                  setModalError('');
                 }}
               >
                 Batal
@@ -357,7 +341,7 @@ export const SavingsPage = () => {
             className="fixed inset-0 -z-10" 
             onClick={() => {
               setShowEditModal(false);
-              setModalError(''); // Reset error saat menutup modal
+              setModalError('');
             }}
           ></div>
         </div>
