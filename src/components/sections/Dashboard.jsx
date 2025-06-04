@@ -1,16 +1,44 @@
-'use client';
+"use client"
 
-import { useState, useEffect } from 'react';
-import { ApiService } from '../../services/apiService.js';
-import { ArrowDownLeft, ArrowUpRight, ChevronRight, CreditCard, Droplet, File, Heart, Home, Send, Truck, Wifi, Zap } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { SavingsModel } from '../../models/SavingsModel.js';
+import { useState, useEffect } from "react"
+import { ApiService } from "../../services/apiService.js"
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  Droplet,
+  File,
+  Heart,
+  Home,
+  Send,
+  Truck,
+  Wifi,
+  Zap,
+  TrendingUp,
+  Target,
+  Calendar,
+  Bell,
+  Settings,
+  Users,
+  LogOut,
+  Plus,
+  Eye,
+  EyeOff,
+  Menu,
+  Search,
+  CreditCard,
+  BarChart3,
+  Clock,
+} from "lucide-react"
+import { Link } from "react-router-dom"
+import { SavingsModel } from "../../models/SavingsModel.js"
 
 export const Dashboard = () => {
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [userData, setUserData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [balanceVisible, setBalanceVisible] = useState(true)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Financial data state
   const [financialData, setFinancialData] = useState({
@@ -25,55 +53,49 @@ export const Dashboard = () => {
       total: 0,
       upcoming: [],
     },
-  });
-  const [financialDataLoading, setFinancialDataLoading] = useState(true);
+  })
+  const [financialDataLoading, setFinancialDataLoading] = useState(true)
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await ApiService.getProfile();
+        const response = await ApiService.getProfile()
         if (response.success) {
-          setUserData(response.data);
+          setUserData(response.data)
 
-          // Menggunakan data dari profil untuk balance, income, dan expense
-          const { balance, total_income, total_expense } = response.data;
+          const { balance, total_income, total_expense } = response.data
 
-          // Fetch bills data untuk fitur lainnya
-          const billsResponse = await ApiService.getBills();
+          const billsResponse = await ApiService.getBills()
 
-          let billsTotal = 0;
-          let upcomingBills = [];
+          let billsTotal = 0
+          let upcomingBills = []
 
           if (billsResponse.success && billsResponse.data && billsResponse.data.bills) {
             upcomingBills = billsResponse.data.bills.map((bill) => ({
               name: bill.name,
               amount: bill.amount,
               dueDate: bill.dueDate,
-              category: bill.category || 'Other',
-            }));
+              category: bill.category || "Other",
+            }))
 
-            billsTotal = upcomingBills.reduce((total, bill) => total + bill.amount, 0);
+            billsTotal = upcomingBills.reduce((total, bill) => total + bill.amount, 0)
           }
 
-          // Fetch real savings data from API
-          const savingsResponse = await ApiService.getSavings();
-          let savingsTotal = 0;
-          let savingsGoals = [];
+          const savingsResponse = await ApiService.getSavings()
+          let savingsTotal = 0
+          let savingsGoals = []
 
           if (savingsResponse.success && savingsResponse.data) {
-            // Get total savings amount from summary
-            savingsTotal = parseInt(savingsResponse.data.summary.total_terkumpul) || 0;
-            
-            // Map savings records to goals format
-            savingsGoals = savingsResponse.data.records.map(record => {
-              // Create a SavingsModel instance for each record
-              const savingsModel = new SavingsModel(record);
+            savingsTotal = Number.parseInt(savingsResponse.data.summary.total_terkumpul) || 0
+
+            savingsGoals = savingsResponse.data.records.map((record) => {
+              const savingsModel = new SavingsModel(record)
               return {
                 name: savingsModel.namaSavings,
-                collected: parseInt(savingsModel.terkumpul),
-                target: parseInt(savingsModel.target)
-              };
-            });
+                collected: Number.parseInt(savingsModel.terkumpul),
+                target: Number.parseInt(savingsModel.target),
+              }
+            })
           }
 
           setFinancialData({
@@ -88,91 +110,135 @@ export const Dashboard = () => {
               total: billsTotal,
               upcoming: upcomingBills,
             },
-          });
+          })
         } else {
-          setError(response.message || 'Failed to load user profile');
+          setError(response.message || "Failed to load user profile")
         }
       } catch (err) {
-        setError('An unexpected error occurred');
-        console.error('Profile fetch error:', err);
+        setError("An unexpected error occurred")
+        console.error("Profile fetch error:", err)
       } finally {
-        setLoading(false);
-        setFinancialDataLoading(false);
+        setLoading(false)
+        setFinancialDataLoading(false)
       }
-    };
+    }
 
-    fetchUserProfile();
-  }, []);
+    fetchUserProfile()
+  }, [])
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'decimal',
+    return new Intl.NumberFormat("id-ID", {
+      style: "decimal",
       maximumFractionDigits: 0,
-    }).format(amount);
-  };
+    }).format(amount)
+  }
 
   const getCategoryIcon = (category) => {
+    const iconClass = "w-4 h-4"
     switch (category) {
-      case 'Rent':
-        return <Home className="w-4 h-4" />;
-      case 'Electricity':
-        return <Zap className="w-4 h-4" />;
-      case 'Internet':
-        return <Wifi className="w-4 h-4" />;
-      case 'Water':
-        return <Droplet className="w-4 h-4" />;
-      case 'Vehicle':
-        return <Truck className="w-4 h-4" />;
-      case 'Heart':
-        return <Heart className="w-4 h-4" />;
+      case "Rent":
+        return <Home className={iconClass} />
+      case "Electricity":
+        return <Zap className={iconClass} />
+      case "Internet":
+        return <Wifi className={iconClass} />
+      case "Water":
+        return <Droplet className={iconClass} />
+      case "Vehicle":
+        return <Truck className={iconClass} />
+      case "Heart":
+        return <Heart className={iconClass} />
       default:
-        return <File className="w-4 h-4" />;
+        return <File className={iconClass} />
     }
-  };
+  }
 
   const handleLogout = async () => {
     try {
-      const response = await ApiService.logout();
+      const response = await ApiService.logout()
       if (response.success) {
-        window.location.href = '/';
+        window.location.href = "/"
       } else {
-        setError(response.message || 'Logout failed');
+        setError(response.message || "Logout failed")
       }
     } catch (error) {
-      setError('An unexpected error occurred during logout');
-      console.error('Logout error:', error);
+      setError("An unexpected error occurred during logout")
+      console.error("Logout error:", error)
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-10">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Modern Header */}
+      <header className="bg-white sticky top-0 z-50 border-b border-gray-100">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
+          <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" className="h-10" />
+              <button
+                className="md:hidden mr-2 p-2 rounded-lg hover:bg-gray-100"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                <Menu className="w-5 h-5 text-gray-600" />
+              </button>
+              <img
+                src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true"
+                alt="PayPlus Logo"
+                className="h-8"
+              />
             </div>
+
+            <div className="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2 flex-1 max-w-xs mx-8">
+              <Search className="w-4 h-4 text-gray-500 mr-2" />
+              <input
+                type="text"
+                placeholder="Search transactions..."
+                className="bg-transparent border-none focus:outline-none text-sm w-full"
+              />
+            </div>
+
             <div className="flex items-center space-x-4">
+              <button className="relative p-2 rounded-full hover:bg-gray-100 transition-colors">
+                <Bell className="w-5 h-5 text-gray-600" />
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full"></div>
+              </button>
+
               <div className="relative">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png" alt="Profile" className="w-10 h-10 rounded-full border-2 border-indigo-500 cursor-pointer" onClick={() => setShowDropdown(!showDropdown)} />
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png"
+                  alt="Profile"
+                  className="w-9 h-9 rounded-full cursor-pointer border border-gray-200"
+                  onClick={() => setShowDropdown(!showDropdown)}
+                />
 
                 {showDropdown && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md overflow-hidden shadow-xl z-10">
-                    <div className="px-4 py-2 border-b">
-                      <p className="text-sm font-medium text-gray-900">{userData?.name || 'User Name'}</p>
-                      <p className="text-xs text-gray-500">Account #: {userData?.phone || '08123456789'}</p>
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg overflow-hidden shadow-lg z-10 border border-gray-100">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="font-medium text-gray-900">{userData?.name || "User Name"}</p>
+                      <p className="text-xs text-gray-500">{userData?.phone || "08123456789"}</p>
                     </div>
-                    <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      Account Settings
-                    </Link>
-                    <Link to="/friends" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      Friends
-                    </Link>
-                    <a href="#" onClick={handleLogout} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      Logout
-                    </a>
+                    <div className="py-1">
+                      <Link
+                        to="/settings"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        <Settings className="w-4 h-4 mr-3 text-gray-500" />
+                        Settings
+                      </Link>
+                      <Link
+                        to="/friends"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        <Users className="w-4 h-4 mr-3 text-gray-500" />
+                        Friends
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 text-left"
+                      >
+                        <LogOut className="w-4 h-4 mr-3 text-gray-500" />
+                        Logout
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -181,180 +247,412 @@ export const Dashboard = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-grow container mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        {loading || financialDataLoading ? (
-          <p className="text-gray-600">Loading data...</p>
-        ) : error ? (
-          <p className="text-red-500">{error}</p>
-        ) : (
-          <>
-            <h1 className="text-3xl font-bold mb-8 text-gray-800">Welcome back, {userData?.name || 'User'}!</h1>
-
-            {/* User Info & Balance Card */}
-            <div className="rounded-xl p-6 mb-8 text-white" style={{ background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)' }}>
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <p className="text-sm opacity-90">Saldo Tersedia</p>
-                  <h2 className="text-3xl font-bold mt-1">Rp. {formatCurrency(financialData.balance || 0)}</h2>
-                </div>
-                <Link to="/topup" className="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-opacity-90 transition-colors">
-                  Top Up
-                </Link>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center">
-                  <ArrowUpRight className="w-4 h-4 mr-1" />
-                  <span className="text-sm">Pemasukan: Rp. {formatCurrency(financialData.income || 0)}</span>
-                </div>
-                <div className="flex items-center">
-                  <ArrowDownLeft className="w-4 h-4 mr-1" />
-                  <span className="text-sm">Pengeluaran: Rp. {formatCurrency(financialData.expense || 0)}</span>
-                </div>
-              </div>
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-white border-b border-gray-100 py-2">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 mb-2">
+              <Search className="w-4 h-4 text-gray-500 mr-2" />
+              <input
+                type="text"
+                placeholder="Search transactions..."
+                className="bg-transparent border-none focus:outline-none text-sm w-full"
+              />
             </div>
-
-            {/* Summary Cards */}
-            <div className="grid gap-6 mb-8 md:grid-cols-3">
-              <div className="flex items-center p-4 bg-white rounded-lg shadow-xs hover:shadow-md transition-shadow duration-300">
-                <div className="p-3 mr-4 text-green-500 bg-green-100 rounded-full">
-                  <ArrowUpRight className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="mb-2 text-sm font-medium text-gray-600">Total Pemasukan</p>
-                  <p className="text-lg font-semibold text-gray-700">Rp. {formatCurrency(financialData.income || 0)}</p>
-                </div>
-              </div>
-              <div className="flex items-center p-4 bg-white rounded-lg shadow-xs hover:shadow-md transition-shadow duration-300">
-                <div className="p-3 mr-4 text-red-500 bg-red-100 rounded-full">
-                  <ArrowDownLeft className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="mb-2 text-sm font-medium text-gray-600">Total Pengeluaran</p>
-                  <p className="text-lg font-semibold text-gray-700">Rp. {formatCurrency(financialData.expense || 0)}</p>
-                </div>
-              </div>
-              <div className="flex items-center p-4 bg-white rounded-lg shadow-xs hover:shadow-md transition-shadow duration-300">
-                <div className="p-3 mr-4 text-yellow-500 bg-yellow-100 rounded-full">
-                  <CreditCard className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="mb-2 text-sm font-medium text-gray-600">Tagihan Tertunda</p>
-                  <p className="text-lg font-semibold text-gray-700">Rp. {formatCurrency(financialData.bills?.total || 0)}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Access Cards */}
-            <div className="grid gap-6 mb-8 md:grid-cols-2">
-              <Link to="/income" className="block p-6 bg-white rounded-lg shadow-xs hover:shadow-md transition-shadow duration-300">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-gray-700">Income Records</h2>
-                  <ChevronRight className="text-gray-500" />
-                </div>
-                <p className="text-gray-600">View detailed income history and analytics</p>
+            <nav className="flex justify-between">
+              <Link to="/dashboard" className="text-blue-600 px-3 py-2 text-sm font-medium">
+                Dashboard
               </Link>
-              <Link to="/expense" className="block p-6 bg-white rounded-lg shadow-xs hover:shadow-md transition-shadow duration-300">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold text-gray-700">Expense Records</h2>
-                  <ChevronRight className="text-gray-500" />
-                </div>
-                <p className="text-gray-600">Track your spending patterns and categories</p>
+              <Link to="/transactions" className="text-gray-600 px-3 py-2 text-sm font-medium">
+                Transactions
+              </Link>
+              <Link to="/cards" className="text-gray-600 px-3 py-2 text-sm font-medium">
+                Cards
+              </Link>
+              <Link to="/settings" className="text-gray-600 px-3 py-2 text-sm font-medium">
+                Settings
+              </Link>
+            </nav>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content with Sidebar Layout */}
+      <div className="flex-1 flex flex-col md:flex-row">
+        {/* Sidebar Navigation - Desktop Only */}
+        <aside className="hidden md:block w-64 bg-white border-r border-gray-100 p-4">
+          <nav className="space-y-1 sticky top-20">
+            <Link
+              to="/dashboard"
+              className="flex items-center px-4 py-3 text-blue-600 bg-blue-50 rounded-lg font-medium"
+            >
+              <Home className="w-5 h-5 mr-3" />
+              Dashboard
+            </Link>
+            <Link to="/transactions" className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg">
+              <BarChart3 className="w-5 h-5 mr-3 text-gray-500" />
+              Transactions
+            </Link>
+            <Link to="/cards" className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg">
+              <CreditCard className="w-5 h-5 mr-3 text-gray-500" />
+              Cards
+            </Link>
+            <Link to="/savings" className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg">
+              <Target className="w-5 h-5 mr-3 text-gray-500" />
+              Savings
+            </Link>
+            <Link to="/bills" className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg">
+              <Calendar className="w-5 h-5 mr-3 text-gray-500" />
+              Bills
+            </Link>
+            <div className="pt-4 mt-4 border-t border-gray-100">
+              <Link to="/settings" className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg">
+                <Settings className="w-5 h-5 mr-3 text-gray-500" />
+                Settings
               </Link>
             </div>
+          </nav>
+        </aside>
 
-            {/* Bills and Savings */}
-            <div className="grid gap-6 mb-8 md:grid-cols-2">
-              {/* Upcoming Bills */}
-              <Link to="/bills" className="block">
-                <div className="bg-white rounded-lg shadow-xs p-6 hover:shadow-md transition-shadow duration-300">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold text-gray-700">Upcoming Bills</h2>
-                    <ChevronRight className="text-gray-500" />
+        {/* Main Content Area */}
+        <main className="flex-1 p-4 md:p-8">
+          {loading || financialDataLoading ? (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="w-10 h-10 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+            </div>
+          ) : error ? (
+            <div className="bg-red-50 border border-red-100 rounded-lg p-4 text-red-700">
+              <div className="flex items-center">
+                <span>{error}</span>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Welcome and Balance Section - Side by Side on Desktop */}
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
+                <div className="md:w-1/2">
+                  <h1 className="text-2xl font-bold text-gray-900">Welcome back, {userData?.name || "User"}</h1>
+                  <p className="text-gray-600 mt-1">Heres your financial overview</p>
+
+                  <div className="mt-6 flex flex-wrap gap-4">
+                    <div className="bg-white rounded-lg shadow-sm p-4 flex items-center space-x-3 flex-1 min-w-[180px]">
+                      <div className="p-2 bg-green-100 rounded-md">
+                        <TrendingUp className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Income</p>
+                        <p className="font-bold text-gray-900">Rp. {formatCurrency(financialData.income || 0)}</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-sm p-4 flex items-center space-x-3 flex-1 min-w-[180px]">
+                      <div className="p-2 bg-red-100 rounded-md">
+                        <ArrowDownLeft className="w-5 h-5 text-red-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Expense</p>
+                        <p className="font-bold text-gray-900">Rp. {formatCurrency(financialData.expense || 0)}</p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-4">
-                    {financialData.bills && financialData.bills.upcoming && financialData.bills.upcoming.length > 0 ? (
-                      financialData.bills.upcoming.map((bill, index) => (
-                        <div key={index} className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <span className="mr-3 text-gray-500">{getCategoryIcon(bill.category)}</span>
-                            <span className="text-gray-700">{bill.name}</span>
+                </div>
+
+                {/* Balance Card */}
+                <div className="md:w-1/2 bg-white rounded-xl shadow-sm overflow-hidden">
+                  <div className="bg-blue-600 p-6 text-white">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <p className="text-blue-100 font-medium">Available Balance</p>
+                          <button
+                            onClick={() => setBalanceVisible(!balanceVisible)}
+                            className="p-1 hover:bg-white/10 rounded-full transition-colors"
+                          >
+                            {balanceVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                          </button>
+                        </div>
+                        <h2 className="text-3xl font-bold mt-1">
+                          {balanceVisible ? `Rp. ${formatCurrency(financialData.balance || 0)}` : "Rp. ••••••••"}
+                        </h2>
+                      </div>
+                      <Link
+                        to="/topup"
+                        className="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition-colors"
+                      >
+                        <Plus className="w-4 h-4 inline mr-1" />
+                        Top Up
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-bold text-gray-900">Quick Actions</h2>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <Link
+                    to="/transfer"
+                    className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 text-center"
+                  >
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <Send className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <p className="font-medium text-gray-900">Transfer</p>
+                  </Link>
+
+                  <Link
+                    to="/topup"
+                    className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 text-center"
+                  >
+                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <Plus className="w-5 h-5 text-green-600" />
+                    </div>
+                    <p className="font-medium text-gray-900">Top Up</p>
+                  </Link>
+
+                  <Link
+                    to="/bills/pay"
+                    className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 text-center"
+                  >
+                    <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <Calendar className="w-5 h-5 text-amber-600" />
+                    </div>
+                    <p className="font-medium text-gray-900">Pay Bills</p>
+                  </Link>
+
+                  <Link
+                    to="/savings/add"
+                    className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300 text-center"
+                  >
+                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <Target className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <p className="font-medium text-gray-900">Save</p>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Recent Transactions and Upcoming Bills - Side by Side */}
+              <div className="grid md:grid-cols-2 gap-6 mb-8">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-bold text-gray-900">Recent Transactions</h2>
+                    <Link to="/transactions" className="text-blue-600 text-sm font-medium hover:underline">
+                      View All
+                    </Link>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div className="divide-y divide-gray-100">
+                      <div className="p-4 flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="p-2 bg-green-100 rounded-md mr-3">
+                            <ArrowUpRight className="w-4 h-4 text-green-600" />
                           </div>
-                          <div className="text-right">
-                            <p className="text-gray-700 font-semibold">Rp {formatCurrency(bill.amount)}</p>
-                            <p className="text-sm text-gray-500">Due on {bill.dueDate}</p>
+                          <div>
+                            <p className="font-medium text-gray-900">Salary</p>
+                            <p className="text-xs text-gray-500">Income</p>
                           </div>
                         </div>
-                      ))
-                    ) : (
-                      <div className="flex justify-between mb-1">
-                        <span className="text-gray-700">No upcoming bills.</span>
+                        <div className="text-right">
+                          <p className="font-bold text-green-600">+Rp. 5,000,000</p>
+                          <p className="text-xs text-gray-500">Today</p>
+                        </div>
                       </div>
-                    )}
+
+                      <div className="p-4 flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="p-2 bg-red-100 rounded-md mr-3">
+                            <ArrowDownLeft className="w-4 h-4 text-red-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">Groceries</p>
+                            <p className="text-xs text-gray-500">Expense</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-red-600">-Rp. 250,000</p>
+                          <p className="text-xs text-gray-500">Yesterday</p>
+                        </div>
+                      </div>
+
+                      <div className="p-4 flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="p-2 bg-red-100 rounded-md mr-3">
+                            <ArrowDownLeft className="w-4 h-4 text-red-600" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">Netflix</p>
+                            <p className="text-xs text-gray-500">Subscription</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-red-600">-Rp. 159,000</p>
+                          <p className="text-xs text-gray-500">3 days ago</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </Link>
 
-              {/* Savings Goals */}
-              <Link to="/savings" className="block">
-                <div className="bg-white rounded-lg shadow-xs p-6 hover:shadow-md transition-shadow duration-300">
+                <div>
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold text-gray-700">Savings Goals</h2>
-                    <ChevronRight className="text-gray-500" />
+                    <h2 className="text-lg font-bold text-gray-900">Upcoming Bills</h2>
+                    <Link to="/bills" className="text-blue-600 text-sm font-medium hover:underline">
+                      View All
+                    </Link>
                   </div>
-                  <div className="space-y-4">
-                    {financialData.savings && financialData.savings.goals && financialData.savings.goals.length > 0 ? (
-                      financialData.savings.goals.map((goal, index) => {
-                        const progress = Math.min((goal.collected / goal.target) * 100, 100);
-                        return (
-                          <div key={index}>
-                            <div className="flex justify-between mb-1">
-                              <span className="text-gray-700">{goal.name}</span>
-                              <span className="text-gray-600">
-                                Rp {formatCurrency(goal.collected)} / {formatCurrency(goal.target)}
-                              </span>
+                  <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div className="divide-y divide-gray-100">
+                      {financialData.bills &&
+                      financialData.bills.upcoming &&
+                      financialData.bills.upcoming.length > 0 ? (
+                        financialData.bills.upcoming.slice(0, 3).map((bill, index) => (
+                          <div key={index} className="p-4 flex items-center justify-between">
+                            <div className="flex items-center">
+                              <div className="p-2 bg-amber-100 rounded-md mr-3">{getCategoryIcon(bill.category)}</div>
+                              <div>
+                                <p className="font-medium text-gray-900">{bill.name}</p>
+                                <p className="text-xs text-gray-500">Due {bill.dueDate}</p>
+                              </div>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2.5">
-                              <div className="bg-green-600 h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
+                            <div className="text-right">
+                              <p className="font-bold text-gray-900">Rp. {formatCurrency(bill.amount)}</p>
+                              <div className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full inline-block">
+                                Pending
+                              </div>
                             </div>
                           </div>
-                        );
+                        ))
+                      ) : (
+                        <div className="p-8 text-center text-gray-500">
+                          <Calendar className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                          <p>No upcoming bills</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Savings Goals */}
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-bold text-gray-900">Savings Goals</h2>
+                  <Link to="/savings" className="text-blue-600 text-sm font-medium hover:underline">
+                    View All
+                  </Link>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm p-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {financialData.savings && financialData.savings.goals && financialData.savings.goals.length > 0 ? (
+                      financialData.savings.goals.slice(0, 2).map((goal, index) => {
+                        const progress = Math.min((goal.collected / goal.target) * 100, 100)
+                        return (
+                          <div key={index} className="bg-gray-50 rounded-lg p-4">
+                            <div className="flex justify-between items-center mb-2">
+                              <div>
+                                <h3 className="font-medium text-gray-900">{goal.name}</h3>
+                                <p className="text-xs text-gray-500">
+                                  Rp {formatCurrency(goal.collected)} / {formatCurrency(goal.target)}
+                                </p>
+                              </div>
+                              <span className="text-sm font-medium text-gray-600">{progress.toFixed(0)}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
+                              <div className="bg-green-600 h-2 rounded-full" style={{ width: `${progress}%` }}></div>
+                            </div>
+                          </div>
+                        )
                       })
                     ) : (
-                      <div className="flex justify-between mb-1">
-                        <span className="text-gray-700">You have no savings.</span>
+                      <div className="col-span-2 text-center py-6 text-gray-500">
+                        <Target className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                        <p>No savings goals yet</p>
+                        <Link
+                          to="/savings/create"
+                          className="mt-2 inline-flex items-center text-blue-600 hover:underline text-sm font-medium"
+                        >
+                          <Plus className="w-4 h-4 mr-1" />
+                          Create a goal
+                        </Link>
                       </div>
                     )}
                   </div>
                 </div>
-              </Link>
-            </div>
-
-            {/* Quick Transfer */}
-            <div className="mb-8">
-              <div className="bg-white rounded-lg shadow-xs p-6 hover:shadow-md transition-shadow duration-300">
-                <h2 className="text-xl font-semibold text-gray-700 mb-4">Quick Transfer</h2>
-                <p className="text-gray-600 mb-4">Need to move money? Initiate a quick transfer now.</p>
-                <Link
-                  to="/transfer"
-                  className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                >
-                  <Send className="w-4 h-4 mr-2" />
-                  Start New Transfer
-                </Link>
               </div>
-            </div>
 
-            {/* Floating Chatbot Button */}
-            <Link
-              to="/chatbot"
-              className="fixed bottom-4 right-4 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 flex items-center justify-center"
-            >
-              Chatbot
-            </Link>
-          </>
-        )}
-      </main>
+              {/* Financial Insights */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-bold text-gray-900">Financial Insights</h2>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm p-6">
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="p-2 bg-blue-100 rounded-md">
+                          <BarChart3 className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <h3 className="font-medium text-gray-900">Spending Analysis</h3>
+                      </div>
+                      <p className="text-sm text-gray-600">Your spending is 15% lower than last month.</p>
+                      <Link
+                        to="/insights/spending"
+                        className="mt-3 inline-block text-blue-600 text-sm font-medium hover:underline"
+                      >
+                        View Details
+                      </Link>
+                    </div>
+
+                    <div className="bg-green-50 rounded-lg p-4">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="p-2 bg-green-100 rounded-md">
+                          <TrendingUp className="w-5 h-5 text-green-600" />
+                        </div>
+                        <h3 className="font-medium text-gray-900">Savings Potential</h3>
+                      </div>
+                      <p className="text-sm text-gray-600">You could save Rp. 500,000 more this month.</p>
+                      <Link
+                        to="/insights/savings"
+                        className="mt-3 inline-block text-blue-600 text-sm font-medium hover:underline"
+                      >
+                        View Details
+                      </Link>
+                    </div>
+
+                    <div className="bg-purple-50 rounded-lg p-4">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="p-2 bg-purple-100 rounded-md">
+                          <Clock className="w-5 h-5 text-purple-600" />
+                        </div>
+                        <h3 className="font-medium text-gray-900">Upcoming Payments</h3>
+                      </div>
+                      <p className="text-sm text-gray-600">3 bills due in the next 7 days.</p>
+                      <Link
+                        to="/insights/payments"
+                        className="mt-3 inline-block text-blue-600 text-sm font-medium hover:underline"
+                      >
+                        View Details
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </main>
+      </div>
+
+      {/* Floating Action Button */}
+      <Link
+        to="/transfer"
+        className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-md hover:bg-blue-700 transition-colors flex items-center justify-center"
+      >
+        <Send className="w-6 h-6" />
+      </Link>
     </div>
-  );
-};
+  )
+}
