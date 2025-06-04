@@ -763,7 +763,10 @@ export const TransferPage = () => {
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
-                  onClick={resetForm}
+                  onClick={() => {
+                    resetForm();
+                    window.location.reload();
+                  }}
                   className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center font-semibold"
                 >
                   <Plus className="w-5 h-5 mr-2" />
