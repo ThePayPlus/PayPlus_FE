@@ -61,6 +61,11 @@ export const Dashboard = () => {
   const [notifications, setNotifications] = useState([])
   const [showNotifications, setShowNotifications] = useState(false)
 
+  // Tambahkan fungsi dismissNotification di sini
+  const dismissNotification = (id) => {
+    setNotifications((prev) => prev.filter((notification) => notification.id !== id))
+  }
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -77,7 +82,7 @@ export const Dashboard = () => {
 
           // Tambahkan ini di bagian atas import
           
-          // Kemudahkan kode ini di dalam useEffect fetchUserProfile
+          // Kemudahan kode ini di dalam useEffect fetchUserProfile
           
           if (billsResponse.success && billsResponse.data && billsResponse.data.bills) {
             upcomingBills = billsResponse.data.bills.map((bill) => ({
@@ -714,9 +719,4 @@ export const Dashboard = () => {
       </Link>
     </div>
   )
-}
-
-// Tambahkan fungsi dismissNotification di bawah handleLogout
-const dismissNotification = (id) => {
-  setNotifications(notifications.filter(notification => notification.id !== id));
 }
