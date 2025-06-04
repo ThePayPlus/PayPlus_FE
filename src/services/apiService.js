@@ -3,8 +3,8 @@ import { io } from 'socket.io-client';
 
 class ApiService {
   // Base URL for the backend API
-  static baseUrl = 'http://localhost:3000/api';
-  static wsUrl = 'ws://localhost:3000';
+  static baseUrl = 'https://78nvh33s-3000.asse.devtunnels.ms/api';
+  static wssUrl = 'https://78nvh33s-3000.asse.devtunnels.ms/';
 
   // Token storage key
   static tokenKey = 'auth_token';
