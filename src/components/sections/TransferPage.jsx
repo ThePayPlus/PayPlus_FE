@@ -1,280 +1,449 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, User, Send, ArrowLeft, CheckCircle, AlertCircle, Gift, CreditCard, Clock, ChevronRight } from 'lucide-react';
-import { TransferController } from '../../controllers/TransferController.js';
-import FriendController from '../../controllers/FriendController.js';
+"use client"
+
+import { useState, useEffect } from "react"
+import { Link } from "react-router-dom"
+import {
+  Search,
+  User,
+  Send,
+  ArrowLeft,
+  CheckCircle,
+  AlertCircle,
+  Gift,
+  ChevronRight,
+  Menu,
+  X,
+  Wallet,
+  Users,
+  History,
+  Plus,
+} from "lucide-react"
+import { TransferController } from "../../controllers/TransferController.js"
+import FriendController from "../../controllers/FriendController.js"
 
 export const TransferPage = () => {
   const [formData, setFormData] = useState({
     step: 1,
-    searchQuery: '',
+    searchQuery: "",
     searchResults: [],
     selectedUser: null,
-    amount: '',
-    message: '',
+    amount: "",
+    message: "",
     loading: false,
-    error: '',
+    error: "",
     success: false,
     userData: null,
-    transferType: 'normal',
-  });
-  const [controller] = useState(() => new TransferController());
-  const [transferMode, setTransferMode] = useState('search'); 
-  const [friends, setFriends] = useState([]);
-  const [recentTransfers, setRecentTransfers] = useState([]);
+    transferType: "normal",
+  })
+  const [controller] = useState(() => new TransferController())
+  const [transferMode, setTransferMode] = useState("search")
+  const [friends, setFriends] = useState([])
+  const [recentTransfers, setRecentTransfers] = useState([])
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // Fetch user profile only
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const data = await controller.fetchUserData();
-        setFormData((prev) => ({ ...prev, userData: data.userData }));
+        const data = await controller.fetchUserData()
+        setFormData((prev) => ({ ...prev, userData: data.userData }))
       } catch (error) {
-        setFormData((prev) => ({ 
-          ...prev, 
-          error: error.message || 'Failed to fetch user data',
-          userData: null
-        }));
-        console.error('Error fetching user data:', error);
+        setFormData((prev) => ({
+          ...prev,
+          error: error.message || "Failed to fetch user data",
+          userData: null,
+        }))
+        console.error("Error fetching user data:", error)
       }
-    };
-    fetchUserData();
-    
+    }
+    fetchUserData()
+
     // Fetch recent transfers
     const fetchRecentTransfers = async () => {
       try {
-        const result = await controller.fetchRecentTransfers();
+        const result = await controller.fetchRecentTransfers()
         if (result.success) {
-          setRecentTransfers(result.records || []);
+          setRecentTransfers(result.records || [])
         }
       } catch (error) {
-        console.error('Error fetching recent transfers:', error);
+        console.error("Error fetching recent transfers:", error)
       }
-    };
-    fetchRecentTransfers();
-  }, []);
+    }
+    fetchRecentTransfers()
+  }, [])
 
   // Fetch friends when mode is 'friend'
   useEffect(() => {
-    if (transferMode === 'friend') {
+    if (transferMode === "friend") {
       const fetchFriends = async () => {
-        const response = await FriendController.getFriends();
-        if (response.success) setFriends(response.friends);
-      };
-      fetchFriends();
+        const response = await FriendController.getFriends()
+        if (response.success) setFriends(response.friends)
+      }
+      fetchFriends()
     }
-  }, [transferMode]);
+  }, [transferMode])
 
   const handleChange = (name, value) => {
-    const updatedData = controller.updateField(name, value);
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+    const updatedData = controller.updateField(name, value)
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
   const handleSearch = async () => {
-    if (!formData.searchQuery.trim()) return;
-    setFormData((prev) => ({ ...prev, loading: true, error: '' }));
-    const result = await controller.searchUser(formData.searchQuery);
+    if (!formData.searchQuery.trim()) return
+    setFormData((prev) => ({ ...prev, loading: true, error: "" }))
+    const result = await controller.searchUser(formData.searchQuery)
     setFormData((prev) => ({
       ...prev,
       searchResults: result.results || [],
-      error: result.error || '',
+      error: result.error || "",
       loading: false,
-    }));
-  };
+    }))
+  }
 
   const selectUser = (user) => {
     setFormData((prev) => ({
       ...prev,
       selectedUser: user,
       step: 2,
-      error: '',
-    }));
-  };
+      error: "",
+    }))
+  }
 
   const handleAmountChange = (e) => {
-    const value = e.target.value;
+    const value = e.target.value
     if (/^\d*$/.test(value)) {
-      handleChange('amount', value);
+      handleChange("amount", value)
     }
-  };
+  }
 
   const goToConfirmation = () => {
-    const validation = controller.validateAmount(formData.amount);
+    const validation = controller.validateAmount(formData.amount)
     if (!validation.valid) {
-      setFormData((prev) => ({ ...prev, error: validation.message }));
-      return;
+      setFormData((prev) => ({ ...prev, error: validation.message }))
+      return
     }
-    setFormData((prev) => ({ ...prev, error: '', step: 3 }));
-  };
+    setFormData((prev) => ({ ...prev, error: "", step: 3 }))
+  }
 
   const handleTransfer = async () => {
-    setFormData((prev) => ({ ...prev, loading: true, error: '' }));
+    setFormData((prev) => ({ ...prev, loading: true, error: "" }))
     const response = await controller.transferMoney(
       formData.selectedUser,
       formData.amount,
       formData.transferType,
-      formData.message
-    );
+      formData.message,
+    )
     if (response.success) {
-      setFormData((prev) => ({ ...prev, success: true, step: 4, loading: false }));
+      setFormData((prev) => ({ ...prev, success: true, step: 4, loading: false }))
       // Refresh recent transfers after successful transfer
       try {
-        const result = await controller.fetchRecentTransfers();
+        const result = await controller.fetchRecentTransfers()
         if (result.success) {
-          setRecentTransfers(result.records || []);
+          setRecentTransfers(result.records || [])
         }
       } catch (error) {
-        console.error('Error fetching recent transfers:', error);
+        console.error("Error fetching recent transfers:", error)
       }
     } else {
       setFormData((prev) => ({
         ...prev,
-        error: response.message || 'Transfer failed',
+        error: response.message || "Transfer failed",
         loading: false,
-      }));
+      }))
     }
-  };
+  }
 
   const resetForm = () => {
     setFormData({
       step: 1,
-      searchQuery: '',
+      searchQuery: "",
       searchResults: [],
       selectedUser: null,
-      amount: '',
-      message: '',
+      amount: "",
+      message: "",
       loading: false,
-      error: '',
+      error: "",
       success: false,
       userData: formData.userData,
-      transferType: 'normal',
-    });
-  };
+      transferType: "normal",
+    })
+  }
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'decimal',
+    return new Intl.NumberFormat("id-ID", {
+      style: "decimal",
       maximumFractionDigits: 0,
-    }).format(amount);
-  };
+    }).format(amount)
+  }
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    }).format(date);
-  };
+    const date = new Date(dateString)
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(date)
+  }
 
-  const { step, searchQuery, searchResults, selectedUser, amount, message, loading, error, success, userData, transferType } = formData;
+  const {
+    step,
+    searchQuery,
+    searchResults,
+    selectedUser,
+    amount,
+    message,
+    loading,
+    error,
+    success,
+    userData,
+    transferType,
+  } = formData
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
               <Link to="/dashboard">
-                <img
-                  src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true"
-                  alt="PayPlus Logo"
-                  className="h-10"
-                />
+                <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" className="h-10" />
               </Link>
             </div>
+
+            {/* Desktop Navigation */}
             <nav className="hidden sm:flex space-x-4">
-              <Link
-                to="/dashboard"
+              <Link 
+                to="/topUp" 
                 className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
               >
-                Dashboard
+                Top-Up
               </Link>
-              <Link
-                to="/transfer"
-                className="text-indigo-600 font-medium hover:text-indigo-800 transition-colors duration-200"
+              <Link 
+                to="/transfer" 
+                className="text-indigo-600 font-medium border-b-2 border-indigo-600 hover:text-indigo-800 transition-colors duration-200"
               >
                 Transfer
               </Link>
-              <Link
-                to="/bills"
+              <Link 
+                to="/bills" 
                 className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
               >
                 Bills
               </Link>
-              <Link
-                to="/expense"
+              <Link 
+                to="/expense" 
                 className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
               >
                 Expenses
               </Link>
-              <Link
-                to="/income"
+              <Link 
+                to="/income" 
                 className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
               >
                 Income
               </Link>
+              <Link 
+                to="/savings" 
+                className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
+              >
+                Savings
+              </Link>
+              <Link 
+                to="/friends" 
+                className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
+              >
+                Friends
+              </Link>
             </nav>
+
             {/* Mobile menu button */}
-            <div className="sm:hidden">
-              <button className="text-gray-600 hover:text-gray-800 focus:outline-none">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
-              </button>
-            </div>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="sm:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6 text-gray-600" /> : <Menu className="w-6 h-6 text-gray-600" />}
+            </button>
           </div>
+
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="sm:hidden py-4 border-t border-gray-200">
+              <nav className="flex flex-col space-y-4">
+                <Link
+                  to="/TopUp"
+                  className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Top-Up
+                </Link>
+                <Link
+                  to="/Transfer"
+                  className="text-indigo-600 font-medium border-b-2 border-indigo-600 hover:text-indigo-800 transition-colors duration-200"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Transfer
+                </Link>
+                <Link
+                  to="/bills"
+                  className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Bills
+                </Link>
+                <Link
+                  to="/Expense"
+                  className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Expenses
+                </Link>
+                <Link
+                  to="/Income"
+                  className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Income
+                </Link>
+                <Link
+                  to="/Savings"
+                  className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Savings
+                </Link>
+                <Link
+                  to="/Friends"
+                  className="text-gray-600 hover:text-gray-800 transition-colors duration-200"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Friends
+                </Link>
+              </nav>
+            </div>
+          )}
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {step === 1 && (
-          <div className="max-w-lg mx-auto">
-            <h1 className="text-3xl font-bold mb-8 text-gray-800 text-center sm:text-left">Transfer</h1>
+          <div className="max-w-2xl mx-auto">
+            {/* Page Title */}
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold text-slate-900 mb-2">Send Money</h1>
+              <p className="text-slate-600">Transfer money to friends and family instantly</p>
+            </div>
 
             {/* Balance Card */}
             {userData && (
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl p-6 mb-8 shadow-lg transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl">
-                <p className="text-sm font-medium text-indigo-100 mb-1">Your Balance</p>
-                <p className="text-3xl font-bold">Rp {formatCurrency(userData.balance || 0)}</p>
-                <div className="mt-4 pt-4 border-t border-indigo-400 border-opacity-30">
-                  <p className="text-xs text-indigo-200">Available for transfer</p>
+              <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-8 mb-8 shadow-xl">
+                <div className="absolute inset-0 bg-black/10"></div>
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-blue-100 text-sm font-medium mb-1">Available Balance</p>
+                      <p className="text-4xl font-bold text-white">Rp {formatCurrency(userData.balance || 0)}</p>
+                    </div>
+                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                      <Wallet className="w-8 h-8 text-white" />
+                    </div>
+                  </div>
+                  <div className="flex items-center text-blue-100 text-sm">
+                    <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                    Ready for transfers
+                  </div>
                 </div>
+                <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full"></div>
+                <div className="absolute -left-4 -top-4 w-24 h-24 bg-white/5 rounded-full"></div>
               </div>
             )}
 
-            {/* Recent Transfers Section */}
+            {/* Quick Actions */}
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <button
+                onClick={() => setTransferMode("search")}
+                className={`p-6 rounded-xl border-2 transition-all duration-200 ${
+                  transferMode === "search"
+                    ? "border-blue-500 bg-blue-50 shadow-lg scale-105"
+                    : "border-slate-200 bg-white hover:border-blue-300 hover:shadow-md"
+                }`}
+              >
+                <div className="flex flex-col items-center text-center">
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
+                      transferMode === "search" ? "bg-blue-500" : "bg-slate-100"
+                    }`}
+                  >
+                    <Search className={`w-6 h-6 ${transferMode === "search" ? "text-white" : "text-slate-600"}`} />
+                  </div>
+                  <h3 className="font-semibold text-slate-900 mb-1">Search Number</h3>
+                  <p className="text-sm text-slate-600">Find by phone number</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setTransferMode("friend")}
+                className={`p-6 rounded-xl border-2 transition-all duration-200 ${
+                  transferMode === "friend"
+                    ? "border-blue-500 bg-blue-50 shadow-lg scale-105"
+                    : "border-slate-200 bg-white hover:border-blue-300 hover:shadow-md"
+                }`}
+              >
+                <div className="flex flex-col items-center text-center">
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
+                      transferMode === "friend" ? "bg-blue-500" : "bg-slate-100"
+                    }`}
+                  >
+                    <Users className={`w-6 h-6 ${transferMode === "friend" ? "text-white" : "text-slate-600"}`} />
+                  </div>
+                  <h3 className="font-semibold text-slate-900 mb-1">From Friends</h3>
+                  <p className="text-sm text-slate-600">Select from contacts</p>
+                </div>
+              </button>
+            </div>
+
+            {/* Recent Transfers */}
             {recentTransfers.length > 0 && (
-              <div className="bg-white rounded-xl shadow-md p-6 mb-8 overflow-hidden">
-                <h2 className="text-lg font-semibold mb-4 text-gray-800 flex items-center">
-                  <Clock className="w-5 h-5 mr-2 text-indigo-500" />
-                  Recent Transfers
-                </h2>
-                <div className="space-y-3">
+              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center mr-3">
+                      <History className="w-5 h-5 text-slate-600" />
+                    </div>
+                    <h2 className="text-xl font-semibold text-slate-900">Recent Transfers</h2>
+                  </div>
+                  <Link to="/history" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                    View All
+                  </Link>
+                </div>
+                <div className="space-y-4">
                   {recentTransfers.slice(0, 3).map((transfer, index) => (
-                    <div 
+                    <div
                       key={index}
-                      className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors duration-200"
+                      className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:border-blue-200 hover:bg-blue-50/50 transition-all duration-200 group"
                     >
                       <div className="flex items-center">
-                        <div className="bg-indigo-100 p-2 rounded-full mr-3">
-                          <User className="w-5 h-5 text-indigo-600" />
+                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mr-4">
+                          <User className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <p className="font-medium text-gray-800">{transfer.recipient_name}</p>
-                          <p className="text-xs text-gray-500">{formatDate(transfer.date)}</p>
+                          <p className="font-semibold text-slate-900">{transfer.recipient_name}</p>
+                          <p className="text-sm text-slate-500">{formatDate(transfer.date)}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium text-gray-800">Rp {formatCurrency(transfer.amount)}</p>
-                        <button 
-                          onClick={() => selectUser({
-                            name: transfer.recipient_name,
-                            phone: transfer.recipient_phone
-                          })}
-                          className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center mt-1"
+                        <p className="font-semibold text-slate-900">Rp {formatCurrency(transfer.amount)}</p>
+                        <button
+                          onClick={() =>
+                            selectUser({
+                              name: transfer.recipient_name,
+                              phone: transfer.recipient_phone,
+                            })
+                          }
+                          className="text-sm text-blue-600 hover:text-blue-700 flex items-center mt-1 group-hover:translate-x-1 transition-transform duration-200"
                         >
-                          Transfer Again <ChevronRight className="w-3 h-3 ml-1" />
+                          Send Again <ChevronRight className="w-3 h-3 ml-1" />
                         </button>
                       </div>
                     </div>
@@ -283,45 +452,32 @@ export const TransferPage = () => {
               </div>
             )}
 
-            {/* Transfer Mode Tabs */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
-              <div className="flex mb-0 border-b">
-                <button
-                  className={`flex-1 py-3 font-medium transition-colors duration-200 ${transferMode === 'search' ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-600 hover:bg-indigo-50'}`}
-                  onClick={() => setTransferMode('search')}
-                >
-                  <div className="flex items-center justify-center">
-                    <Search className="w-4 h-4 mr-2" />
-                    Search Number
-                  </div>
-                </button>
-                <button
-                  className={`flex-1 py-3 font-medium transition-colors duration-200 ${transferMode === 'friend' ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-600 hover:bg-indigo-50'}`}
-                  onClick={() => setTransferMode('friend')}
-                >
-                  <div className="flex items-center justify-center">
-                    <User className="w-4 h-4 mr-2" />
-                    From Friends
-                  </div>
-                </button>
-              </div>
-
+            {/* Transfer Content */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
               {/* Search by Number */}
-              {transferMode === 'search' && (
-                <div className="p-6">
-                  <h2 className="text-xl font-semibold mb-4 text-gray-800">Find Recipient</h2>
-                  <div className="flex mb-4">
+              {transferMode === "search" && (
+                <div className="p-8">
+                  <div className="flex items-center mb-6">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                      <Search className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <h2 className="text-2xl font-semibold text-slate-900">Find Recipient</h2>
+                  </div>
+
+                  <div className="relative mb-6">
                     <input
                       type="text"
-                      placeholder="Enter phone number"
+                      placeholder="Enter phone number (e.g., +62812345678)"
                       value={searchQuery}
-                      onChange={(e) => handleChange('searchQuery', e.target.value)}
-                      className="flex-grow p-3 border rounded-l-lg focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+                      onChange={(e) => handleChange("searchQuery", e.target.value)}
+                      className="w-full pl-12 pr-4 py-4 border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all duration-200 text-lg"
+                      onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                     />
+                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <button
                       onClick={handleSearch}
-                      disabled={loading}
-                      className="bg-indigo-600 text-white p-3 rounded-r-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center min-w-[50px]"
+                      disabled={loading || !searchQuery.trim()}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loading ? (
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -332,69 +488,78 @@ export const TransferPage = () => {
                   </div>
 
                   {error && (
-                    <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 animate-fadeIn">
-                      <div className="flex items-start">
-                        <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
-                        <p>{error}</p>
-                      </div>
+                    <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl mb-6 flex items-start">
+                      <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
+                      <p>{error}</p>
                     </div>
                   )}
 
                   {/* Search Results */}
                   {searchResults.length > 0 && (
-                    <div className="mt-4 animate-fadeIn">
-                      <h3 className="text-md font-medium mb-3 text-gray-700">Search Results</h3>
-                      <div className="space-y-2">
-                        {searchResults.map((user) => (
-                          <div
-                            key={user.phone}
-                            onClick={() => selectUser(user)}
-                            className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-indigo-50 transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md"
-                          >
-                            <div className="bg-indigo-100 p-3 rounded-full mr-4">
-                              <User className="w-5 h-5 text-indigo-600" />
-                            </div>
-                            <div className="flex-grow">
-                              <p className="font-medium text-gray-800">{user.name}</p>
-                              <p className="text-sm text-gray-500">{user.phone}</p>
-                            </div>
-                            <ChevronRight className="w-5 h-5 text-gray-400" />
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-semibold text-slate-900 mb-4">Search Results</h3>
+                      {searchResults.map((user) => (
+                        <div
+                          key={user.phone}
+                          onClick={() => selectUser(user)}
+                          className="flex items-center p-4 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 group"
+                        >
+                          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mr-4">
+                            <User className="w-6 h-6 text-white" />
                           </div>
-                        ))}
-                      </div>
+                          <div className="flex-grow">
+                            <p className="font-semibold text-slate-900">{user.name}</p>
+                            <p className="text-slate-600">{user.phone}</p>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-200" />
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
               )}
 
               {/* Select from Friends */}
-              {transferMode === 'friend' && (
-                <div className="p-6">
-                  <h2 className="text-xl font-semibold mb-4 text-gray-800">Select Friend</h2>
+              {transferMode === "friend" && (
+                <div className="p-8">
+                  <div className="flex items-center mb-6">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                      <Users className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <h2 className="text-2xl font-semibold text-slate-900">Select Friend</h2>
+                  </div>
+
                   {friends.length === 0 ? (
-                    <div className="text-center py-8">
-                      <User className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                      <p className="text-gray-500 mb-2">You have no friends yet</p>
-                      <Link to="/friends" className="text-indigo-600 hover:text-indigo-800 font-medium">
+                    <div className="text-center py-12">
+                      <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Users className="w-10 h-10 text-slate-400" />
+                      </div>
+                      <h3 className="text-xl font-semibold text-slate-900 mb-2">No Friends Yet</h3>
+                      <p className="text-slate-600 mb-6">Add friends to make transfers easier</p>
+                      <Link
+                        to="/friends"
+                        className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors duration-200 font-medium"
+                      >
+                        <Plus className="w-5 h-5 mr-2" />
                         Add Friends
                       </Link>
                     </div>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       {friends.map((friend) => (
                         <div
                           key={friend.phone}
                           onClick={() => selectUser(friend)}
-                          className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-indigo-50 transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md"
+                          className="flex items-center p-4 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 group"
                         >
-                          <div className="bg-indigo-100 p-3 rounded-full mr-4">
-                            <User className="w-5 h-5 text-indigo-600" />
+                          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mr-4">
+                            <User className="w-6 h-6 text-white" />
                           </div>
                           <div className="flex-grow">
-                            <p className="font-medium text-gray-800">{friend.name}</p>
-                            <p className="text-sm text-gray-500">{friend.phone}</p>
+                            <p className="font-semibold text-slate-900">{friend.name}</p>
+                            <p className="text-slate-600">{friend.phone}</p>
                           </div>
-                          <ChevronRight className="w-5 h-5 text-gray-400" />
+                          <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-200" />
                         </div>
                       ))}
                     </div>
@@ -406,230 +571,281 @@ export const TransferPage = () => {
         )}
 
         {step === 2 && selectedUser && (
-          <div className="max-w-md mx-auto animate-fadeIn">
+          <div className="max-w-lg mx-auto">
             <button
               onClick={() => setFormData((prev) => ({ ...prev, step: 1 }))}
-              className="flex items-center text-indigo-600 mb-6 hover:text-indigo-800 transition-colors duration-200 group"
+              className="flex items-center text-blue-600 mb-6 hover:text-blue-700 transition-colors duration-200 group"
             >
-              <ArrowLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform duration-200" />
-              Back
+              <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform duration-200" />
+              Back to Search
             </button>
 
-            <h1 className="text-3xl font-bold mb-8 text-gray-800">Transfer Amount</h1>
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-slate-900 mb-2">Enter Amount</h1>
+              <p className="text-slate-600">How much would you like to send?</p>
+            </div>
 
-            <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-              <div className="flex items-center mb-6 p-4 bg-indigo-50 rounded-lg">
-                <div className="bg-indigo-100 p-3 rounded-full mr-4">
-                  <User className="w-6 h-6 text-indigo-600" />
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+              {/* Recipient Info */}
+              <div className="flex items-center p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl mb-8">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mr-4">
+                  <User className="w-8 h-8 text-white" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-800">{selectedUser.name}</p>
-                  <p className="text-sm text-gray-500">{selectedUser.phone}</p>
-                </div>
-              </div>
-              
-              {/* Transfer Type Selection */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Transfer Type
-                </label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div
-                    onClick={() => handleChange('transferType', 'normal')}
-                    className={`flex flex-col items-center justify-center p-4 border rounded-lg cursor-pointer transition-all duration-200 ${transferType === 'normal' ? 'border-indigo-500 bg-indigo-50 shadow-md transform scale-[1.02]' : 'border-gray-200 hover:border-indigo-300'}`}
-                  >
-                    <Send className={`w-6 h-6 mb-2 ${transferType === 'normal' ? 'text-indigo-600' : 'text-gray-500'}`} />
-                    <span className={`text-sm font-medium ${transferType === 'normal' ? 'text-indigo-600' : 'text-gray-700'}`}>Normal</span>
-                  </div>
-                  <div
-                    onClick={() => handleChange('transferType', 'gift')}
-                    className={`flex flex-col items-center justify-center p-4 border rounded-lg cursor-pointer transition-all duration-200 ${transferType === 'gift' ? 'border-indigo-500 bg-indigo-50 shadow-md transform scale-[1.02]' : 'border-gray-200 hover:border-indigo-300'}`}
-                  >
-                    <Gift className={`w-6 h-6 mb-2 ${transferType === 'gift' ? 'text-indigo-600' : 'text-gray-500'}`} />
-                    <span className={`text-sm font-medium ${transferType === 'gift' ? 'text-indigo-600' : 'text-gray-700'}`}>Gift</span>
-                  </div>
+                  <p className="text-lg font-semibold text-slate-900">{selectedUser.name}</p>
+                  <p className="text-slate-600">{selectedUser.phone}</p>
                 </div>
               </div>
 
-              <div className="mb-6">
-                <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-2">
-                  Amount (Rp)
+              {/* Transfer Type Selection */}
+              <div className="mb-8">
+                <label className="block text-lg font-semibold text-slate-900 mb-4">Transfer Type</label>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => handleChange("transferType", "normal")}
+                    className={`p-6 border-2 rounded-xl transition-all duration-200 ${
+                      transferType === "normal"
+                        ? "border-blue-500 bg-blue-50 shadow-lg scale-105"
+                        : "border-slate-200 hover:border-blue-300 hover:shadow-md"
+                    }`}
+                  >
+                    <div className="flex flex-col items-center">
+                      <div
+                        className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
+                          transferType === "normal" ? "bg-blue-500" : "bg-slate-100"
+                        }`}
+                      >
+                        <Send className={`w-6 h-6 ${transferType === "normal" ? "text-white" : "text-slate-600"}`} />
+                      </div>
+                      <span
+                        className={`font-semibold ${transferType === "normal" ? "text-blue-600" : "text-slate-700"}`}
+                      >
+                        Normal
+                      </span>
+                      <span className="text-sm text-slate-500 mt-1">Regular transfer</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => handleChange("transferType", "gift")}
+                    className={`p-6 border-2 rounded-xl transition-all duration-200 ${
+                      transferType === "gift"
+                        ? "border-blue-500 bg-blue-50 shadow-lg scale-105"
+                        : "border-slate-200 hover:border-blue-300 hover:shadow-md"
+                    }`}
+                  >
+                    <div className="flex flex-col items-center">
+                      <div
+                        className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
+                          transferType === "gift" ? "bg-blue-500" : "bg-slate-100"
+                        }`}
+                      >
+                        <Gift className={`w-6 h-6 ${transferType === "gift" ? "text-white" : "text-slate-600"}`} />
+                      </div>
+                      <span className={`font-semibold ${transferType === "gift" ? "text-blue-600" : "text-slate-700"}`}>
+                        Gift
+                      </span>
+                      <span className="text-sm text-slate-500 mt-1">With message</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Amount Input */}
+              <div className="mb-8">
+                <label htmlFor="amount" className="block text-lg font-semibold text-slate-900 mb-4">
+                  Amount
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500 font-medium">Rp</span>
+                  <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+                    <span className="text-slate-500 text-xl font-semibold">Rp</span>
                   </div>
                   <input
                     type="text"
                     id="amount"
                     value={amount}
                     onChange={handleAmountChange}
-                    className="pl-10 p-3 w-full border rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-lg transition-all duration-200"
+                    className="pl-16 pr-6 py-4 w-full border-2 border-slate-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 text-2xl font-semibold transition-all duration-200"
                     placeholder="0"
                   />
                 </div>
-                {amount && (
-                  <p className="mt-2 text-sm text-gray-600 animate-fadeIn">
-                    Rp {formatCurrency(amount)}
-                  </p>
-                )}
+                {amount && <p className="mt-3 text-slate-600 text-lg">Rp {formatCurrency(amount)}</p>}
               </div>
 
-              <div className="mb-6">
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                  Message {transferType === 'gift' && <span className="text-indigo-600">*</span>}
+              {/* Message Input */}
+              <div className="mb-8">
+                <label htmlFor="message" className="block text-lg font-semibold text-slate-900 mb-4">
+                  Message {transferType === "gift" && <span className="text-red-500">*</span>}
                 </label>
                 <textarea
                   id="message"
                   value={message}
-                  onChange={(e) => handleChange('message', e.target.value)}
-                  className={`p-3 w-full border rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 ${transferType !== 'gift' ? 'bg-gray-50 text-gray-400' : ''}`}
-                  rows="3"
-                  placeholder={transferType === 'gift' ? "Write a message for your gift" : "Message (only for Gift transfers)"}
-                  required={transferType === 'gift'}
-                  disabled={transferType !== 'gift'}
-                ></textarea>
-                {transferType !== 'gift' && (
-                  <p className="text-xs text-gray-400 mt-1">Message can only be filled for Gift transfers</p>
-                )}
+                  onChange={(e) => handleChange("message", e.target.value)}
+                  className={`p-4 w-full border-2 rounded-xl focus:ring-4 transition-all duration-200 ${
+                    transferType === "gift"
+                      ? "border-slate-200 focus:border-blue-500 focus:ring-blue-100"
+                      : "border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed"
+                  }`}
+                  rows="4"
+                  placeholder={
+                    transferType === "gift"
+                      ? "Write a message for your gift..."
+                      : "Message can only be added for Gift transfers"
+                  }
+                  required={transferType === "gift"}
+                  disabled={transferType !== "gift"}
+                />
               </div>
 
               {error && (
-                <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 animate-fadeIn">
-                  <div className="flex items-start">
-                    <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
-                    <p>{error}</p>
-                  </div>
+                <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl mb-6 flex items-start">
+                  <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
+                  <p>{error}</p>
                 </div>
               )}
 
               <button
                 onClick={goToConfirmation}
-                className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg shadow hover:bg-indigo-700 transition-all duration-200 flex items-center justify-center transform hover:translate-y-[-2px] hover:shadow-lg"
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center text-lg font-semibold"
               >
-                Continue
+                Continue to Review
+                <ChevronRight className="w-5 h-5 ml-2" />
               </button>
             </div>
           </div>
         )}
 
         {step === 3 && selectedUser && (
-          <div className="max-w-md mx-auto animate-fadeIn">
+          <div className="max-w-lg mx-auto">
             <button
               onClick={() => setFormData((prev) => ({ ...prev, step: 2 }))}
-              className="flex items-center text-indigo-600 mb-6 hover:text-indigo-800 transition-colors duration-200 group"
+              className="flex items-center text-blue-600 mb-6 hover:text-blue-700 transition-colors duration-200 group"
             >
-              <ArrowLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform duration-200" />
-              Back
+              <ArrowLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform duration-200" />
+              Back to Amount
             </button>
 
-            <h1 className="text-3xl font-bold mb-8 text-gray-800">Confirm Transfer</h1>
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-slate-900 mb-2">Review Transfer</h1>
+              <p className="text-slate-600">Please confirm the details below</p>
+            </div>
 
-            <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-              <div className="border-b pb-4 mb-4">
-                <p className="text-sm text-gray-500 mb-1">Recipient</p>
-                <div className="flex items-center">
-                  <div className="bg-indigo-100 p-2 rounded-full mr-3">
-                    <User className="w-5 h-5 text-indigo-600" />
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+              {/* Transfer Summary */}
+              <div className="space-y-6 mb-8">
+                {/* Recipient */}
+                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                  <div className="flex items-center">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mr-4">
+                      <User className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-slate-500">To</p>
+                      <p className="font-semibold text-slate-900">{selectedUser.name}</p>
+                      <p className="text-sm text-slate-600">{selectedUser.phone}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-gray-800">{selectedUser.name}</p>
-                    <p className="text-sm text-gray-500">{selectedUser.phone}</p>
+                </div>
+
+                {/* Amount */}
+                <div className="text-center p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                  <p className="text-sm text-slate-500 mb-2">Amount</p>
+                  <p className="text-4xl font-bold text-slate-900">Rp {formatCurrency(amount)}</p>
+                </div>
+
+                {/* Transfer Type */}
+                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                  <div className="flex items-center">
+                    {transferType === "normal" ? (
+                      <Send className="w-6 h-6 text-blue-600 mr-3" />
+                    ) : (
+                      <Gift className="w-6 h-6 text-blue-600 mr-3" />
+                    )}
+                    <div>
+                      <p className="text-sm text-slate-500">Type</p>
+                      <p className="font-semibold text-slate-900 capitalize">{transferType}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="border-b pb-4 mb-4">
-                <p className="text-sm text-gray-500 mb-1">Transfer Type</p>
-                <div className="flex items-center">
-                  {transferType === 'normal' ? (
-                    <>
-                      <Send className="w-5 h-5 text-indigo-600 mr-2" />
-                      <p className="font-medium text-gray-800">Normal</p>
-                    </>
-                  ) : (
-                    <>
-                      <Gift className="w-5 h-5 text-indigo-600 mr-2" />
-                      <p className="font-medium text-gray-800">Gift</p>
-                    </>
-                  )}
-                </div>
+                {/* Message */}
+                {message && (
+                  <div className="p-4 bg-slate-50 rounded-xl">
+                    <p className="text-sm text-slate-500 mb-2">Message</p>
+                    <p className="text-slate-900">{message}</p>
+                  </div>
+                )}
               </div>
-
-              <div className="border-b pb-4 mb-4">
-                <p className="text-sm text-gray-500 mb-1">Amount</p>
-                <p className="text-xl font-semibold text-gray-800">Rp {formatCurrency(amount)}</p>
-              </div>
-
-              {message && (
-                <div className="border-b pb-4 mb-4">
-                  <p className="text-sm text-gray-500 mb-1">Message</p>
-                  <p className="text-gray-800">{message}</p>
-                </div>
-              )}
 
               {error && (
-                <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 animate-fadeIn">
-                  <div className="flex items-start">
-                    <AlertCircle className="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" />
-                    <p>{error}</p>
-                  </div>
+                <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl mb-6 flex items-start">
+                  <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0 mt-0.5" />
+                  <p>{error}</p>
                 </div>
               )}
 
               <button
                 onClick={handleTransfer}
                 disabled={loading}
-                className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg shadow hover:bg-indigo-700 transition-all duration-200 flex items-center justify-center transform hover:translate-y-[-2px] hover:shadow-lg"
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  <>
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin mr-3"></div>
+                    Processing...
+                  </>
                 ) : (
-                  <Send className="w-5 h-5 mr-2" />
+                  <>
+                    <Send className="w-5 h-5 mr-3" />
+                    Send Transfer
+                  </>
                 )}
-                Send Transfer
               </button>
             </div>
           </div>
         )}
 
         {step === 4 && (
-          <div className="max-w-md mx-auto text-center animate-fadeIn">
-            <div className="bg-white rounded-xl shadow-md p-8 mb-6">
+          <div className="max-w-lg mx-auto text-center">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
               {success ? (
                 <>
-                  <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce-once">
-                    <CheckCircle className="w-10 h-10 text-green-500" />
+                  <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <CheckCircle className="w-12 h-12 text-green-500" />
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-800 mb-3">Transfer Successful!</h2>
-                  <p className="text-gray-600 mb-8">
-                    You have successfully transferred <span className="font-semibold">Rp {formatCurrency(amount)}</span> to <span className="font-semibold">{selectedUser.name}</span>
-                    {transferType === 'gift' && " as a gift"}
+                  <h2 className="text-3xl font-bold text-slate-900 mb-4">Transfer Successful!</h2>
+                  <p className="text-slate-600 text-lg mb-2">You have successfully sent</p>
+                  <p className="text-2xl font-bold text-slate-900 mb-2">Rp {formatCurrency(amount)}</p>
+                  <p className="text-slate-600 text-lg mb-8">
+                    to <span className="font-semibold">{selectedUser.name}</span>
+                    {transferType === "gift" && " as a gift"}
                   </p>
                 </>
               ) : (
                 <>
-                  <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-shake">
-                    <AlertCircle className="w-10 h-10 text-red-500" />
+                  <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <AlertCircle className="w-12 h-12 text-red-500" />
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-800 mb-3">Transfer Failed</h2>
-                  <p className="text-gray-600 mb-8">{error || 'An error occurred while processing the transfer'}</p>
+                  <h2 className="text-3xl font-bold text-slate-900 mb-4">Transfer Failed</h2>
+                  <p className="text-slate-600 text-lg mb-8">
+                    {error || "An error occurred while processing the transfer"}
+                  </p>
                 </>
               )}
 
-              <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+              <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={resetForm}
-                  className="flex-1 bg-indigo-600 text-white py-3 px-4 rounded-lg shadow hover:bg-indigo-700 transition-all duration-200 flex items-center justify-center transform hover:translate-y-[-2px] hover:shadow-lg"
+                  className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center font-semibold"
                 >
-                  <CreditCard className="w-5 h-5 mr-2" />
+                  <Plus className="w-5 h-5 mr-2" />
                   New Transfer
                 </button>
                 <Link
                   to="/dashboard"
-                  className="flex-1 bg-gray-200 text-gray-800 py-3 px-4 rounded-lg shadow hover:bg-gray-300 transition-all duration-200 flex items-center justify-center transform hover:translate-y-[-2px] hover:shadow-lg"
+                  className="flex-1 bg-slate-100 text-slate-700 py-3 px-6 rounded-xl shadow hover:shadow-md hover:bg-slate-200 transition-all duration-200 flex items-center justify-center font-semibold"
                 >
-                  To Dashboard
+                  Back to Dashboard
                 </Link>
               </div>
             </div>
@@ -637,5 +853,5 @@ export const TransferPage = () => {
         )}
       </main>
     </div>
-  );
-};
+  )
+}

@@ -12,6 +12,7 @@ import {
   File,
   AlertTriangle,
   X,
+  Menu,
   Pencil,
   Plus,
   Calendar,
@@ -32,7 +33,7 @@ export const BillPage = () => {
   const [notifications, setNotifications] = useState([]);
   const [showAddBillForm, setShowAddBillForm] = useState(false);
   const [editingBill, setEditingBill] = useState(null);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [newBill, setNewBill] = useState({
     name: '',
     amount: '',
@@ -158,51 +159,64 @@ export const BillPage = () => {
                 <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" className="h-10" />
               </Link>
             </div>
+            {/* Desktop Navigation */}
             <nav className="hidden sm:flex space-x-4">
+              <Link to="/topUp" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Top-Up
+              </Link>
               <Link to="/transfer" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Transfer
               </Link>
-              <Link to="/savings" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
-                Savings
-              </Link>
-              <Link to="/income" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
-                Income
+              <Link to="/bills" className="text-indigo-600 font-medium border-b-2 border-indigo-600 hover:text-indigo-800 transition-colors duration-200">
+                Bills
               </Link>
               <Link to="/expense" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Expenses
               </Link>
-            </nav>
-            <div className="md:hidden">
-              <button
-                onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="text-gray-600 hover:text-indigo-600 transition-colors duration-200"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
-          </div>
-          {showMobileMenu && (
-            <div className="md:hidden py-2 pb-4 animate-fadeIn">
-              <Link
-                to="/income"
-                className="block px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors duration-200"
-              >
+              <Link to="/income" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Income
               </Link>
-              <Link
-                to="/bills"
-                className="block px-4 py-2 text-indigo-600 font-medium"
-              >
-                Tagihan
-              </Link>
-              <Link
-                to="/Savings"
-                className="block px-4 py-2 text-gray-600 hover:text-indigo-600 transition-colors duration-200"
-              >
+              <Link to="/savings" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Savings
               </Link>
+              <Link to="/friends" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
+                Friends
+              </Link>
+            </nav>
+            {/* Mobile menu button */}
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+              className="sm:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6 text-gray-600" /> : <Menu className="w-6 h-6 text-gray-600" />}
+            </button>
+          </div>
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="sm:hidden py-4 border-t border-gray-200">
+              <nav className="flex flex-col space-y-4">
+                <Link to="/topUp" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Top-Up
+                </Link>
+                <Link to="/transfer" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Transfer
+                </Link>
+                <Link to="/bills" className="text-indigo-600 font-medium border-b-2 border-indigo-600 hover:text-indigo-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Bills
+                </Link>
+                <Link to="/expense" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Expenses
+                </Link>
+                <Link to="/income" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Income
+                </Link>
+                <Link to="/savings" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Savings
+                </Link>
+                <Link to="/friends" className="text-gray-600 hover:text-gray-800 transition-colors duration-200" onClick={() => setMobileMenuOpen(false)}>
+                  Friends
+                </Link>
+              </nav>
             </div>
           )}
         </div>
@@ -300,7 +314,7 @@ export const BillPage = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-500 font-medium">Total Bills</p>
-                <p className="text-2xl font-bold text-gray-800">Rp {BillModel.formatCurrency(totalBillAmount)}</p>
+                <p className="text-2xl font-bold text-gray-800">Rp {BillController.formatCurrency(totalBillAmount)}</p>
               </div>
             </div>
           </div>
@@ -313,7 +327,7 @@ export const BillPage = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-500 font-medium">Upcoming Bills</p>
-                <p className="text-2xl font-bold text-gray-800">{bills.filter(bill => !BillModel.isOverdue(bill.dueDate)).length}</p>
+                <p className="text-2xl font-bold text-gray-800">{bills.filter(bill => !BillController.isOverdue(bill.dueDate)).length}</p>
               </div>
             </div>
           </div>
@@ -326,7 +340,7 @@ export const BillPage = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-500 font-medium">Overdue Bills</p>
-                <p className="text-2xl font-bold text-gray-800">{bills.filter(bill => BillModel.isOverdue(bill.dueDate)).length}</p>
+                <p className="text-2xl font-bold text-gray-800">{bills.filter(bill => BillController.isOverdue(bill.dueDate)).length}</p>
               </div>
             </div>
           </div>
@@ -334,7 +348,7 @@ export const BillPage = () => {
 
         {/* Add/Edit Bill Form */}
         {showAddBillForm && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-opacity-10 backdrop-blur-md flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6 animate-fadeIn">
               <h2 className="text-xl font-bold mb-4">{editingBill ? 'Edit Bill' : 'Add New Bill'}</h2>
               
@@ -477,7 +491,7 @@ export const BillPage = () => {
               className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               <Plus className="mr-2 h-5 w-5" />
-              Tambah Tagihan Pertama
+              Add First Bill
             </button>
           </div>
         ) : (
@@ -486,7 +500,7 @@ export const BillPage = () => {
             {Object.entries(billsByCategory).map(([category, categoryBills]) => (
               <div key={category} className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
                 <div 
-                  className={`px-6 py-4 flex items-center ${BillModel.getCategoryColor(category)} cursor-pointer`}
+                  className={`px-6 py-4 flex items-center ${BillController.getCategoryColor(category)} cursor-pointer`}
                   onClick={() => toggleCategoryExpand(category)}
                 >
                   <div className="mr-3">
@@ -521,16 +535,16 @@ export const BillPage = () => {
                             <h4 className="text-lg font-medium text-gray-900">{bill.name}</h4>
                             <div className="flex items-center mt-1">
                               <span className={`text-sm ${
-                                BillModel.isOverdue(bill.dueDate) ? 'text-red-600 font-medium' : 
-                                BillModel.isDueTomorrow(bill.dueDate) ? 'text-yellow-600 font-medium' : 
+                                BillController.isOverdue(bill.dueDate) ? 'text-red-600 font-medium' : 
+                                BillController.isDueTomorrow(bill.dueDate) ? 'text-yellow-600 font-medium' : 
                                 'text-gray-500'
                               }`}>
-                                Due on {BillModel.formatDate(bill.dueDate)}
+                                Due on {BillController.formatDate(bill.dueDate)}
                               </span>
                             </div>
                           </div>
                           <div className="flex flex-col items-end">
-                            <span className="text-xl font-bold text-gray-900">Rp {BillModel.formatCurrency(bill.amount)}</span>
+                            <span className="text-xl font-bold text-gray-900">Rp {BillController.formatCurrency(bill.amount)}</span>
                             <div className="flex mt-2 space-x-2">
                               <button
                                 onClick={(e) => {

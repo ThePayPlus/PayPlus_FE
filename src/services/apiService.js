@@ -5,7 +5,6 @@ class ApiService {
   // Base URL for the backend API
   static baseUrl = 'https://78nvh33s-3000.asse.devtunnels.ms/api';
   static wsUrl = 'ws://localhost:3000';
-
   // Token storage key
   static tokenKey = 'auth_token';
 
