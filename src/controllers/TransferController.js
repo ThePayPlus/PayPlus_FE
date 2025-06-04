@@ -47,8 +47,12 @@ export class TransferController {
   }
 
   validateAmount(amount) {
+    const maxAmount = 1000000000;
     if (!amount || parseInt(amount) <= 0) {
       return { valid: false, message: 'Please enter a valid amount' };
+    }
+    if (parseInt(amount) > maxAmount) {
+      return { valid: false, message: 'Maximum transfer amount is 1,000,000,000' };
     }
     return { valid: true };
   }

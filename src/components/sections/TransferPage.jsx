@@ -15,7 +15,6 @@ import {
   X,
   Wallet,
   Users,
-  History,
   Plus,
 } from "lucide-react"
 import { TransferController } from "../../controllers/TransferController.js"

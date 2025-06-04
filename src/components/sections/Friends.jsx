@@ -44,8 +44,33 @@ export const Friends = () => {
       FriendController.showNotification('Friend Request Accepted', `${data.name} accepted your friend request`);
     });
 
+    // Handle friend status updates
+    ws.current.on('friend_status_update', (data) => {
+      setFriends((prevFriends) => {
+        return prevFriends.map((friend) => {
+          if (friend.phone === data.phone) {
+            return {
+              ...friend,
+              status: data.status,
+              lastSeen: data.status === 'offline' ? new Date() : friend.lastSeen,
+            };
+          }
+          return friend;
+        });
+      });
+    });
+
+    // Emit user online status when component mounts
+    if (ws.current && ws.current.connected) {
+      ws.current.emit('user_status', { status: 'online' });
+    }
+
     return () => {
       if (ws.current) {
+        // Emit offline status when component unmounts
+        if (ws.current.connected) {
+          ws.current.emit('user_status', { status: 'offline' });
+        }
         ws.current.disconnect();
       }
     };
@@ -232,11 +257,11 @@ export const Friends = () => {
         </div>
       </header>
 
-      {/* Main Content - WhatsApp Style Layout */}
+      {/* Main Content */}
       <main className="flex-grow container mx-auto px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex h-[calc(100vh-10rem)] bg-white rounded-lg shadow overflow-hidden">
           {/* Left Side - Friends List */}
-          <div className="w-1/3 border-r border-gray-200 flex flex-col">
+          <div className="w-1/5 border-r border-gray-200 flex flex-col">
             {/* Friend Requests Dropdown */}
             {showFriendRequests && (
               <div className="bg-white border-b border-gray-200">
@@ -321,13 +346,20 @@ export const Friends = () => {
                       onClick={() => setSelectedFriend(friend)}
                       className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${selectedFriend && selectedFriend.id === friend.id ? 'bg-indigo-50' : ''}`}
                     >
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                          <User className="w-5 h-5 text-indigo-600" />
-                        </div>
-                        <div className="ml-3">
-                          <h3 className="font-medium text-gray-900">{friend.name}</h3>
-                          <p className="text-sm text-gray-500">{friend.phone}</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <div className="relative">
+                            <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                              <User className="w-5 h-5 text-indigo-600" />
+                            </div>
+                            {/* Indikator status online dengan animasi pulse */}
+                            <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${friend.status === 'online' ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
+                          </div>
+                          <div className="ml-3">
+                            <h3 className="font-medium text-gray-900">{friend.name}</h3>
+                            <p className="text-sm text-gray-500">{friend.phone}</p>
+                            <p className="text-xs ${friend.status === 'online' ? 'text-green-500 font-medium' : 'text-gray-400'}">{friend.getStatusText()}</p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -338,16 +370,32 @@ export const Friends = () => {
           </div>
 
           {/* Right Side - Chat Room */}
-          <div className="w-2/3">
+          <div className={`${selectedFriend ? 'flex' : 'hidden md:flex'} md:w-2/3 lg:w-4/4 flex-col w-full`}>
             {selectedFriend ? (
               <ChatRoom friend={selectedFriend} onBack={() => setSelectedFriend(null)} ws={ws} />
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
-                <div className="bg-gray-100 p-6 rounded-full mb-6">
-                  <User className="w-16 h-16 text-gray-400" />
+              <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 p-6">
+                <div className="bg-indigo-50 p-8 rounded-full mb-6">
+                  <User className="w-20 h-20 text-indigo-400" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-700 mb-2">Select a friend to start chatting</h2>
-                <p className="text-gray-500 max-w-md px-6">Choose a conversation from the left or add new friends to chat with.</p>
+                <h2 className="text-2xl font-semibold text-gray-700 mb-4">Selamat datang di PayPlus Chat</h2>
+                <p className="text-gray-500 max-w-md px-6 mb-6">Pilih teman dari daftar untuk mulai mengobrol atau tambahkan teman baru dengan mengklik tombol + di atas.</p>
+
+                <div className="grid grid-cols-2 gap-4 mt-4 w-full max-w-md">
+                  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <div className="text-indigo-500 font-medium mb-1">Total Teman</div>
+                    <div className="text-2xl font-bold">{friends.length}</div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <div className="text-green-500 font-medium mb-1">Online</div>
+                    <div className="text-2xl font-bold">{friends.filter((f) => f.status === 'online').length}</div>
+                  </div>
+                </div>
+
+                <button onClick={() => setShowAddFriendModal(true)} className="mt-8 flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                  <Plus className="w-5 h-5" />
+                  <span>Tambah Teman Baru</span>
+                </button>
               </div>
             )}
           </div>
