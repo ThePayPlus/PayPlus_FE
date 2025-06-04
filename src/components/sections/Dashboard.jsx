@@ -200,15 +200,6 @@ export const Dashboard = () => {
               />
             </div>
 
-            <div className="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2 flex-1 max-w-xs mx-8">
-              <Search className="w-4 h-4 text-gray-500 mr-2" />
-              <input
-                type="text"
-                placeholder="Search transactions..."
-                className="bg-transparent border-none focus:outline-none text-sm w-full"
-              />
-            </div>
-
             <div className="flex items-center space-x-4">
               <div className="relative">
                 <button 
@@ -403,7 +394,7 @@ export const Dashboard = () => {
                   <p className="text-gray-600 mt-1">Heres your financial overview</p>
 
                   <div className="mt-6 flex flex-wrap gap-4">
-                    <div className="bg-white rounded-lg shadow-sm p-4 flex items-center space-x-3 flex-1 min-w-[180px]">
+                    <Link to="/income" className="bg-white rounded-lg shadow-sm p-4 flex items-center space-x-3 flex-1 min-w-[180px] cursor-pointer hover:shadow-md transition-all duration-300">  
                       <div className="p-2 bg-green-100 rounded-md">
                         <TrendingUp className="w-5 h-5 text-green-600" />
                       </div>
@@ -411,9 +402,9 @@ export const Dashboard = () => {
                         <p className="text-xs text-gray-500">Income</p>
                         <p className="font-bold text-gray-900">Rp. {formatCurrency(financialData.income || 0)}</p>
                       </div>
-                    </div>
+                    </Link>
 
-                    <div className="bg-white rounded-lg shadow-sm p-4 flex items-center space-x-3 flex-1 min-w-[180px]">
+                    <Link to="/expense" className="bg-white rounded-lg shadow-sm p-4 flex items-center space-x-3 flex-1 min-w-[180px] cursor-pointer hover:shadow-md transition-all duration-300">
                       <div className="p-2 bg-red-100 rounded-md">
                         <ArrowDownLeft className="w-5 h-5 text-red-600" />
                       </div>
@@ -421,7 +412,7 @@ export const Dashboard = () => {
                         <p className="text-xs text-gray-500">Expense</p>
                         <p className="font-bold text-gray-900">Rp. {formatCurrency(financialData.expense || 0)}</p>
                       </div>
-                    </div>
+                    </Link>
                   </div>
                 </div>
 
@@ -640,7 +631,7 @@ export const Dashboard = () => {
                         <Target className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                         <p>No savings goals yet</p>
                         <Link
-                          to="/savings/create"
+                          to="/savings"
                           className="mt-2 inline-flex items-center text-blue-600 hover:underline text-sm font-medium"
                         >
                           <Plus className="w-4 h-4 mr-1" />
