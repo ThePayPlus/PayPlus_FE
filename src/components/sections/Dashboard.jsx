@@ -30,19 +30,22 @@ import {
   Bot,
   X,
   Handshake,
-} from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { SavingsModel } from '../../models/SavingsModel.js';
-import BillController from '../../controllers/BillController';
-import { Friend } from '../../models/FriendModel.js';
+} from "lucide-react"
+import { Link } from "react-router-dom"
+import { SavingsModel } from "../../models/SavingsModel.js"
+import BillController from "../../controllers/BillController"
+import RecentTransactionController from "../../controllers/RecentTransactionController"
 
 export const Dashboard = () => {
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [balanceVisible, setBalanceVisible] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userData, setUserData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [balanceVisible, setBalanceVisible] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [recentTransactions, setRecentTransactions] = useState([]) // Tambahkan state ini
+  const [recentTransactionsLoading, setRecentTransactionsLoading] = useState(true) // Tambahkan state ini
+
 
   // Financial data state
   const [financialData, setFinancialData] = useState({
@@ -73,41 +76,27 @@ export const Dashboard = () => {
       try {
         const response = await ApiService.getProfile();
         if (response.success) {
-          setUserData(response.data);
-
-          const { balance, total_income, total_expense } = response.data;
-
-          const billsResponse = await ApiService.getBills();
-
-          let billsTotal = 0;
-          let upcomingBills = [];
-
-          // Tambahkan ini di bagian atas import
-
-          // Kemudahan kode ini di dalam useEffect fetchUserProfile
-
+          setUserData(response.data)
+          const { balance, total_income, total_expense } = response.data
+          const billsResponse = await ApiService.getBills()
+          let billsTotal = 0
+          let upcomingBills = []
           if (billsResponse.success && billsResponse.data && billsResponse.data.bills) {
             upcomingBills = billsResponse.data.bills.map((bill) => ({
               name: bill.name,
               amount: bill.amount,
               dueDate: bill.dueDate,
-              category: bill.category || 'Other',
-            }));
-
-            billsTotal = upcomingBills.reduce((total, bill) => total + bill.amount, 0);
-
-            // Tambahkan ini untuk mendapatkan notifikasi
-            const billNotifications = BillController.checkBillsStatus(upcomingBills);
-            setNotifications(billNotifications);
+              category: bill.category || "Other",
+            }))
+            billsTotal = upcomingBills.reduce((total, bill) => total + bill.amount, 0)
+            const billNotifications = BillController.checkBillsStatus(upcomingBills)
+            setNotifications(billNotifications)
           }
-
-          const savingsResponse = await ApiService.getSavings();
-          let savingsTotal = 0;
-          let savingsGoals = [];
-
+          const savingsResponse = await ApiService.getSavings()
+          let savingsTotal = 0
+          let savingsGoals = []
           if (savingsResponse.success && savingsResponse.data) {
-            savingsTotal = Number.parseInt(savingsResponse.data.summary.total_terkumpul) || 0;
-
+            savingsTotal = Number.parseInt(savingsResponse.data.summary.total_terkumpul) || 0
             savingsGoals = savingsResponse.data.records.map((record) => {
               const savingsModel = new SavingsModel(record);
               return {
@@ -144,6 +133,26 @@ export const Dashboard = () => {
     };
 
     fetchUserProfile();
+  }, []);
+
+  // Tambahkan useEffect baru untuk mengambil recent transactions
+  useEffect(() => {
+    const fetchRecentTransactions = async () => {
+      try {
+        const response = await RecentTransactionController.fetchRecentTransactions();
+        if (response.success) {
+          setRecentTransactions(response.data.recentTransactions);
+        } else {
+          console.error(response.message || "Failed to load recent transactions");
+        }
+      } catch (err) {
+        console.error("Recent transactions fetch error:", err);
+      } finally {
+        setRecentTransactionsLoading(false);
+      }
+    };
+
+    fetchRecentTransactions();
   }, []);
 
   const formatCurrency = (amount) => {
@@ -224,10 +233,16 @@ export const Dashboard = () => {
                                 {notification.type === 'overdue' ? <Clock className="w-4 h-4" /> : <Calendar className="w-4 h-4" />}
                               </div>
                               <div>
-                                <p className={`text-sm font-semibold ${notification.type === 'overdue' ? 'text-red-700' : 'text-yellow-700'}`}>{notification.type === 'overdue' ? 'Tagihan Terlambat' : 'Tagihan Jatuh Tempo Besok'}</p>
+                                <p className={`text-sm font-semibold ${notification.type === 'overdue' ? 'text-red-700' : 'text-yellow-700'}`}>
+                                  {notification.type === 'overdue' ? 'Overdue Bill' : 'Bill Due Soon'}
+                                </p>
                                 <p className="text-sm mt-1 text-gray-700">{notification.message}</p>
-                                <Link to="/bills" className="text-xs text-blue-600 hover:text-blue-800 mt-2 inline-flex items-center font-medium" onClick={() => setShowNotifications(false)}>
-                                  Lihat Detail
+                                <Link 
+                                  to="/bills" 
+                                  className="text-xs text-blue-600 hover:text-blue-800 mt-2 inline-flex items-center font-medium"
+                                  onClick={() => setShowNotifications(false)}
+                                >
+                                  See Detail
                                   <ArrowUpRight className="w-3 h-3 ml-1" />
                                 </Link>
                               </div>
@@ -291,9 +306,6 @@ export const Dashboard = () => {
               <Link to="/transactions" className="text-gray-600 px-3 py-2 text-sm font-medium">
                 Transactions
               </Link>
-              <Link to="/cards" className="text-gray-600 px-3 py-2 text-sm font-medium">
-                Cards
-              </Link>
               <Link to="/settings" className="text-gray-600 px-3 py-2 text-sm font-medium">
                 Settings
               </Link>
@@ -314,10 +326,6 @@ export const Dashboard = () => {
             <Link to="/transactions" className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg">
               <BarChart3 className="w-5 h-5 mr-3 text-gray-500" />
               Transactions
-            </Link>
-            <Link to="/cards" className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg">
-              <CreditCard className="w-5 h-5 mr-3 text-gray-500" />
-              Cards
             </Link>
             <Link to="/savings" className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg">
               <Target className="w-5 h-5 mr-3 text-gray-500" />
@@ -442,57 +450,52 @@ export const Dashboard = () => {
                   </div>
                   <div className="bg-white rounded-xl shadow-sm overflow-hidden">
                     <div className="divide-y divide-gray-100">
-                      <div className="p-4 flex items-center justify-between">
-                        <div className="flex items-center">
-                          <div className="p-2 bg-green-100 rounded-md mr-3">
-                            <ArrowUpRight className="w-4 h-4 text-green-600" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900">Salary</p>
-                            <p className="text-xs text-gray-500">Income</p>
-                          </div>
+                      {recentTransactionsLoading ? (
+                        <div className="p-4 flex justify-center">
+                          <div className="w-6 h-6 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-bold text-green-600">+Rp. 5,000,000</p>
-                          <p className="text-xs text-gray-500">Today</p>
+                      ) : recentTransactions.length === 0 ? (
+                        <div className="p-4 text-center text-gray-500">
+                          <BarChart3 className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                          <p>No recent transactions</p>
                         </div>
-                      </div>
+                      ) : (
+                        recentTransactions.slice(0, 3).map((transaction, index) => {
+                          const isIncome = transaction.transactionType === 'income';
+                          const Icon = isIncome ? ArrowUpRight : ArrowDownLeft;
+                          const iconColor = isIncome ? 'text-green-600' : 'text-red-600';
+                          const bgColor = isIncome ? 'bg-green-100' : 'bg-red-100';
+                          const textColor = isIncome ? 'text-green-600' : 'text-red-600';
+                          const sign = isIncome ? '+' : '-';
 
-                      <div className="p-4 flex items-center justify-between">
-                        <div className="flex items-center">
-                          <div className="p-2 bg-red-100 rounded-md mr-3">
-                            <ArrowDownLeft className="w-4 h-4 text-red-600" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900">Groceries</p>
-                            <p className="text-xs text-gray-500">Expense</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-red-600">-Rp. 250,000</p>
-                          <p className="text-xs text-gray-500">Yesterday</p>
-                        </div>
-                      </div>
-
-                      <div className="p-4 flex items-center justify-between">
-                        <div className="flex items-center">
-                          <div className="p-2 bg-red-100 rounded-md mr-3">
-                            <ArrowDownLeft className="w-4 h-4 text-red-600" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900">Netflix</p>
-                            <p className="text-xs text-gray-500">Subscription</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold text-red-600">-Rp. 159,000</p>
-                          <p className="text-xs text-gray-500">3 days ago</p>
-                        </div>
-                      </div>
+                          return (
+                            <div key={index} className="p-4 flex items-center justify-between">
+                              <div className="flex items-center">
+                                <div className={`p-2 ${bgColor} rounded-md mr-3`}>
+                                  <Icon className={`w-4 h-4 ${iconColor}`} />
+                                </div>
+                                <div>
+                                  <p className="font-medium text-gray-900">{transaction.type}</p>
+                                  <p className="text-xs text-gray-500 capitalize">{transaction.transactionType}</p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className={`font-bold ${textColor}`}>
+                                  {sign}Rp. {RecentTransactionController.formatCurrency(transaction.amount)}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {RecentTransactionController.formatRelativeDate(transaction.date)}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
                   </div>
                 </div>
 
+                {/* Upcoming Bills */}
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-bold text-gray-900">Upcoming Bills</h2>
@@ -502,121 +505,112 @@ export const Dashboard = () => {
                   </div>
                   <div className="bg-white rounded-xl shadow-sm overflow-hidden">
                     <div className="divide-y divide-gray-100">
-                      {financialData.bills && financialData.bills.upcoming && financialData.bills.upcoming.length > 0 ? (
-                        financialData.bills.upcoming.slice(0, 3).map((bill, index) => (
-                          <div key={index} className="p-4 flex items-center justify-between">
-                            <div className="flex items-center">
-                              <div className="p-2 bg-amber-100 rounded-md mr-3">{getCategoryIcon(bill.category)}</div>
-                              <div>
-                                <p className="font-medium text-gray-900">{bill.name}</p>
-                                <p className="text-xs text-gray-500">Due {bill.dueDate}</p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-bold text-gray-900">Rp. {formatCurrency(bill.amount)}</p>
-                              <div className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full inline-block">Pending</div>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="p-8 text-center text-gray-500">
+                      {financialDataLoading ? (
+                        <div className="p-4 flex justify-center">
+                          <div className="w-6 h-6 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+                        </div>
+                      ) : financialData.bills.upcoming.length === 0 ? (
+                        <div className="p-4 text-center text-gray-500">
                           <Calendar className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                           <p>No upcoming bills</p>
                         </div>
+                      ) : (
+                        financialData.bills.upcoming
+                          .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
+                          .slice(0, 3)
+                          .map((bill, index) => (
+                            <div key={index} className="p-4 flex items-center justify-between">
+                              <div className="flex items-center">
+                                <div className="p-2 bg-amber-100 rounded-md mr-3">
+                                  {getCategoryIcon(bill.category)}
+                                </div>
+                                <div>
+                                  <p className="font-medium text-gray-900">{bill.name}</p>
+                                  <p className="text-xs text-gray-500">
+                                    Due {new Date(bill.dueDate).toLocaleDateString()}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-bold text-gray-900">Rp. {formatCurrency(bill.amount)}</p>
+                              </div>
+                            </div>
+                          ))
                       )}
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* Savings Goals */}
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-900">Savings Goals</h2>
-                  <Link to="/savings" className="text-blue-600 text-sm font-medium hover:underline">
-                    View All
-                  </Link>
-                </div>
-                <div className="bg-white rounded-xl shadow-sm p-6">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {financialData.savings && financialData.savings.goals && financialData.savings.goals.length > 0 ? (
-                      financialData.savings.goals.slice(0, 2).map((goal, index) => {
-                        const progress = Math.min((goal.collected / goal.target) * 100, 100);
-                        return (
-                          <div key={index} className="bg-gray-50 rounded-lg p-4">
-                            <div className="flex justify-between items-center mb-2">
-                              <div>
-                                <h3 className="font-medium text-gray-900">{goal.name}</h3>
-                                <p className="text-xs text-gray-500">
-                                  Rp {formatCurrency(goal.collected)} / {formatCurrency(goal.target)}
+              {/* Savings Goals and Financial Insights - Side by Side */}
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Savings Goals */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-bold text-gray-900">Savings Goals</h2>
+                    <Link to="/savings" className="text-blue-600 text-sm font-medium hover:underline">
+                      View All
+                    </Link>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div className="divide-y divide-gray-100">
+                      {financialDataLoading ? (
+                        <div className="p-4 flex justify-center">
+                          <div className="w-6 h-6 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+                        </div>
+                      ) : financialData.savings.goals.length === 0 ? (
+                        <div className="p-4 text-center text-gray-500">
+                          <Target className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                          <p>No savings goals</p>
+                        </div>
+                      ) : (
+                        financialData.savings.goals.slice(0, 3).map((goal, index) => {
+                          const percentage = Math.min(100, Math.round((goal.collected / goal.target) * 100));
+                          return (
+                            <div key={index} className="p-4">
+                              <div className="flex justify-between items-center mb-2">
+                                <p className="font-medium text-gray-900">{goal.name}</p>
+                                <p className="text-sm text-gray-500">
+                                  {percentage}% • Rp. {formatCurrency(goal.collected)} / Rp. {formatCurrency(goal.target)}
                                 </p>
                               </div>
-                              <span className="text-sm font-medium text-gray-600">{progress.toFixed(0)}%</span>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div
+                                  className="bg-blue-600 h-2 rounded-full"
+                                  style={{ width: `${percentage}%` }}
+                                ></div>
+                              </div>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
-                              <div className="bg-green-600 h-2 rounded-full" style={{ width: `${progress}%` }}></div>
-                            </div>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <div className="col-span-2 text-center py-6 text-gray-500">
-                        <Target className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                        <p>No savings goals yet</p>
-                        <Link to="/savings" className="mt-2 inline-flex items-center text-blue-600 hover:underline text-sm font-medium">
-                          <Plus className="w-4 h-4 mr-1" />
-                          Create a goal
-                        </Link>
-                      </div>
-                    )}
+                          );
+                        })
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Financial Insights */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-900">Financial Insights</h2>
-                </div>
-                <div className="bg-white rounded-xl shadow-sm p-6">
-                  <div className="grid md:grid-cols-3 gap-6">
-                    <div className="bg-blue-50 rounded-lg p-4">
-                      <div className="flex items-center space-x-3 mb-3">
-                        <div className="p-2 bg-blue-100 rounded-md">
-                          <BarChart3 className="w-5 h-5 text-blue-600" />
-                        </div>
-                        <h3 className="font-medium text-gray-900">Spending Analysis</h3>
+                {/* Financial Insights */}
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-bold text-gray-900">Financial Insights</h2>
+                  </div>
+                  <div className="bg-white rounded-xl shadow-sm p-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="p-2 bg-blue-100 rounded-md">
+                        <Bot className="w-5 h-5 text-blue-600" />
                       </div>
-                      <p className="text-sm text-gray-600">Your spending is 15% lower than last month.</p>
-                      <Link to="/insights/spending" className="mt-3 inline-block text-blue-600 text-sm font-medium hover:underline">
-                        View Details
-                      </Link>
-                    </div>
-
-                    <div className="bg-green-50 rounded-lg p-4">
-                      <div className="flex items-center space-x-3 mb-3">
-                        <div className="p-2 bg-green-100 rounded-md">
-                          <TrendingUp className="w-5 h-5 text-green-600" />
-                        </div>
-                        <h3 className="font-medium text-gray-900">Savings Potential</h3>
+                      <div>
+                        <p className="font-medium text-gray-900">Spending Analysis</p>
+                        <p className="text-gray-600 mt-1">
+                          Based on your recent transactions, you're spending more on entertainment compared to last month.
+                          Consider setting a budget to manage expenses better.
+                        </p>
+                        <Link
+                          to="/chatbot"
+                          className="mt-3 text-blue-600 text-sm font-medium hover:underline inline-flex items-center"
+                        >
+                          View Detailed Analysis
+                          <ArrowUpRight className="w-3 h-3 ml-1" />
+                        </Link>
                       </div>
-                      <p className="text-sm text-gray-600">You could save Rp. 500,000 more this month.</p>
-                      <Link to="/insights/savings" className="mt-3 inline-block text-blue-600 text-sm font-medium hover:underline">
-                        View Details
-                      </Link>
-                    </div>
-
-                    <div className="bg-purple-50 rounded-lg p-4">
-                      <div className="flex items-center space-x-3 mb-3">
-                        <div className="p-2 bg-purple-100 rounded-md">
-                          <Clock className="w-5 h-5 text-purple-600" />
-                        </div>
-                        <h3 className="font-medium text-gray-900">Upcoming Payments</h3>
-                      </div>
-                      <p className="text-sm text-gray-600">3 bills due in the next 7 days.</p>
-                      <Link to="/insights/payments" className="mt-3 inline-block text-blue-600 text-sm font-medium hover:underline">
-                        View Details
-                      </Link>
                     </div>
                   </div>
                 </div>
