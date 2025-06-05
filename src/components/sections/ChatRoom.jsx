@@ -184,6 +184,13 @@ const ChatRoom = ({ friend, onBack, ws }) => {
           </div>
         ) : (
           <div className="space-y-3">
+            {/* Tampilkan tanggal di awal percakapan */}
+            {messages.length > 0 && (
+              <div className="flex justify-center my-2">
+                <div className="bg-gray-200 text-gray-700 text-xs px-3 py-1 rounded-full">{messages[0].formatDate()}</div>
+              </div>
+            )}
+
             {messages.map((msg, index) => {
               const isSentByMe = msg.isSentByMe();
               return (
@@ -193,7 +200,6 @@ const ChatRoom = ({ friend, onBack, ws }) => {
                   </div>
                   <div className={`flex flex-col items-end ${isSentByMe ? 'ml-2' : 'mr-2'}`}>
                     <p className={`text-[10px] sm:text-xs ${isSentByMe ? 'text-gray-500' : 'text-gray-500'}`}>{msg.formatTime()}</p>
-                    <p className={`text-[8px] sm:text-[10px] ${isSentByMe ? 'text-gray-500' : 'text-gray-500'}`}>{msg.formatDate()}</p>
                   </div>
                 </div>
               );
@@ -225,7 +231,7 @@ const ChatRoom = ({ friend, onBack, ws }) => {
             }}
             placeholder="Type a message..."
             className="flex-grow px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            onKeyUp={(e) => e.key === 'Enter' && handleSendMessage()}
           />
           <button
             onClick={handleSendMessage}
