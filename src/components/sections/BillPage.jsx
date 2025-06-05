@@ -26,7 +26,6 @@ import BillController from "../../controllers/BillController";
 import BillModel from "../../models/BillModel";
 
 export const BillPage = () => {
-  // State
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -45,12 +44,10 @@ export const BillPage = () => {
   const [expandedCategories, setExpandedCategories] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
 
-  // Fetch bills on component mount
   useEffect(() => {
     fetchBills();
   }, []);
 
-  // Fetch bills function
   const fetchBills = async () => {
     await BillController.fetchBills(
       setLoading,
@@ -62,7 +59,6 @@ export const BillPage = () => {
     );
   };
 
-  // Fungsi untuk mendapatkan ikon kategori
   const getCategoryIcon = (category) => {
     switch (category) {
       case "Rent":
@@ -82,7 +78,6 @@ export const BillPage = () => {
     }
   };
 
-  // Event handlers
   const handleInputChange = (e) => {
     BillController.handleInputChange(e, editingBill, setEditingBill, newBill, setNewBill);
   };
@@ -147,10 +142,8 @@ export const BillPage = () => {
     BillController.toggleCategoryExpand(category, setExpandedCategories);
   };
 
-  // Render UI
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
@@ -159,7 +152,6 @@ export const BillPage = () => {
                 <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" className="h-10" />
               </Link>
             </div>
-            {/* Desktop Navigation */}
             <nav className="hidden sm:flex space-x-4">
               <Link to="/topUp" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">
                 Top-Up
@@ -183,7 +175,6 @@ export const BillPage = () => {
                 Friends
               </Link>
             </nav>
-            {/* Mobile menu button */}
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
               className="sm:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
@@ -191,7 +182,6 @@ export const BillPage = () => {
               {mobileMenuOpen ? <X className="w-6 h-6 text-gray-600" /> : <Menu className="w-6 h-6 text-gray-600" />}
             </button>
           </div>
-          {/* Mobile Navigation */}
           {mobileMenuOpen && (
             <div className="sm:hidden py-4 border-t border-gray-200">
               <nav className="flex flex-col space-y-4">
@@ -255,7 +245,6 @@ export const BillPage = () => {
           </div>
         )}
 
-        {/* Error Message */}
         {error && (
           <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
             <span className="block sm:inline">{error}</span>
@@ -481,8 +470,8 @@ export const BillPage = () => {
             <div className="mx-auto w-24 h-24 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
               <File className="h-12 w-12 text-indigo-500" />
             </div>
-            <h3 className="text-xl font-medium text-gray-900 mb-2">Belum ada tagihan</h3>
-            <p className="text-gray-500 mb-6">Anda belum memiliki tagihan yang perlu dibayar.</p>
+            <h3 className="text-xl font-medium text-gray-900 mb-2">There is no bill</h3>
+            <p className="text-gray-500 mb-6">You don't have any bills to pay yet.</p>
             <button
               onClick={() => {
                 setEditingBill(null);
@@ -496,7 +485,6 @@ export const BillPage = () => {
           </div>
         ) : (
           <div className="space-y-8">
-            {/* Grouped by Category */}
             {Object.entries(billsByCategory).map(([category, categoryBills]) => (
               <div key={category} className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
                 <div 

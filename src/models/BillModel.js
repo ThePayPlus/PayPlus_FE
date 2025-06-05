@@ -19,12 +19,10 @@ class Bill {
     );
   }
 
-  // Metode untuk mendapatkan daftar tagihan
   static async getBills() {
     try {
       const response = await ApiService.getBills();
       if (response.success && response.data && response.data.bills) {
-        // Konversi data JSON menjadi objek Bill
         response.data.bills = response.data.bills.map(bill => Bill.fromJson(bill));
       }
       return response;
@@ -34,7 +32,6 @@ class Bill {
     }
   }
 
-  // Metode untuk menambahkan tagihan baru
   static async addBill(name, amount, dueDate, category) {
     try {
       const response = await ApiService.addBill(name, amount, dueDate, category);
@@ -48,7 +45,6 @@ class Bill {
     }
   }
 
-  // Metode untuk memperbarui tagihan
   static async updateBill(billId, name, amount, dueDate, category) {
     try {
       const response = await ApiService.updateBill(billId, name, amount, dueDate, category);
@@ -62,7 +58,6 @@ class Bill {
     }
   }
 
-  // Metode untuk menghapus tagihan
   static async deleteBill(billId) {
     try {
       return await ApiService.deleteBill(billId);

@@ -1,7 +1,6 @@
 import BillModel from '../models/BillModel';
 
 class BillController {
-  // Metode untuk mengambil data tagihan
   static async fetchBills(setLoading, setBills, setError, setNotifications, setTotalBillAmount, setBillsByCategory) {
     try {
       setLoading(true);
@@ -14,15 +13,12 @@ class BillController {
         
         setBills(sortedBills);
         
-        // Buat notifikasi berdasarkan status tagihan
         const notifications = this.checkBillsStatus(sortedBills);
         setNotifications(notifications);
         
-        // Hitung total tagihan
         const total = this.calculateTotalBillAmount(sortedBills);
         setTotalBillAmount(total);
         
-        // Kelompokkan tagihan berdasarkan kategori
         const byCategory = this.groupBillsByCategory(sortedBills);
         setBillsByCategory(byCategory);
       } else {
@@ -36,12 +32,10 @@ class BillController {
     }
   }
 
-  // Metode untuk menambahkan tagihan baru
   static async addBill(newBill, setLoading, setError, setSuccessMessage, resetForm, closeForm, refreshBills) {
     try {
       setLoading(true);
       
-      // Validasi input
       if (!newBill.name || !newBill.amount || !newBill.dueDate || !newBill.category) {
         setError("All fields must be filled in");
         return;
@@ -74,12 +68,10 @@ class BillController {
     }
   }
 
-  // Metode untuk memperbarui tagihan
   static async updateBill(editingBill, setLoading, setError, setSuccessMessage, resetEditingBill, closeForm, refreshBills) {
     try {
       setLoading(true);
       
-      // Validasi input
       if (!editingBill.name || !editingBill.amount || !editingBill.dueDate || !editingBill.category) {
         setError("All fields must be filled in");
         return;
@@ -99,7 +91,6 @@ class BillController {
         closeForm();
         refreshBills();
         
-        // Hilangkan pesan sukses setelah 3 detik
         setTimeout(() => {
           setSuccessMessage("");
         }, 3000);
@@ -114,7 +105,6 @@ class BillController {
     }
   }
 
-  // Metode untuk menghapus tagihan
   static async deleteBill(billId, editingBill, setLoading, setError, setSuccessMessage, resetEditingBill, closeForm, refreshBills) {
     if (!window.confirm("Are you sure you want to mark this bill as paid?")) {
       return;
@@ -149,7 +139,6 @@ class BillController {
     }
   }
   
-  // Metode untuk menangani perubahan input
   static handleInputChange(e, editingBill, setEditingBill, newBill, setNewBill) {
     const { name, value } = e.target;
     if (editingBill) {
@@ -165,24 +154,20 @@ class BillController {
     }
   }
   
-  // Metode untuk menangani pengeditan tagihan
   static handleEditBill(bill, setEditingBill, setShowAddBillForm) {
     setEditingBill(bill);
     setShowAddBillForm(true);
   }
   
-  // Metode untuk membatalkan pengeditan
   static handleCancelEdit(setEditingBill, setShowAddBillForm) {
     setEditingBill(null);
     setShowAddBillForm(false);
   }
   
-  // Metode untuk menghapus notifikasi
   static dismissNotification(notificationId, notifications, setNotifications) {
     setNotifications(notifications.filter(notification => notification.id !== notificationId));
   }
   
-  // Metode untuk toggle kategori
   static toggleCategoryExpand(category, setExpandedCategories) {
     setExpandedCategories(prev => ({
       ...prev,
@@ -190,7 +175,6 @@ class BillController {
     }));
   }
   
-  // Fungsi untuk memformat mata uang
   static formatCurrency(amount) {
     return new Intl.NumberFormat("id-ID", {
       style: "decimal",
@@ -198,7 +182,6 @@ class BillController {
     }).format(amount);
   }
 
-  // Fungsi untuk memformat tanggal
   static formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString('id-ID', {
@@ -208,7 +191,6 @@ class BillController {
     });
   }
 
-  // Fungsi untuk memeriksa apakah tagihan sudah jatuh tempo
   static isOverdue(dueDate) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -217,7 +199,6 @@ class BillController {
     return billDueDate < today;
   }
 
-  // Fungsi untuk memeriksa apakah tagihan jatuh tempo besok
   static isDueTomorrow(dueDate) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -230,7 +211,6 @@ class BillController {
     return billDueDate.getTime() === tomorrow.getTime();
   }
 
-  // Fungsi untuk memeriksa status tagihan dan membuat notifikasi
   static checkBillsStatus(billsList) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -244,7 +224,6 @@ class BillController {
       const dueDate = new Date(bill.dueDate);
       dueDate.setHours(0, 0, 0, 0);
       
-      // Cek tagihan yang sudah jatuh tempo (overdue)
       if (dueDate < today) {
         newNotifications.push({
           id: `overdue-${bill.name}-${bill.dueDate}`,
@@ -253,7 +232,6 @@ class BillController {
           bill
         });
       } 
-      // Cek tagihan yang akan jatuh tempo besok (H-1)
       else if (dueDate.getTime() === tomorrow.getTime()) {
         newNotifications.push({
           id: `due-tomorrow-${bill.name}-${bill.dueDate}`,
@@ -267,7 +245,6 @@ class BillController {
     return newNotifications;
   }
 
-  // Fungsi untuk mengelompokkan tagihan berdasarkan kategori
   static groupBillsByCategory(bills) {
     return bills.reduce((acc, bill) => {
       const category = bill.category || 'Other';
@@ -279,12 +256,10 @@ class BillController {
     }, {});
   }
 
-  // Fungsi untuk menghitung total tagihan
   static calculateTotalBillAmount(bills) {
     return bills.reduce((sum, bill) => sum + parseFloat(bill.amount || 0), 0);
   }
   
-  // Fungsi untuk mendapatkan warna kategori
   static getCategoryColor(category) {
     switch (category) {
       case "Rent":
