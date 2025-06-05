@@ -21,6 +21,16 @@ class Message {
     const date = new Date(this.sent_at);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
+
+  formatDate() {
+    const date = new Date(this.sent_at);
+    return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  formatDateTime() {
+    const date = new Date(this.sent_at);
+    return `${date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+  }
 }
 
 export default Message;

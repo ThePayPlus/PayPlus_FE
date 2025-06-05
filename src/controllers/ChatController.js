@@ -6,28 +6,26 @@ class ChatController {
   static async getMessages(friendPhone) {
     try {
       const response = await ApiService.getMessages(friendPhone);
-      
+
       if (response.success) {
         // Convert raw data to Message model instances
-        const messages = Array.isArray(response.messages) 
-          ? response.messages.map(message => Message.fromJson(message))
-          : [];
-          
+        const messages = Array.isArray(response.messages) ? response.messages.map((message) => Message.fromJson(message)) : [];
+
         return {
           success: true,
-          messages: messages
+          messages: messages,
         };
       } else {
         return {
           success: false,
-          message: response.message || 'Failed to load messages'
+          message: response.message || 'Failed to load messages',
         };
       }
     } catch (err) {
       console.error('Messages fetch error:', err);
       return {
         success: false,
-        message: 'An unexpected error occurred'
+        message: 'An unexpected error occurred',
       };
     }
   }
@@ -37,7 +35,7 @@ class ChatController {
     if (!messageData.receiver || !messageData.message.trim()) {
       return {
         success: false,
-        message: 'Receiver and message are required'
+        message: 'Receiver and message are required',
       };
     }
 
@@ -51,23 +49,16 @@ class ChatController {
           if (!acknowledgement || !acknowledgement.error) {
             // Create local message object
             const myPhone = localStorage.getItem('user_phone');
-            const newMsg = new Message(
-              '',
-              myPhone,
-              messageData.receiver,
-              messageData.message,
-              new Date().toISOString(),
-              true
-            );
-            
+            const newMsg = new Message('', myPhone, messageData.receiver, messageData.message, new Date().toISOString(), true);
+
             callback({
               success: true,
-              message: newMsg
+              message: newMsg,
             });
           } else {
             callback({
               success: false,
-              message: acknowledgement.error || 'Failed to send message'
+              message: acknowledgement.error || 'Failed to send message',
             });
           }
         }
@@ -78,7 +69,7 @@ class ChatController {
       console.error('Send message error:', err);
       return {
         success: false,
-        message: 'An unexpected error occurred'
+        message: 'An unexpected error occurred',
       };
     }
   }
@@ -86,7 +77,7 @@ class ChatController {
   // Menangani indikator mengetik
   static sendTypingIndicator(ws, receiverPhone) {
     if (!receiverPhone) return;
-    
+
     try {
       ws.emit('typing', { receiver: receiverPhone });
       return true;
@@ -99,7 +90,7 @@ class ChatController {
   // Menangani indikator berhenti mengetik
   static sendStopTypingIndicator(ws, receiverPhone) {
     if (!receiverPhone) return;
-    
+
     try {
       ws.emit('stop-typing', { receiver: receiverPhone });
       return true;
@@ -118,7 +109,7 @@ class ChatController {
       console.error('Delete friend error:', err);
       return {
         success: false,
-        message: 'An unexpected error occurred'
+        message: 'An unexpected error occurred',
       };
     }
   }
@@ -126,7 +117,7 @@ class ChatController {
   // Bergabung dengan chat room
   static joinChatRoom(ws, friendPhone) {
     if (!ws || !friendPhone) return false;
-    
+
     try {
       ws.emit('join-chat', { friendPhone });
       return true;

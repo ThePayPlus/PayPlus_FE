@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiService } from '../../services/apiService.js';
-import { User, Search, Plus, Bell, X, Phone, Check, Menu } from 'lucide-react';
+import { User, Plus, Bell, X, Phone, Check, Menu } from 'lucide-react';
 import ChatRoom from './ChatRoom.jsx';
 import FriendController from '../../controllers/FriendController.js';
 
@@ -44,33 +44,8 @@ export const Friends = () => {
       FriendController.showNotification('Friend Request Accepted', `${data.name} accepted your friend request`);
     });
 
-    // Handle friend status updates
-    ws.current.on('friend_status_update', (data) => {
-      setFriends((prevFriends) => {
-        return prevFriends.map((friend) => {
-          if (friend.phone === data.phone) {
-            return {
-              ...friend,
-              status: data.status,
-              lastSeen: data.status === 'offline' ? new Date() : friend.lastSeen,
-            };
-          }
-          return friend;
-        });
-      });
-    });
-
-    // Emit user online status when component mounts
-    if (ws.current && ws.current.connected) {
-      ws.current.emit('user_status', { status: 'online' });
-    }
-
     return () => {
       if (ws.current) {
-        // Emit offline status when component unmounts
-        if (ws.current.connected) {
-          ws.current.emit('user_status', { status: 'offline' });
-        }
         ws.current.disconnect();
       }
     };
@@ -259,9 +234,9 @@ export const Friends = () => {
 
       {/* Main Content */}
       <main className="flex-grow container mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        <div className="flex h-[calc(100vh-10rem)] bg-white rounded-lg shadow overflow-hidden">
+        <div className="flex flex-col md:flex-row h-[calc(100vh-10rem)] bg-white rounded-lg shadow overflow-hidden">
           {/* Left Side - Friends List */}
-          <div className="w-1/5 border-r border-gray-200 flex flex-col">
+          <div className="w-full md:w-1/3 lg:w-1/4 border-b md:border-b-0 md:border-r border-gray-200 flex flex-col">
             {/* Friend Requests Dropdown */}
             {showFriendRequests && (
               <div className="bg-white border-b border-gray-200">
@@ -280,26 +255,31 @@ export const Friends = () => {
                   <div>
                     {friendRequests.map((request) => (
                       <div key={request.id} className="p-4 border-b border-gray-100 last:border-b-0">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
+                          <div className="flex items-center mb-2 sm:mb-0">
                             <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
                               <User className="w-5 h-5 text-indigo-600" />
                             </div>
                             <div className="ml-3">
-                              <h3 className="font-medium text-gray-900">{request.name}</h3>
-                              <p className="text-sm text-gray-500">{request.phone}</p>
+                              <p className="text-sm text-gray-500 mt-1">Phone: {request.phone}</p>
                             </div>
                           </div>
-                          <div className="flex space-x-2">
+                          <div className="flex flex-row gap-2 w-full sm:w-auto">
                             {requestActionLoading ? (
                               <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-indigo-500"></div>
                             ) : (
                               <>
-                                <button onClick={() => handleFriendRequestAction(request.id, 'accept')} className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors flex items-center">
+                                <button
+                                  onClick={() => handleFriendRequestAction(request.id, 'accept')}
+                                  className="flex-1 sm:flex-none px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors flex items-center justify-center"
+                                >
                                   <Check className="w-4 h-4 mr-1" />
                                   Accept
                                 </button>
-                                <button onClick={() => handleFriendRequestAction(request.id, 'reject')} className="px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors flex items-center">
+                                <button
+                                  onClick={() => handleFriendRequestAction(request.id, 'reject')}
+                                  className="flex-1 sm:flex-none px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors flex items-center justify-center"
+                                >
                                   <X className="w-4 h-4 mr-1" />
                                   Reject
                                 </button>
@@ -316,16 +296,12 @@ export const Friends = () => {
               </div>
             )}
 
-            {/* Search Bar */}
             <div className="p-3 border-b border-gray-200">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input type="text" placeholder="Search friends..." className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-              </div>
+              <h2 className="font-bold text-gray-800 text-2xl">Friend List</h2>
             </div>
 
             {/* Friends List */}
-            <div className="flex-grow overflow-y-auto">
+            <div className="flex-grow overflow-y-auto max-h-[50vh] md:max-h-none">
               {loading ? (
                 <div className="flex justify-center items-center p-6">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
@@ -352,13 +328,10 @@ export const Friends = () => {
                             <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
                               <User className="w-5 h-5 text-indigo-600" />
                             </div>
-                            {/* Indikator status online dengan animasi pulse */}
-                            <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${friend.status === 'online' ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
                           </div>
                           <div className="ml-3">
                             <h3 className="font-medium text-gray-900">{friend.name}</h3>
                             <p className="text-sm text-gray-500">{friend.phone}</p>
-                            <p className="text-xs ${friend.status === 'online' ? 'text-green-500 font-medium' : 'text-gray-400'}">{friend.getStatusText()}</p>
                           </div>
                         </div>
                       </div>
@@ -370,32 +343,23 @@ export const Friends = () => {
           </div>
 
           {/* Right Side - Chat Room */}
-          <div className={`${selectedFriend ? 'flex' : 'hidden md:flex'} md:w-2/3 lg:w-4/4 flex-col w-full`}>
+          <div className="w-full md:w-2/3 lg:w-3/4 flex-col flex">
             {selectedFriend ? (
               <ChatRoom friend={selectedFriend} onBack={() => setSelectedFriend(null)} ws={ws} />
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 p-6">
-                <div className="bg-indigo-50 p-8 rounded-full mb-6">
-                  <User className="w-20 h-20 text-indigo-400" />
+              <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 p-4 sm:p-6">
+                <div className="bg-indigo-50 p-6 sm:p-8 rounded-full mb-4 sm:mb-6">
+                  <User className="w-16 sm:w-20 h-16 sm:h-20 text-indigo-400" />
                 </div>
-                <h2 className="text-2xl font-semibold text-gray-700 mb-4">Selamat datang di PayPlus Chat</h2>
-                <p className="text-gray-500 max-w-md px-6 mb-6">Pilih teman dari daftar untuk mulai mengobrol atau tambahkan teman baru dengan mengklik tombol + di atas.</p>
+                <h2 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-3 sm:mb-4">Welcome to PayPlus Chat</h2>
+                <p className="text-gray-500 max-w-md px-4 sm:px-6 mb-4 sm:mb-6">Select a friend from the list to start chatting or add a new friend by clicking the + button above.</p>
 
-                <div className="grid grid-cols-2 gap-4 mt-4 w-full max-w-md">
-                  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                    <div className="text-indigo-500 font-medium mb-1">Total Teman</div>
-                    <div className="text-2xl font-bold">{friends.length}</div>
-                  </div>
-                  <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                    <div className="text-green-500 font-medium mb-1">Online</div>
-                    <div className="text-2xl font-bold">{friends.filter((f) => f.status === 'online').length}</div>
+                <div className="mt-2 sm:mt-4 w-full max-w-md px-4">
+                  <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm border border-gray-100">
+                    <div className="text-indigo-500 font-medium mb-1">Total Friends</div>
+                    <div className="text-xl sm:text-2xl font-bold">{friends.length}</div>
                   </div>
                 </div>
-
-                <button onClick={() => setShowAddFriendModal(true)} className="mt-8 flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-                  <Plus className="w-5 h-5" />
-                  <span>Tambah Teman Baru</span>
-                </button>
               </div>
             )}
           </div>

@@ -43,7 +43,7 @@ class FriendController {
     if (phoneNumber === myPhone) {
       return {
         success: false,
-        message: 'Anda tidak dapat menambahkan diri sendiri sebagai teman',
+        message: 'You cannot add yourself as a friend',
       };
     }
 
