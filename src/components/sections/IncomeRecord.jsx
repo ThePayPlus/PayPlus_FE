@@ -7,7 +7,6 @@ import { Link } from "react-router-dom"
 import IncomeController from "../../controllers/income_controller"
 import { Menu, X } from 'lucide-react';
 
-// Register Chart.js components
 ChartJS.register(ArcElement, Tooltip, Legend)
 
 export default function Income() {
@@ -41,14 +40,12 @@ export default function Income() {
     setFilteredRecords(IncomeController.filterRecordsByType(incomeData.incomeRecords, activeFilter))
   }, [activeFilter, incomeData.incomeRecords])
 
-  // Mendapatkan data chart dari controller
   const chartData = IncomeController.prepareChartData(
     incomeData.normalIncome, 
     incomeData.giftIncome, 
     incomeData.topupIncome
   );
   
-  // Mendapatkan opsi chart dari controller
   const chartOptions = IncomeController.getChartOptions();
 
   return (
