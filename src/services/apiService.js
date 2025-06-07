@@ -307,140 +307,101 @@ class ApiService {
     }
   }
 
-  // ===== BAGIAN SAVINGS =====
-  // Method untuk mengambil daftar tabungan pengguna dari server
-  // Return: Object dengan property success (boolean) dan data (array tabungan) atau message (string error)
+  // Get user savings
   static async getSavings() {
     try {
-      // Melakukan request GET ke endpoint /savings untuk mendapatkan daftar tabungan
       const response = await ApiService.api.get('/savings');
-      // Mengembalikan response sukses dengan data tabungan
       return {
-        success: true,          // Indikator bahwa request berhasil
-        data: response.data,    // Data tabungan dari server
+        success: true,
+        data: response.data,
       };
     } catch (error) {
-      // Menangani error jika request gagal
       return {
-        success: false,         // Indikator bahwa request gagal
-        // Mengambil pesan error dari response server atau menggunakan pesan default
+        success: false,
         message: error.response?.data?.message || 'Failed to load savings',
       };
     }
   }
 
-  // Method untuk menambahkan tabungan baru
-  // Parameter: 
-  //   - nama: String nama tabungan
-  //   - deskripsi: String deskripsi tabungan
-  //   - target: Number jumlah target tabungan (akan dikonversi ke integer)
-  // Return: Object dengan property success, data, dan message
+  // Add new savings
   static async addSavings(nama, deskripsi, target) {
     try {
-      // Melakukan request POST ke endpoint /savings dengan data tabungan baru
       const response = await ApiService.api.post('/savings', {
-        nama,                   // Nama tabungan
-        deskripsi,              // Deskripsi tabungan
-        target: parseInt(target), // Mengkonversi target ke integer untuk memastikan format yang benar
+        nama,
+        deskripsi,
+        target: parseInt(target),
       });
 
-      // Mengembalikan response sukses dengan data dan pesan
       return {
-        success: true,          // Indikator bahwa request berhasil
-        data: response.data,    // Data tabungan yang berhasil ditambahkan
-        message: response.data.message || 'Savings added successfully', // Pesan sukses
+        success: true,
+        data: response.data,
+        message: response.data.message || 'Savings added successfully',
       };
     } catch (error) {
-      // Menangani error jika request gagal
       return {
-        success: false,         // Indikator bahwa request gagal
-        // Mengambil pesan error dari response server atau menggunakan pesan default
+        success: false,
         message: error.response?.data?.message || 'Failed to add savings',
       };
     }
   }
 
-  // Method untuk menambahkan jumlah uang ke tabungan yang sudah ada
-  // Parameter:
-  //   - savingsId: String ID tabungan yang akan ditambah
-  //   - amount: Number jumlah yang akan ditambahkan (akan dikonversi ke integer)
-  // Return: Object dengan property success, data, dan message
+  // Add amount to savings
   static async addToSavings(savingsId, amount) {
     try {
-      // Melakukan request PATCH ke endpoint /savings/{id}/add dengan jumlah yang akan ditambahkan
       const response = await ApiService.api.patch(`/savings/${savingsId}/add`, {
-        amount: parseInt(amount),  // Mengkonversi amount ke integer
-        deductFromBalance: true,   // Flag untuk mengurangi saldo utama pengguna
+        amount: parseInt(amount),
+        deductFromBalance: true,
       });
-      // Mengembalikan response sukses dengan data dan pesan
       return {
-        success: true,             // Indikator bahwa request berhasil
-        data: response.data,       // Data hasil penambahan ke tabungan
-        message: response.data.message || 'Amount added to savings successfully', // Pesan sukses
+        success: true,
+        data: response.data,
+        message: response.data.message || 'Amount added to savings successfully',
       };
     } catch (error) {
-      // Menangani error jika request gagal
       return {
-        success: false,            // Indikator bahwa request gagal
-        // Mengambil pesan error dari response server atau menggunakan pesan default
+        success: false,
         message: error.response?.data?.message || 'Failed to add amount to savings',
       };
     }
   }
 
-  // Method untuk menghapus tabungan
-  // Parameter: savingsId - String ID tabungan yang akan dihapus
-  // Return: Object dengan property success dan message
+  // Delete savings
   static async deleteSavings(savingsId) {
     try {
-      // Melakukan request DELETE ke endpoint /savings/{id} untuk menghapus tabungan
       const response = await ApiService.api.delete(`/savings/${savingsId}`);
-      // Mengembalikan response sukses dengan pesan
       return {
-        success: true,             // Indikator bahwa request berhasil
-        message: response.data.message || 'Savings deleted successfully', // Pesan sukses
+        success: true,
+        message: response.data.message || 'Savings deleted successfully',
       };
     } catch (error) {
-      // Menangani error jika request gagal
       return {
-        success: false,            // Indikator bahwa request gagal
-        // Mengambil pesan error dari response server atau menggunakan pesan default
+        success: false,
         message: error.response?.data?.message || 'Failed to delete savings',
       };
     }
   }
 
-  // Method untuk memperbarui target tabungan
-  // Parameter:
-  //   - savingsId: String ID tabungan yang akan diperbarui
-  //   - newTarget: Number target baru untuk tabungan (akan dikonversi ke integer)
-  // Return: Object dengan property success dan message
+  // Update savings target
   static async updateSavingsTarget(savingsId, newTarget) {
     try {
-      // Validasi target tidak boleh 0 atau negatif
-      const targetValue = parseInt(newTarget); // Mengkonversi newTarget ke integer
+      const targetValue = parseInt(newTarget);
       if (targetValue <= 0) {
-        // Jika target <= 0, kembalikan error tanpa melakukan request ke server
         return {
           success: false,
           message: 'Target tabungan tidak boleh 0 atau negatif',
         };
       }
 
-      // Melakukan request PATCH ke endpoint /savings/{id}/update-target dengan target baru
       const response = await ApiService.api.patch(`/savings/${savingsId}/update-target`, {
-        target: targetValue,      // Target baru yang sudah dikonversi ke integer
+        target: targetValue,
       });
-      // Mengembalikan response sukses dengan pesan
       return {
-        success: true,            // Indikator bahwa request berhasil
-        message: response.data.message || 'Target tabungan berhasil diperbarui', // Pesan sukses
+        success: true,
+        message: response.data.message || 'Target tabungan berhasil diperbarui',
       };
     } catch (error) {
-      // Menangani error jika request gagal
       return {
-        success: false,           // Indikator bahwa request gagal
-        // Mengambil pesan error dari response server atau menggunakan pesan default
+        success: false,
         message: error.response?.data?.message || 'Gagal memperbarui target tabungan',
       };
     }
