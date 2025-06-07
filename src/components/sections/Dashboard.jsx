@@ -24,7 +24,6 @@ import {
   EyeOff,
   Menu,
   Search,
-  CreditCard,
   BarChart3,
   Clock,
   Bot,
@@ -46,8 +45,6 @@ export const Dashboard = () => {
   const [recentTransactions, setRecentTransactions] = useState([]) // Tambahkan state ini
   const [recentTransactionsLoading, setRecentTransactionsLoading] = useState(true) // Tambahkan state ini
 
-
-  // Financial data state
   const [financialData, setFinancialData] = useState({
     balance: 0,
     income: 0,
@@ -62,11 +59,9 @@ export const Dashboard = () => {
     },
   });
   const [financialDataLoading, setFinancialDataLoading] = useState(true);
-  // State untuk notifikasi
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
 
-  // Tambahkan fungsi dismissNotification di sini
   const dismissNotification = (id) => {
     setNotifications((prev) => prev.filter((notification) => notification.id !== id));
   };
@@ -135,7 +130,6 @@ export const Dashboard = () => {
     fetchUserProfile();
   }, []);
 
-  // Tambahkan useEffect baru untuk mengambil recent transactions
   useEffect(() => {
     const fetchRecentTransactions = async () => {
       try {
@@ -600,7 +594,7 @@ export const Dashboard = () => {
                       <div>
                         <p className="font-medium text-gray-900">Spending Analysis</p>
                         <p className="text-gray-600 mt-1">
-                          Based on your recent transactions, you're spending more on entertainment compared to last month.
+                          Based on your recent transactions, youre spending more on entertainment compared to last month.
                           Consider setting a budget to manage expenses better.
                         </p>
                         <Link

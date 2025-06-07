@@ -2,12 +2,11 @@ import Income from "../models/income_model";
 import { ApiService } from "../services/apiService.js";
 
 class IncomeController {
-  // Mengambil data income dari API dan mengkonversi ke model Income
+
   static async getIncomeRecords() {
     const response = await ApiService.getIncomeRecords();
     
     if (response.success) {
-      // Convert raw data to Income model instances
       const incomeRecords = response.records.map(record => Income.fromJson(record));
       return {
         success: true,
