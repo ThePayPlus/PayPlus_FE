@@ -13,7 +13,6 @@ export class SavingsController {
     this.selectedSavings = null;
   }
 
-  // Fetch savings data
   async fetchSavingsData() {
     try {
       this.loading = true;
@@ -82,7 +81,6 @@ export class SavingsController {
     });
   }
 
-  // Delete savings
   async deleteSavings(savingsId) {
     try {
       const response = await ApiService.deleteSavings(savingsId);
@@ -104,7 +102,6 @@ export class SavingsController {
     }
   }
 
-  // Transfer savings to balance
   async transferToBalance(savingsId) {
     try {
       const response = await ApiService.deleteSavings(savingsId);
@@ -126,7 +123,6 @@ export class SavingsController {
     }
   }
 
-  // Update savings targets
   async updateSavingsTarget(savingsId, newTarget) {
     if (!savingsId || !newTarget) return { success: false, message: 'Incomplete data' };
 

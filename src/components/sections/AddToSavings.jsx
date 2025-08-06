@@ -21,11 +21,14 @@ export const AddToSavings = () => {
           let data = [];
           if (Array.isArray(response.data)) {
             data = response.data;
-          } else if (response.data.savings && Array.isArray(response.data.savings)) {
+          } 
+          else if (response.data.savings && Array.isArray(response.data.savings)) {
             data = response.data.savings;
-          } else if (response.data.records && Array.isArray(response.data.records)) {
+          } 
+          else if (response.data.records && Array.isArray(response.data.records)) {
             data = response.data.records;
-          } else if (typeof response.data === 'object') {
+          } 
+          else if (typeof response.data === 'object') {
             const possibleKeys = ['savings', 'records', 'data'];
             for (const key of possibleKeys) {
               if (response.data[key] && Array.isArray(response.data[key])) {
@@ -86,9 +89,9 @@ export const AddToSavings = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <a href="/Dashboard">
+              <Link to="/dashboard">
                 <img src="https://github.com/ThePayPlus/PayPlus_FE/blob/main/public/Logo.png?raw=true" alt="PayPlus Logo" className="h-10" />
-              </a>
+              </Link>
             </div>
             <nav className="hidden sm:flex space-x-4">
               <Link to="/Dashboard" className="text-gray-600 hover:text-gray-800 transition-colors duration-200">Dashboard</Link>
@@ -133,7 +136,7 @@ export const AddToSavings = () => {
               type="number"
               step="0.01"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={(e) => setAmount(e.target.value)} // Update state amount saat input berubah
               className="mt-1 p-2 w-full border rounded-lg focus:ring-blue-500 focus:border-blue-500"
               required
               min="1"

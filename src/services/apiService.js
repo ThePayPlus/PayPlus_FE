@@ -307,7 +307,7 @@ class ApiService {
     }
   }
 
-  // Get savings list
+  // Get user savings
   static async getSavings() {
     try {
       const response = await ApiService.api.get('/savings');
@@ -345,7 +345,7 @@ class ApiService {
     }
   }
 
-  // Add amount to existing savings
+  // Add amount to savings
   static async addToSavings(savingsId, amount) {
     try {
       const response = await ApiService.api.patch(`/savings/${savingsId}/add`, {
@@ -384,7 +384,6 @@ class ApiService {
   // Update savings target
   static async updateSavingsTarget(savingsId, newTarget) {
     try {
-      // Validasi target tidak boleh 0 atau negatif
       const targetValue = parseInt(newTarget);
       if (targetValue <= 0) {
         return {

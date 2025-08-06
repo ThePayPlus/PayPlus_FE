@@ -5,16 +5,13 @@ import { CheckCircle, Eye, EyeOff, Mail, Shield, User, X } from "lucide-react"
 import SettingController from "../../controllers/setting_controller.js"
 
 export default function Settings() {
-  // Form references
   const formRef = useRef(null)
 
-  // State for user data
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [phoneNumber, setPhoneNumber] = useState("")
   const [profileImage, setProfileImage] = useState(null)
-  
-  // Fetch user profile data on component mount
+
   useEffect(() => {
     const fetchProfileData = async () => {
       const response = await SettingController.getProfile();
@@ -31,22 +28,20 @@ export default function Settings() {
     fetchProfileData();
   }, [])
 
-  // State for password fields
+
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
 
-  // State for password visibility
+
   const [isCurrentPasswordVisible, setIsCurrentPasswordVisible] = useState(false)
   const [isNewPasswordVisible, setIsNewPasswordVisible] = useState(false)
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false)
 
-  // State for loading and messages
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
   const [isError, setIsError] = useState(false)
 
-  // Function to handle profile image selection
   const handleProfileImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0]
@@ -54,9 +49,9 @@ export default function Settings() {
     }
   }
 
-  // Function to save changes
+
   const saveChanges = async () => {
-    // Validasi form menggunakan controller
+ 
     const validation = SettingController.validateForm(
       fullName, 
       email, 
@@ -74,7 +69,7 @@ export default function Settings() {
     setIsLoading(true);
     
     try {
-      // Handle password change if new password is provided
+     
       if (newPassword) {
         const passwordResponse = await SettingController.changePassword(currentPassword, newPassword);
         if (!passwordResponse.success) {
@@ -85,7 +80,6 @@ export default function Settings() {
         }
       }
       
-      // Update profile information
       const profileResponse = await SettingController.updateProfile(fullName, email);
       
       setIsLoading(false);
@@ -93,7 +87,6 @@ export default function Settings() {
       if (profileResponse.success) {
         setErrorMessage("Pengaturan berhasil diperbarui!");
         setIsError(false);
-        // Reset password fields after successful update
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
